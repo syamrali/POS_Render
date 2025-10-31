@@ -20,11 +20,6 @@ services:
     dockerfilePath: ./Dockerfile.frontend
     dockerContext: ./
     plan: free
-    buildCommand: |
-      docker build \
-        --build-arg VITE_API_URL=$VITE_API_URL \
-        -f Dockerfile.frontend \
-        -t pos-frontend .
     envVars:
       - key: VITE_API_URL
         sync: false
