@@ -4,8 +4,9 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Plus, Minus, ShoppingCart, Trash2, Printer, Clock } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
+import { Input } from "./ui/input";
 import { useRestaurant, type OrderItem } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
 
@@ -15,6 +16,7 @@ export function OrdersPage() {
   const [menuItems, setMenuItems] = useState<api.MenuItem[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [orderType, setOrderType] = useState<"dine-in" | "takeaway" | null>(null);
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
@@ -39,9 +41,18 @@ export function OrdersPage() {
     loadMenuData();
   }, []);
 
-  const filteredItems = selectedCategory === "All" 
-    ? menuItems 
-    : menuItems.filter(item => item.category === selectedCategory);
+  const filteredItems = menuItems.filter(item => {
+    // Filter by category
+    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+    
+    // Filter by search query
+    const matchesSearch = searchQuery === "" || 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.productCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  });
 
   const selectedTableData = tables.find(t => t.id === selectedTable);
   const existingTableOrder = selectedTable ? getTableOrder(selectedTable) : undefined;
@@ -63,6 +74,7 @@ export function OrdersPage() {
     setOrderType(type);
     setCurrentOrder([]);
     setSelectedTable("");
+    setSearchQuery("");
   };
 
   const handleTableSelect = (tableId: string) => {
@@ -124,6 +136,7 @@ export function OrdersPage() {
     setCurrentOrder([]);
     setOrderType(null);
     setSelectedTable("");
+    setSearchQuery("");
   };
 
   const printKOT = async (items: OrderItem[], isAdditional = false) => {
@@ -513,10 +526,25 @@ export function OrdersPage() {
                     setOrderType(null);
                   }
                   setCurrentOrder([]);
+                  setSearchQuery("");
                 }}
               >
                 Change {orderType === "dine-in" ? "Table" : "Type"}
               </Button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search menu items by name, code, or description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             {/* Category Filter */}
@@ -538,6 +566,12 @@ export function OrdersPage() {
 
             {/* Menu Items Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredItems.length === 0 && (
+                <div className="col-span-full text-center py-12 text-muted-foreground">
+                  <Search className="size-12 mx-auto mb-4 opacity-20" />
+                  <p>No items found matching your search</p>
+                </div>
+              )}
               {filteredItems.map(item => (
                 <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader>
