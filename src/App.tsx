@@ -21,10 +21,16 @@ export default function App() {
   useEffect(() => {
     const checkApi = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/tables');
+        // Use the same API URL logic as api.ts
+        const apiBaseUrl = import.meta.env.VITE_API_URL 
+          ? `${import.meta.env.VITE_API_URL}/api` 
+          : `http://${window.location.hostname}:5000/api`;
+        
+        const response = await fetch(`${apiBaseUrl}/tables`);
         if (!response.ok) {
           throw new Error('API not responding');
         }
+        setApiError(false);
       } catch (error) {
         console.error('API connection error:', error);
         setApiError(true);
@@ -41,7 +47,7 @@ export default function App() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>API Connection Error</AlertTitle>
           <AlertDescription>
-            Cannot connect to the backend API. Please make sure the backend server is running on port 5000.
+            Cannot connect to the backend API. Please check your network connection and try again.
           </AlertDescription>
         </Alert>
       )}
