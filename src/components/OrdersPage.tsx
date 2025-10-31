@@ -7,31 +7,37 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Plus, Minus, ShoppingCart, Trash2, Printer, Clock } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { useRestaurant, type OrderItem } from "../contexts/RestaurantContext";
-
-// Mock data - In real app, this would come from a shared state/database
-const menuItems = [
-  { id: "1", name: "Classic Burger", price: 259, category: "Mains", department: "Kitchen", description: "Beef patty with lettuce, tomato, cheese" },
-  { id: "2", name: "Caesar Salad", price: 199, category: "Salads", department: "Kitchen", description: "Romaine lettuce, croutons, parmesan" },
-  { id: "3", name: "Margherita Pizza", price: 299, category: "Mains", department: "Kitchen", description: "Fresh mozzarella, basil, tomato sauce" },
-  { id: "4", name: "Fish & Chips", price: 319, category: "Mains", department: "Kitchen", description: "Beer-battered fish with crispy fries" },
-  { id: "5", name: "Greek Salad", price: 219, category: "Salads", department: "Kitchen", description: "Feta, olives, cucumber, tomatoes" },
-  { id: "6", name: "Pasta Carbonara", price: 279, category: "Mains", department: "Kitchen", description: "Creamy sauce with bacon and parmesan" },
-  { id: "7", name: "Coca Cola", price: 59, category: "Beverages", department: "Bar", description: "330ml can" },
-  { id: "8", name: "Fresh Orange Juice", price: 99, category: "Beverages", department: "Bar", description: "Freshly squeezed" },
-  { id: "9", name: "Chocolate Cake", price: 139, category: "Desserts", department: "Kitchen", description: "Rich chocolate layer cake" },
-  { id: "10", name: "Ice Cream Sundae", price: 119, category: "Desserts", department: "Kitchen", description: "Vanilla ice cream with toppings" },
-];
-
-const categories = ["All", "Mains", "Salads", "Beverages", "Desserts"];
+import * as api from "../services/api";
 
 export function OrdersPage() {
   const { tables, addItemsToTable, getTableOrder, completeTableOrder, markItemsAsSent, addInvoice, kotConfig, billConfig } = useRestaurant();
   
+  const [menuItems, setMenuItems] = useState<api.MenuItem[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [orderType, setOrderType] = useState<"dine-in" | "takeaway" | null>(null);
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [showBillDialog, setShowBillDialog] = useState(false);
+
+  // Load menu items and categories from API
+  useEffect(() => {
+    const loadMenuData = async () => {
+      try {
+        const [items, cats] = await Promise.all([
+          api.getMenuItems(),
+          api.getCategories()
+        ]);
+        setMenuItems(items);
+        const categoryNames = ["All", ...cats.map(c => c.name)];
+        setCategories(categoryNames);
+      } catch (error) {
+        console.error("Error loading menu data:", error);
+      }
+    };
+    
+    loadMenuData();
+  }, []);
 
   const filteredItems = selectedCategory === "All" 
     ? menuItems 
@@ -63,7 +69,7 @@ export function OrdersPage() {
     setSelectedTable(tableId);
   };
 
-  const addToOrder = (item: typeof menuItems[0]) => {
+  const addToOrder = (item: api.MenuItem) => {
     setCurrentOrder(prev => {
       const existingItem = prev.find(orderItem => orderItem.id === item.id && !orderItem.sentToKitchen);
       if (existingItem) {
