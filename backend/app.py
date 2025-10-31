@@ -864,32 +864,21 @@ def import_menu_data():
         logger.error(f"Error importing menu data: {e}")
         return jsonify({'error': f'Failed to import menu data: {str(e)}'}), 500
 
-# Serve React App (for production deployment)
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve_react_app(path):
-    """Serve the React frontend application"""
-    try:
-        # Get the build folder path (parent directory of backend)
-        build_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'build')
-        
-        # If path is provided and file exists, serve it
-        if path != "" and os.path.exists(os.path.join(build_folder, path)):
-            return send_file(os.path.join(build_folder, path))
-        
-        # Check if it's an API request (should have been handled by API routes)
-        if path.startswith('api/'):
-            return jsonify({'error': 'API endpoint not found'}), 404
-        
-        # Otherwise, serve index.html for React routing
-        index_path = os.path.join(build_folder, 'index.html')
-        if os.path.exists(index_path):
-            return send_file(index_path)
-        else:
-            return jsonify({'error': 'Frontend build not found. Please run: npm run build'}), 404
-    except Exception as e:
-        logger.error(f"Error serving frontend: {e}")
-        return jsonify({'error': 'Failed to serve frontend application'}), 500
+# Health check endpoint for Render
+@app.route('/')
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'POS Backend API',
+        'message': 'Backend is running. Use /api/* endpoints for API access.'
+    })
+
+# 404 handler for undefined routes
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors"""
+    return jsonify({'error': 'Endpoint not found. Please check API documentation.'}), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
