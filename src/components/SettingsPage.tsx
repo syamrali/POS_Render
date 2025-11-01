@@ -73,7 +73,8 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="p-6 max-w-screen-xl mx-auto">
+    <div className="h-full overflow-y-auto">
+      <div className="p-6 max-w-screen-xl mx-auto">
       <div className="mb-6">
         <h2 className="text-gray-900 mb-2">Settings</h2>
         <p className="text-muted-foreground">Manage your restaurant and system preferences</p>
@@ -578,6 +579,7 @@ export function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+      </div>
+      </div>
+    );
 }

@@ -123,7 +123,8 @@ export function InvoicesPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="h-full overflow-y-auto">
+      <div className="p-6">
       <div className="mb-6">
         <h2 className="text-gray-900 mb-2">Invoices</h2>
         <p className="text-muted-foreground">View and manage all generated bills</p>

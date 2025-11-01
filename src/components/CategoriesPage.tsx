@@ -88,7 +88,8 @@ export function CategoriesPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="h-full overflow-y-auto">
+      <div className="p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -150,6 +151,7 @@ export function CategoriesPage() {
             </Card>
           )}
         </div>
+      </div>
       </div>
 
       {/* Add Category Dialog */}

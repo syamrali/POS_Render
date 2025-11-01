@@ -261,7 +261,8 @@ export function MenuPage() {
   }));
 
   return (
-    <div className="p-6">
+    <div className="h-full overflow-y-auto">
+      <div className="p-6">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -381,6 +382,7 @@ export function MenuPage() {
             </Card>
           ))}
         </div>
+      </div>
       </div>
 
       {/* Add/Edit Item Dialog */}

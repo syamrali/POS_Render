@@ -54,15 +54,15 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
   };
 
   return (
-    <div className="flex size-full bg-gray-50">
+    <div className="flex h-screen w-full bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-b from-purple-600 to-pink-600 text-white flex flex-col">
-        <div className="p-6">
+      <aside className="w-64 bg-gradient-to-b from-purple-600 to-pink-600 text-white flex flex-col h-screen overflow-y-auto">
+        <div className="p-6 flex-shrink-0">
           <h1 className="text-white">Restaurant POS</h1>
           <p className="text-purple-100 text-sm mt-1">Point of Sale System</p>
         </div>
 
-        <nav className="flex-1 px-3">
+        <nav className="flex-1 px-3 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -83,7 +83,7 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
           })}
         </nav>
 
-        <div className="p-3">
+        <div className="p-3 flex-shrink-0">
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:bg-white/10 hover:text-white"
@@ -96,7 +96,7 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 h-screen overflow-y-auto">
         {renderPage()}
       </main>
     </div>

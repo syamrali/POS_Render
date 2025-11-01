@@ -130,7 +130,8 @@ export function TablesPage() {
   }, {} as Record<string, Table[]>);
 
   return (
-    <div className="p-6">
+    <div className="h-full overflow-y-auto">
+      <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-gray-900 mb-2">Table Management</h2>
@@ -236,6 +237,7 @@ export function TablesPage() {
             </div>
           </div>
         ))}
+      </div>
       </div>
 
       {/* Add/Edit Dialog */}
