@@ -428,9 +428,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex h-screen">
       {/* Main Content Area - This will be adjusted by POSLayout */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         {/* Left Section - Table Selection or Menu */}
-        <div className="flex-1 p-6 overflow-y-auto" style={{ marginRight: '384px' }}>
+        <div className="flex-1 p-6 overflow-hidden">
           {!orderType && (
             <div className="flex flex-col items-center justify-center h-full">
               <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -589,7 +589,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
         {/* Right Section - Order Summary (Fixed header and footer) */}
         {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-          <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 fixed right-0 top-0 h-full">
+          <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0" style={{ height: '100vh' }}>
             {/* Header - Fixed at top */}
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between gap-2">
