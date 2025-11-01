@@ -17,7 +17,7 @@ services:
   - type: web
     name: pos-frontend
     runtime: docker
-    dockerfilePath: ./frontend/Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: ./frontend
     plan: free
     envVars:
