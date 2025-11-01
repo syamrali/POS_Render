@@ -429,9 +429,9 @@ export function OrdersPage() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen">
       {/* Left Section - Table Selection or Menu */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 overflow-hidden">
         {!orderType && (
           <div className="flex flex-col items-center justify-center h-full">
             <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -601,7 +601,7 @@ export function OrdersPage() {
       </div>
 
       {/* Right Section - Order Summary */}
-      <div className="w-96 bg-white border-l border-gray-200 flex flex-col" style={{ height: '100vh' }}>
+      <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0" style={{ height: '100vh' }}>
         <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <ShoppingCart className="size-5 text-purple-600" />
