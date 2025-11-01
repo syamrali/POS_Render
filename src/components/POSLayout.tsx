@@ -96,7 +96,7 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 h-screen overflow-y-auto">
+      <main className="flex-1 overflow-hidden">
         {renderPage()}
       </main>
     </div>
