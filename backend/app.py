@@ -26,6 +26,12 @@ database_url = os.environ.get('DATABASE_URL', 'postgresql://pos_user:pos_passwor
 if database_url.startswith('mysql://'):
     database_url = database_url.replace('mysql://', 'mysql+pymysql://')
 
+# Update postgresql:// to use psycopg (psycopg3) driver
+if database_url.startswith('postgresql://'):
+    database_url = database_url.replace('postgresql://', 'postgresql+psycopg://')
+elif database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql+psycopg://')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {

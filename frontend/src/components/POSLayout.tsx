@@ -55,10 +55,10 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-b from-purple-600 to-pink-600 text-white flex flex-col h-screen overflow-y-auto">
+      {/* Sidebar - Fixed */}
+      <aside className="fixed left-0 top-0 w-64 bg-gradient-to-b from-purple-600 to-pink-600 text-white flex flex-col overflow-y-auto shadow-xl z-40" style={{ height: '100vh' }}>
         <div className="p-6 flex-shrink-0">
-          <h1 className="text-white">Restaurant POS</h1>
+          <h1 className="text-2xl font-bold text-white">Restaurant POS</h1>
           <p className="text-purple-100 text-sm mt-1">Point of Sale System</p>
         </div>
 
@@ -96,7 +96,7 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 h-screen overflow-y-auto bg-gray-50" style={{ marginLeft: '256px' }}>
         {renderPage()}
       </main>
     </div>
