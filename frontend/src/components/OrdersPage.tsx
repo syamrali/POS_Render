@@ -601,9 +601,9 @@ export function OrdersPage() {
       </div>
 
       {/* Right Section - Order Summary */}
-      <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 relative" style={{ height: '100vh' }}>
-        {/* Header - Top Right Corner */}
-        <div className="absolute top-0 right-0 p-6 border-b border-gray-200 flex-shrink-0 bg-white w-full">
+      <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0" style={{ height: '100vh' }}>
+        {/* Header - Top */}
+        <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-end gap-2">
             <h3 className="text-gray-900">Current Order</h3>
             <ShoppingCart className="size-5 text-purple-600" />
@@ -614,7 +614,7 @@ export function OrdersPage() {
         </div>
 
         {/* Scrollable Items Area */}
-        <ScrollArea className="flex-1 p-6 mt-20 mb-32">
+        <ScrollArea className="flex-1 p-6">
           {currentOrder.length === 0 ? (
             <div className="text-center text-muted-foreground py-12">
               <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
@@ -685,8 +685,8 @@ export function OrdersPage() {
           )}
         </ScrollArea>
 
-        {/* Footer - Bottom Right Corner */}
-        <div className="absolute bottom-0 right-0 p-6 border-t border-gray-200 space-y-4 flex-shrink-0 bg-white w-full">
+        {/* Footer - Bottom */}
+        <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0">
           <div className="space-y-2">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
