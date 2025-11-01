@@ -31,11 +31,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    // Changed to a full-page gradient with pink and violet colors
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-violet-600 via-pink-500 to-purple-700 p-4">
+    // Updated to match the application's exact color scheme
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-600 p-4">
       <Card className="w-full max-w-md shadow-2xl border-0">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-center bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text text-transparent">
+          <CardTitle className="text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Welcome Back
           </CardTitle>
           <CardDescription className="text-center">
@@ -86,7 +86,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </div>
               <button
                 type="button"
-                className="text-violet-600 hover:text-violet-800 transition-colors"
+                className="text-purple-600 hover:text-purple-800 transition-colors"
                 onClick={() => console.log("Forgot password clicked")}
               >
                 Forgot password?
@@ -95,7 +95,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 text-white"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
               Sign In
             </Button>
@@ -104,7 +104,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <span className="text-muted-foreground">Don't have an account? </span>
               <button
                 type="button"
-                className="text-violet-600 hover:text-violet-800 transition-colors"
+                className="text-purple-600 hover:text-purple-800 transition-colors"
                 onClick={() => console.log("Sign up clicked")}
               >
                 Sign up
