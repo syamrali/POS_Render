@@ -428,7 +428,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex h-screen">
       {/* Left Section - Table Selection or Menu */}
-      <div className="flex-1 p-6 overflow-hidden">
+      <div className="flex-1 p-6 overflow-hidden" style={{ marginRight: '24rem' }}>
         {!orderType && (
           <div className="flex flex-col items-center justify-center h-full">
             <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -509,27 +509,13 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
         {/* Show menu items when order type is selected and (takeaway or table selected for dine-in) */}
         {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
           <>
-            <div className="mb-6 flex justify-between items-center">
+            <div className="mb-6">
               <div>
                 <h2 className="text-gray-900 mb-2">
                   {orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}
                 </h2>
                 <p className="text-muted-foreground">Select items to add to order</p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (orderType === "dine-in") {
-                    setSelectedTable("");
-                  } else {
-                    setOrderType(null);
-                  }
-                  setCurrentOrder([]);
-                  setSearchQuery("");
-                }}
-              >
-                Change {orderType === "dine-in" ? "Table" : "Type"}
-              </Button>
             </div>
 
             {/* Search Bar */}
@@ -565,7 +551,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
             <div className="flex">
               {/* Menu Items Grid */}
-              <div className="flex-1 pr-6">
+              <div className="flex-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredItems.length === 0 && (
                     <div className="col-span-full text-center py-12 text-muted-foreground">
@@ -598,136 +584,138 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                   ))}
                 </div>
               </div>
-
-              {/* Right Section - Order Summary (Only visible when order type is selected) */}
-              <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0" style={{ height: '100vh' }}>
-                {/* Header - Top */}
-                <div className="p-6 border-b border-gray-200 flex-shrink-0">
-                  <div className="flex items-center justify-end gap-2">
-                    <h3 className="text-gray-900">Current Order</h3>
-                    <ShoppingCart className="size-5 text-purple-600" />
-                  </div>
-                  <p className="text-muted-foreground text-right">
-                    {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
-                  </p>
-                </div>
-
-                {/* Scrollable Items Area */}
-                <ScrollArea className="flex-1 p-6">
-                  {currentOrder.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-12">
-                      <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
-                      <p>No items in order</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Pending Items */}
-                      {getPendingItems().length > 0 && (
-                        <div>
-                          <p className="text-muted-foreground mb-2">New Items</p>
-                          {getPendingItems().map((item, index) => (
-                            <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
-                              <div className="flex-1">
-                                <p className="text-gray-900">{item.name}</p>
-                                <p className="text-muted-foreground">₹{item.price} each</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  className="size-8"
-                                  onClick={() => updateQuantity(item.id, -1, false)}
-                                >
-                                  <Minus className="size-3" />
-                                </Button>
-                                <span className="w-8 text-center">{item.quantity}</span>
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  className="size-8"
-                                  onClick={() => updateQuantity(item.id, 1, false)}
-                                >
-                                  <Plus className="size-3" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => removeFromOrder(item.id, false)}
-                                >
-                                  <Trash2 className="size-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Sent to Kitchen Items */}
-                      {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
-                        <div>
-                          <p className="text-muted-foreground mb-2">Sent to Kitchen</p>
-                          {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
-                            <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-60">
-                              <div className="flex-1">
-                                <p className="text-gray-900">{item.name}</p>
-                                <p className="text-muted-foreground">₹{item.price} each</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="w-8 text-center">x{item.quantity}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </ScrollArea>
-
-                {/* Footer - Bottom */}
-                <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Subtotal</span>
-                      <span>₹{subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>GST (5%)</span>
-                      <span>₹{tax.toFixed(2)}</span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between">
-                      <span>Total</span>
-                      <span className="text-purple-600">₹{total.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Button
-                      onClick={placeOrder}
-                      disabled={getPendingItems().length === 0}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    >
-                      <Printer className="size-4 mr-2" />
-                      {existingTableOrder ? "Add More Items" : "Place Order"}
-                    </Button>
-                    {orderType === "dine-in" && existingTableOrder && (
-                      <Button
-                        onClick={() => setShowBillDialog(true)}
-                        disabled={currentOrder.length === 0}
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                      >
-                        <Printer className="size-4 mr-2" />
-                        Generate Bill
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
             </div>
           </>
         )}
       </div>
+
+      {/* Right Section - Order Summary (Fixed position like sidebar) */}
+      {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+        <div className="fixed right-0 top-0 w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 shadow-xl z-50" style={{ height: '100vh' }}>
+          {/* Header - Top */}
+          <div className="p-6 border-b border-gray-200 flex-shrink-0">
+            <div className="flex items-center justify-end gap-2">
+              <h3 className="text-gray-900">Current Order</h3>
+              <ShoppingCart className="size-5 text-purple-600" />
+            </div>
+            <p className="text-muted-foreground text-right">
+              {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
+            </p>
+          </div>
+
+          {/* Scrollable Items Area */}
+          <ScrollArea className="flex-1 p-6">
+            {currentOrder.length === 0 ? (
+              <div className="text-center text-muted-foreground py-12">
+                <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
+                <p>No items in order</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Pending Items */}
+                {getPendingItems().length > 0 && (
+                  <div>
+                    <p className="text-muted-foreground mb-2">New Items</p>
+                    {getPendingItems().map((item, index) => (
+                      <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
+                        <div className="flex-1">
+                          <p className="text-gray-900">{item.name}</p>
+                          <p className="text-muted-foreground">₹{item.price} each</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-8"
+                            onClick={() => updateQuantity(item.id, -1, false)}
+                          >
+                            <Minus className="size-3" />
+                          </Button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-8"
+                            onClick={() => updateQuantity(item.id, 1, false)}
+                          >
+                            <Plus className="size-3" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => removeFromOrder(item.id, false)}
+                          >
+                            <Trash2 className="size-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Sent to Kitchen Items */}
+                {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
+                  <div>
+                    <p className="text-muted-foreground mb-2">Sent to Kitchen</p>
+                    {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
+                      <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-60">
+                        <div className="flex-1">
+                          <p className="text-gray-900">{item.name}</p>
+                          <p className="text-muted-foreground">₹{item.price} each</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-8 text-center">x{item.quantity}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </ScrollArea>
+
+          {/* Footer - Bottom */}
+          <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0">
+            <div className="space-y-2">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>GST (5%)</span>
+                <span>₹{tax.toFixed(2)}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between">
+                <span>Total</span>
+                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Button
+                onClick={placeOrder}
+                disabled={getPendingItems().length === 0}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                <Printer className="size-4 mr-2" />
+                {existingTableOrder ? "Add More Items" : "Place Order"}
+              </Button>
+              {orderType === "dine-in" && existingTableOrder && (
+                <Button
+                  onClick={() => setShowBillDialog(true)}
+                  disabled={currentOrder.length === 0}
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                >
+                  <Printer className="size-4 mr-2" />
+                  Generate Bill
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bill Generation Dialog */}
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
