@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UtensilsCrossed, TableProperties, Settings, LogOut, ShoppingCart, FileText, BarChart3, FolderPlus, Tag } from "lucide-react";
+import { UtensilsCrossed, TableProperties, Settings, LogOut, ShoppingCart, FileText, BarChart3, FolderPlus, Tag, Home, Coffee, Package } from "lucide-react";
 import { Button } from "./ui/button";
 import { MenuPage } from "./MenuPage";
 import { TablesPage } from "./TablesPage";
@@ -14,13 +14,15 @@ interface POSLayoutProps {
   onLogout: () => void;
 }
 
-type PageType = "orders" | "menu" | "departments" | "categories" | "tables" | "invoices" | "reports" | "settings";
+type PageType = "orders" | "dine-in" | "takeaway" | "menu" | "departments" | "categories" | "tables" | "invoices" | "reports" | "settings";
 
 export function POSLayout({ onLogout }: POSLayoutProps) {
   const [currentPage, setCurrentPage] = useState<PageType>("orders");
 
   const navItems = [
     { id: "orders" as PageType, label: "Orders", icon: ShoppingCart },
+    { id: "dine-in" as PageType, label: "Dine In", icon: Home },
+    { id: "takeaway" as PageType, label: "Take Away", icon: Package },
     { id: "menu" as PageType, label: "Menu", icon: UtensilsCrossed },
     { id: "departments" as PageType, label: "Departments", icon: FolderPlus },
     { id: "categories" as PageType, label: "Categories", icon: Tag },
@@ -34,6 +36,10 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
     switch (currentPage) {
       case "orders":
         return <OrdersPage />;
+      case "dine-in":
+        return <OrdersPage defaultOrderType="dine-in" />;
+      case "takeaway":
+        return <OrdersPage defaultOrderType="takeaway" />;
       case "menu":
         return <MenuPage />;
       case "departments":
