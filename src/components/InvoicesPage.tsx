@@ -354,6 +354,7 @@ export function InvoicesPage() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
