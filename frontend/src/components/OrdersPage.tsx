@@ -428,7 +428,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex h-screen">
       {/* Left Section - Table Selection or Menu */}
-      <div className="flex-1 p-6 overflow-hidden" style={{ marginRight: '24rem' }}>
+      <div className="flex-1 p-6 overflow-hidden">
         {!orderType && (
           <div className="flex flex-col items-center justify-center h-full">
             <ShoppingCart className="size-16 text-purple-300 mb-6" />
