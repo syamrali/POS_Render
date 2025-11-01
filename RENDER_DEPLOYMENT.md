@@ -113,9 +113,9 @@ FLASK_ENV = production
    - **Name**: `pos-frontend`
    - **Region**: Same as backend
    - **Branch**: `main`
-   - **Root Directory**: `.` (root)
+   - **Root Directory**: `frontend`
    - **Environment**: `Docker`
-   - **Dockerfile Path**: `./Dockerfile.frontend`
+   - **Dockerfile Path**: `./Dockerfile` (relative to frontend folder)
 
    **Plan:**
    - Free (or paid for production)
