@@ -608,7 +608,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                 </p>
               </div>
 
-              {/* Scrollable Items Area - This section will scroll */}
+              {/* Scrollable Items Area - Only this section will scroll */}
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                   <div className="p-6">
