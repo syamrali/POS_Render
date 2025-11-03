@@ -428,211 +428,169 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex h-screen">
       {/* Main Content Area - This will be adjusted by POSLayout */}
-      <div className="flex-1 overflow-hidden" style={{ marginLeft: '256px' }}>
-        {/* Two-column layout for menu items and cart */}
-        <div className="flex h-full">
-          {/* Left Section - Menu Items */}
-          <div className="flex-1 p-6 overflow-auto">
-            {!orderType && (
-              <div className="flex flex-col items-center justify-center h-full">
-                <ShoppingCart className="size-16 text-purple-300 mb-6" />
-                <h2 className="text-gray-900 mb-4">Start New Order</h2>
-                <p className="text-muted-foreground mb-6">Select order type to begin</p>
-                <div className="flex gap-4">
-                  <Button
-                    onClick={() => handleOrderTypeChange("dine-in")}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6"
-                  >
-                    Dine-In
-                  </Button>
-                  <Button
-                    onClick={() => handleOrderTypeChange("takeaway")}
-                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-8 py-6"
-                  >
-                    Takeaway
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Show table selection for dine-in orders when no table is selected */}
-            {orderType === "dine-in" && !selectedTable && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-gray-900 mb-2">Select Table</h2>
-                  <p className="text-muted-foreground">Choose a table for dine-in order</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {tables.map(table => (
-                    <Card
-                      key={table.id}
-                      onClick={() => handleTableSelect(table.id)}
-                      className={`cursor-pointer hover:shadow-lg transition-all ${
-                        table.status === "available"
-                          ? "bg-gradient-to-br from-green-50 to-green-100 border-green-200"
-                          : "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
-                      }`}
-                    >
-                      <CardContent className="p-6">
-                        <div className="text-center space-y-3">
-                          <div>
-                            <p className="text-gray-900 mb-1">Table {table.name}</p>
-                            <Badge
-                              className={
-                                table.status === "available"
-                                  ? "bg-green-100 text-green-700 border-green-200"
-                                  : "bg-orange-100 text-orange-700 border-orange-200"
-                              }
-                              variant="outline"
-                            >
-                              {table.status}
-                            </Badge>
-                          </div>
-                          <div className="text-muted-foreground">
-                            {table.seats} seats • {table.category}
-                          </div>
-                          {table.status === "occupied" && getTableOrder(table.id) && (
-                            <div className="pt-2 border-t border-gray-200">
-                              <div className="flex items-center justify-center gap-1 text-orange-600">
-                                <Clock className="size-3" />
-                                <span className="text-sm">
-                                  {Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Show menu items when order type is selected and (takeaway or table selected for dine-in) */}
-            {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-              <>
-                <div className="mb-6">
-                  <div>
-                    <h2 className="text-gray-900 mb-2">
-                      {orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}
-                    </h2>
-                    <p className="text-muted-foreground">Select items to add to order</p>
-                  </div>
-                </div>
-
-                {/* Search Bar */}
-                <div className="mb-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Search menu items by name, code, or description..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                {/* Category Filter */}
-                <div className="flex gap-2 mb-6 flex-wrap">
-                  {categories.map(category => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
-                      onClick={() => setSelectedCategory(category)}
-                      className={selectedCategory === category 
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                        : ""
-                      }
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Menu Items Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredItems.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-muted-foreground">
-                      <Search className="size-12 mx-auto mb-4 opacity-20" />
-                      <p>No items found matching your search</p>
-                    </div>
-                  )}
-                  {filteredItems.map(item => (
-                    <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-gray-900">{item.name}</CardTitle>
-                            <Badge variant="secondary" className="mt-1">{item.category}</Badge>
-                          </div>
-                          <p className="text-purple-600">₹{item.price}</p>
-                        </div>
-                        <CardDescription>{item.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Button
-                          onClick={() => addToOrder(item)}
-                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                        >
-                          <Plus className="size-4 mr-2" />
-                          Add to Order
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Bill Generation Dialog */}
-        <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Generate Bill</DialogTitle>
-              <DialogDescription>
-                Would you like to print the bill?
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between">
-                  <span>Total Amount:</span>
-                  <span className="text-purple-600">₹{total.toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Section - Menu Items */}
+        <div className="flex-1 p-6 overflow-auto" style={{ marginLeft: '256px' }}>
+          {!orderType && (
+            <div className="flex flex-col items-center justify-center h-full">
+              <ShoppingCart className="size-16 text-purple-300 mb-6" />
+              <h2 className="text-gray-900 mb-4">Start New Order</h2>
+              <p className="text-muted-foreground mb-6">Select order type to begin</p>
+              <div className="flex gap-4">
                 <Button
-                  onClick={() => {
-                    printBill();
-                    completeBill();
-                  }}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  onClick={() => handleOrderTypeChange("dine-in")}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6"
                 >
-                  <Printer className="size-4 mr-2" />
-                  Print Bill
+                  Dine-In
                 </Button>
                 <Button
-                  onClick={completeBill}
-                  variant="outline"
-                  className="flex-1"
+                  onClick={() => handleOrderTypeChange("takeaway")}
+                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-8 py-6"
                 >
-                  Complete Without Printing
+                  Takeaway
                 </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          )}
+
+          {/* Show table selection for dine-in orders when no table is selected */}
+          {orderType === "dine-in" && !selectedTable && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-gray-900 mb-2">Select Table</h2>
+                <p className="text-muted-foreground">Choose a table for dine-in order</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {tables.map(table => (
+                  <Card
+                    key={table.id}
+                    onClick={() => handleTableSelect(table.id)}
+                    className={`cursor-pointer hover:shadow-lg transition-all ${
+                      table.status === "available"
+                        ? "bg-gradient-to-br from-green-50 to-green-100 border-green-200"
+                        : "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
+                    }`}
+                  >
+                    <CardContent className="p-6">
+                      <div className="text-center space-y-3">
+                        <div>
+                          <p className="text-gray-900 mb-1">Table {table.name}</p>
+                          <Badge
+                            className={
+                              table.status === "available"
+                                ? "bg-green-100 text-green-700 border-green-200"
+                                : "bg-orange-100 text-orange-700 border-orange-200"
+                            }
+                            variant="outline"
+                          >
+                            {table.status}
+                          </Badge>
+                        </div>
+                        <div className="text-muted-foreground">
+                          {table.seats} seats • {table.category}
+                        </div>
+                        {table.status === "occupied" && getTableOrder(table.id) && (
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="flex items-center justify-center gap-1 text-orange-600">
+                              <Clock className="size-3" />
+                              <span className="text-sm">
+                                {Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Show menu items when order type is selected and (takeaway or table selected for dine-in) */}
+          {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+            <>
+              <div className="mb-6">
+                <div>
+                  <h2 className="text-gray-900 mb-2">
+                    {orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}
+                  </h2>
+                  <p className="text-muted-foreground">Select items to add to order</p>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search menu items by name, code, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Category Filter */}
+              <div className="flex gap-2 mb-6 flex-wrap">
+                {categories.map(category => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category)}
+                    className={selectedCategory === category 
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      : ""
+                    }
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Menu Items Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredItems.length === 0 && (
+                  <div className="col-span-full text-center py-12 text-muted-foreground">
+                    <Search className="size-12 mx-auto mb-4 opacity-20" />
+                    <p>No items found matching your search</p>
+                  </div>
+                )}
+                {filteredItems.map(item => (
+                  <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-gray-900">{item.name}</CardTitle>
+                          <Badge variant="secondary" className="mt-1">{item.category}</Badge>
+                        </div>
+                        <p className="text-purple-600">₹{item.price}</p>
+                      </div>
+                      <CardDescription>{item.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        onClick={() => addToOrder(item)}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
+                        <Plus className="size-4 mr-2" />
+                        Add to Order
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 fixed right-0 top-0 h-full">
+        <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 fixed right-0 top-0" style={{ height: '100vh' }}>
           {/* Header - Fixed at top */}
           <div className="p-6 border-b border-gray-200 flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
@@ -777,6 +735,45 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </div>
         </div>
       )}
+
+      {/* Bill Generation Dialog */}
+      <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Generate Bill</DialogTitle>
+            <DialogDescription>
+              Would you like to print the bill?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between">
+                <span>Total Amount:</span>
+                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  printBill();
+                  completeBill();
+                }}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                <Printer className="size-4 mr-2" />
+                Print Bill
+              </Button>
+              <Button
+                onClick={completeBill}
+                variant="outline"
+                className="flex-1"
+              >
+                Complete Without Printing
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
