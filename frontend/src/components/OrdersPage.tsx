@@ -688,8 +688,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                     )}
                   </div>
                 )}
-              </div>
-            </ScrollArea>
+            </div>
           </div>
 
           {/* Footer - Fixed at bottom */}
