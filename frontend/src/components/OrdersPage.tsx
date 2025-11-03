@@ -428,9 +428,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex h-screen">
       {/* Main Content Area - This will be adjusted by POSLayout */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden" style={{ marginLeft: '256px' }}>
         {/* Left Section - Menu Items */}
-        <div className="flex-1 p-6 overflow-auto" style={{ marginLeft: '256px', marginRight: '384px' }}>
+        <div className="flex-1 p-6 overflow-auto">
           {!orderType && (
             <div className="flex flex-col items-center justify-center h-full">
               <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -586,194 +586,195 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
             </>
           )}
         </div>
-      </div>
 
-      {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
-      {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 fixed right-0 top-0" style={{ height: '100vh' }}>
-          {/* Header - Fixed at top */}
-          <div className="p-6 border-b border-gray-200 flex-shrink-0">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-gray-900 font-semibold">Current Order</h3>
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="size-5 text-purple-600" />
-                <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
-                  {getAllItems().length}
-                </span>
+        {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
+        {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+          <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 fixed right-0 top-0" style={{ height: '100vh', zIndex: 10 }}>
+            {/* Header - Fixed at top */}
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-gray-900 font-semibold">Current Order</h3>
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="size-5 text-purple-600" />
+                  <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                    {getAllItems().length}
+                  </span>
+                </div>
               </div>
+              <p className="text-muted-foreground text-sm mt-1">
+                {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
+              </p>
             </div>
-            <p className="text-muted-foreground text-sm mt-1">
-              {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
-            </p>
-          </div>
 
-          {/* Scrollable Items Area - Only this section will scroll */}
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="p-6">
-                {currentOrder.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-12">
-                    <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
-                    <p>No items in order</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Pending Items */}
-                    {getPendingItems().length > 0 && (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-medium text-muted-foreground">New Items</h4>
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {getPendingItems().reduce((sum, item) => sum + item.quantity, 0)} items
-                          </span>
-                        </div>
-                        {getPendingItems().map((item, index) => (
-                          <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
-                            <div className="flex-1">
-                              <p className="text-gray-900 font-medium">{item.name}</p>
-                              <p className="text-muted-foreground text-sm">₹{item.price} each</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="size-8"
-                                onClick={() => updateQuantity(item.id, -1, false)}
-                              >
-                                <Minus className="size-3" />
-                              </Button>
-                              <span className="w-8 text-center font-medium">{item.quantity}</span>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="size-8"
-                                onClick={() => updateQuantity(item.id, 1, false)}
-                              >
-                                <Plus className="size-3" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => removeFromOrder(item.id, false)}
-                              >
-                                <Trash2 className="size-3" />
-                              </Button>
-                            </div>
+            {/* Scrollable Items Area - Only this section will scroll */}
+            <div className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  {currentOrder.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-12">
+                      <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
+                      <p>No items in order</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Pending Items */}
+                      {getPendingItems().length > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-medium text-muted-foreground">New Items</h4>
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {getPendingItems().reduce((sum, item) => sum + item.quantity, 0)} items
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          {getPendingItems().map((item, index) => (
+                            <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
+                              <div className="flex-1">
+                                <p className="text-gray-900 font-medium">{item.name}</p>
+                                <p className="text-muted-foreground text-sm">₹{item.price} each</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="size-8"
+                                  onClick={() => updateQuantity(item.id, -1, false)}
+                                >
+                                  <Minus className="size-3" />
+                                </Button>
+                                <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="size-8"
+                                  onClick={() => updateQuantity(item.id, 1, false)}
+                                >
+                                  <Plus className="size-3" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => removeFromOrder(item.id, false)}
+                                >
+                                  <Trash2 className="size-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-                    {/* Sent to Kitchen Items */}
-                    {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-medium text-muted-foreground">Sent to Kitchen</h4>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                            {currentOrder.filter(item => item.sentToKitchen).reduce((sum, item) => sum + item.quantity, 0)} items
-                          </span>
-                        </div>
-                        {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
-                          <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-70">
-                            <div className="flex-1">
-                              <p className="text-gray-900 font-medium">{item.name}</p>
-                              <p className="text-muted-foreground text-sm">₹{item.price} each</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-8 text-center">x{item.quantity}</span>
-                            </div>
+                      {/* Sent to Kitchen Items */}
+                      {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-medium text-muted-foreground">Sent to Kitchen</h4>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                              {currentOrder.filter(item => item.sentToKitchen).reduce((sum, item) => sum + item.quantity, 0)} items
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
+                            <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-70">
+                              <div className="flex-1">
+                                <p className="text-gray-900 font-medium">{item.name}</p>
+                                <p className="text-muted-foreground text-sm">₹{item.price} each</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-8 text-center">x{item.quantity}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Footer - Fixed at bottom */}
+            <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0 bg-white">
+              <div className="space-y-2">
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>GST (5%)</span>
+                  <span>₹{tax.toFixed(2)}</span>
+                </div>
+                <div className="pt-2 border-t border-gray-200">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span className="text-purple-600">₹{total.toFixed(2)}</span>
                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  onClick={placeOrder}
+                  disabled={getPendingItems().length === 0}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  <Printer className="size-4 mr-2" />
+                  {existingTableOrder ? "Add More Items" : "Place Order"}
+                </Button>
+                {orderType === "dine-in" && existingTableOrder && (
+                  <Button
+                    onClick={() => setShowBillDialog(true)}
+                    disabled={currentOrder.length === 0}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  >
+                    <Printer className="size-4 mr-2" />
+                    Generate Bill
+                  </Button>
                 )}
               </div>
-            </ScrollArea>
+            </div>
           </div>
+        )}
 
-          {/* Footer - Fixed at bottom */}
-          <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0 bg-white">
-            <div className="space-y-2">
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>GST (5%)</span>
-                <span>₹{tax.toFixed(2)}</span>
-              </div>
-              <div className="pt-2 border-t border-gray-200">
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
+        {/* Bill Generation Dialog */}
+        <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Generate Bill</DialogTitle>
+              <DialogDescription>
+                Would you like to print the bill?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between">
+                  <span>Total Amount:</span>
                   <span className="text-purple-600">₹{total.toFixed(2)}</span>
                 </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Button
-                onClick={placeOrder}
-                disabled={getPendingItems().length === 0}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Printer className="size-4 mr-2" />
-                {existingTableOrder ? "Add More Items" : "Place Order"}
-              </Button>
-              {orderType === "dine-in" && existingTableOrder && (
+              <div className="flex gap-2">
                 <Button
-                  onClick={() => setShowBillDialog(true)}
-                  disabled={currentOrder.length === 0}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  onClick={() => {
+                    printBill();
+                    completeBill();
+                  }}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 >
                   <Printer className="size-4 mr-2" />
-                  Generate Bill
+                  Print Bill
                 </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bill Generation Dialog */}
-      <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Generate Bill</DialogTitle>
-            <DialogDescription>
-              Would you like to print the bill?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="space-y-2 mb-4">
-              <div className="flex justify-between">
-                <span>Total Amount:</span>
-                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                <Button
+                  onClick={completeBill}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Complete Without Printing
+                </Button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => {
-                  printBill();
-                  completeBill();
-                }}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Printer className="size-4 mr-2" />
-                Print Bill
-              </Button>
-              <Button
-                onClick={completeBill}
-                variant="outline"
-                className="flex-1"
-              >
-                Complete Without Printing
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </div>
+
     </div>
   );
 }
