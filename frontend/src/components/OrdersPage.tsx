@@ -590,9 +590,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0">
+        <aside className="w-96 bg-white border-l border-gray-200 flex flex-col h-screen sticky top-0">
           {/* Header - Fixed at top */}
-          <div className="p-6 border-b border-gray-200 flex-shrink-0">
+          <header className="p-6 border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-gray-900 font-semibold">Current Order</h3>
               <div className="flex items-center gap-2">
@@ -605,12 +605,11 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
             <p className="text-muted-foreground text-sm mt-1">
               {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
             </p>
-          </div>
+          </header>
 
           {/* Scrollable Items Area - Only this section will scroll */}
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="p-6">
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
                 {currentOrder.length === 0 ? (
                   <div className="text-center text-muted-foreground py-12">
                     <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
@@ -694,46 +693,47 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </div>
 
           {/* Footer - Fixed at bottom */}
-          <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0 bg-white">
-            <div className="space-y-2">
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>GST (5%)</span>
-                <span>₹{tax.toFixed(2)}</span>
-              </div>
-              <div className="pt-2 border-t border-gray-200">
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span className="text-purple-600">₹{total.toFixed(2)}</span>
+          <footer className="mt-auto border-t border-gray-200 bg-white">
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal.toFixed(2)}</span>
                 </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Button
-                onClick={placeOrder}
-                disabled={getPendingItems().length === 0}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Printer className="size-4 mr-2" />
-                {existingTableOrder ? "Add More Items" : "Place Order"}
-              </Button>
-              {orderType === "dine-in" && existingTableOrder && (
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>GST (5%)</span>
+                  <span>₹{tax.toFixed(2)}</span>
+                </div>
+                <div className="pt-2 border-t border-gray-200">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                  </div>
+                </div>
+                </div>
+              <div className="space-y-2">
                 <Button
-                  onClick={() => setShowBillDialog(true)}
-                  disabled={currentOrder.length === 0}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  onClick={placeOrder}
+                  disabled={getPendingItems().length === 0}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 >
                   <Printer className="size-4 mr-2" />
-                  Generate Bill
+                  {existingTableOrder ? "Add More Items" : "Place Order"}
                 </Button>
-              )}
+                {orderType === "dine-in" && existingTableOrder && (
+                  <Button
+                    onClick={() => setShowBillDialog(true)}
+                    disabled={currentOrder.length === 0}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  >
+                    <Printer className="size-4 mr-2" />
+                    Generate Bill
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </footer>
+        </aside>
       )}
 
       {/* Bill Generation Dialog */}
