@@ -590,9 +590,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 bg-white border-l border-gray-200 flex flex-col h-screen sticky top-0">
+        <aside className="w-96 bg-white border-l border-gray-200 flex flex-col h-screen">
           {/* Header - Fixed at top */}
-          <header className="p-6 border-b border-gray-200 bg-white">
+          <header className="p-6 border-b border-gray-200 bg-white flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-gray-900 font-semibold">Current Order</h3>
               <div className="flex items-center gap-2">
@@ -608,7 +608,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </header>
 
           {/* Scrollable Items Area - Only this section will scroll */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <div className="p-6">
                 {currentOrder.length === 0 ? (
                   <div className="text-center text-muted-foreground py-12">
@@ -692,7 +692,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </div>
 
           {/* Footer - Fixed at bottom */}
-          <footer className="mt-auto border-t border-gray-200 bg-white">
+          <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
             <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-muted-foreground text-sm">
@@ -709,7 +709,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                     <span className="text-purple-600">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
-                </div>
+              </div>
               <div className="space-y-2">
                 <Button
                   onClick={placeOrder}
