@@ -428,167 +428,312 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex h-screen">
       {/* Main Content Area - This will be adjusted by POSLayout */}
-      <div className="flex-1 overflow-hidden" style={{ marginLeft: '256px' }}>
-        {/* Two-column layout for menu items and cart */}
-        <div className="flex h-full">
-          {/* Left Section - Menu Items */}
-          <div className="flex-1 p-6 overflow-auto">
-            {!orderType && (
-              <div className="flex flex-col items-center justify-center h-full">
-                <ShoppingCart className="size-16 text-purple-300 mb-6" />
-                <h2 className="text-gray-900 mb-4">Start New Order</h2>
-                <p className="text-muted-foreground mb-6">Select order type to begin</p>
-                <div className="flex gap-4">
-                  <Button
-                    onClick={() => handleOrderTypeChange("dine-in")}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6"
+      <div className="flex-1 flex overflow-hidden" style={{ marginLeft: '256px' }}>
+        {/* Left Section - Menu Items */}
+        <div className="flex-1 p-6 overflow-auto">
+          {!orderType && (
+            <div className="flex flex-col items-center justify-center h-full">
+              <ShoppingCart className="size-16 text-purple-300 mb-6" />
+              <h2 className="text-gray-900 mb-4">Start New Order</h2>
+              <p className="text-muted-foreground mb-6">Select order type to begin</p>
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => handleOrderTypeChange("dine-in")}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6"
+                >
+                  Dine-In
+                </Button>
+                <Button
+                  onClick={() => handleOrderTypeChange("takeaway")}
+                  className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-8 py-6"
+                >
+                  Takeaway
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Show table selection for dine-in orders when no table is selected */}
+          {orderType === "dine-in" && !selectedTable && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-gray-900 mb-2">Select Table</h2>
+                <p className="text-muted-foreground">Choose a table for dine-in order</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {tables.map(table => (
+                  <Card
+                    key={table.id}
+                    onClick={() => handleTableSelect(table.id)}
+                    className={`cursor-pointer hover:shadow-lg transition-all ${
+                      table.status === "available"
+                        ? "bg-gradient-to-br from-green-50 to-green-100 border-green-200"
+                        : "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
+                    }`}
                   >
-                    Dine-In
-                  </Button>
-                  <Button
-                    onClick={() => handleOrderTypeChange("takeaway")}
-                    className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-8 py-6"
-                  >
-                    Takeaway
-                  </Button>
+                    <CardContent className="p-6">
+                      <div className="text-center space-y-3">
+                        <div>
+                          <p className="text-gray-900 mb-1">Table {table.name}</p>
+                          <Badge
+                            className={
+                              table.status === "available"
+                                ? "bg-green-100 text-green-700 border-green-200"
+                                : "bg-orange-100 text-orange-700 border-orange-200"
+                            }
+                            variant="outline"
+                          >
+                            {table.status}
+                          </Badge>
+                        </div>
+                        <div className="text-muted-foreground">
+                          {table.seats} seats • {table.category}
+                        </div>
+                        {table.status === "occupied" && getTableOrder(table.id) && (
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="flex items-center justify-center gap-1 text-orange-600">
+                              <Clock className="size-3" />
+                              <span className="text-sm">
+                                {Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Show menu items when order type is selected and (takeaway or table selected for dine-in) */}
+          {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+            <>
+              <div className="mb-6">
+                <div>
+                  <h2 className="text-gray-900 mb-2">
+                    {orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}
+                  </h2>
+                  <p className="text-muted-foreground">Select items to add to order</p>
                 </div>
               </div>
-            )}
 
-            {/* Show table selection for dine-in orders when no table is selected */}
-            {orderType === "dine-in" && !selectedTable && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-gray-900 mb-2">Select Table</h2>
-                  <p className="text-muted-foreground">Choose a table for dine-in order</p>
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search menu items by name, code, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {tables.map(table => (
-                    <Card
-                      key={table.id}
-                      onClick={() => handleTableSelect(table.id)}
-                      className={`cursor-pointer hover:shadow-lg transition-all ${
-                        table.status === "available"
-                          ? "bg-gradient-to-br from-green-50 to-green-100 border-green-200"
-                          : "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
-                      }`}
-                    >
-                      <CardContent className="p-6">
-                        <div className="text-center space-y-3">
-                          <div>
-                            <p className="text-gray-900 mb-1">Table {table.name}</p>
-                            <Badge
-                              className={
-                                table.status === "available"
-                                  ? "bg-green-100 text-green-700 border-green-200"
-                                  : "bg-orange-100 text-orange-700 border-orange-200"
-                              }
-                              variant="outline"
-                            >
-                              {table.status}
-                            </Badge>
+              {/* Category Filter */}
+              <div className="flex gap-2 mb-6 flex-wrap">
+                {categories.map(category => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category)}
+                    className={selectedCategory === category 
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      : ""
+                    }
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Menu Items Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredItems.length === 0 && (
+                  <div className="col-span-full text-center py-12 text-muted-foreground">
+                    <Search className="size-12 mx-auto mb-4 opacity-20" />
+                    <p>No items found matching your search</p>
+                  </div>
+                )}
+                {filteredItems.map(item => (
+                  <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-gray-900">{item.name}</CardTitle>
+                          <Badge variant="secondary" className="mt-1">{item.category}</Badge>
+                        </div>
+                        <p className="text-purple-600">₹{item.price}</p>
+                      </div>
+                      <CardDescription>{item.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        onClick={() => addToOrder(item)}
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
+                        <Plus className="size-4 mr-2" />
+                        Add to Order
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
+        {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+          <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0" style={{ height: '100vh' }}>
+            {/* Header - Fixed at top */}
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-gray-900 font-semibold">Current Order</h3>
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="size-5 text-purple-600" />
+                  <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                    {getAllItems().length}
+                  </span>
+                </div>
+              </div>
+              <p className="text-muted-foreground text-sm mt-1">
+                {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
+              </p>
+            </div>
+
+            {/* Scrollable Items Area - Only this section will scroll */}
+            <div className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  {currentOrder.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-12">
+                      <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
+                      <p>No items in order</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Pending Items */}
+                      {getPendingItems().length > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-medium text-muted-foreground">New Items</h4>
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {getPendingItems().reduce((sum, item) => sum + item.quantity, 0)} items
+                            </span>
                           </div>
-                          <div className="text-muted-foreground">
-                            {table.seats} seats • {table.category}
-                          </div>
-                          {table.status === "occupied" && getTableOrder(table.id) && (
-                            <div className="pt-2 border-t border-gray-200">
-                              <div className="flex items-center justify-center gap-1 text-orange-600">
-                                <Clock className="size-3" />
-                                <span className="text-sm">
-                                  {Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins
-                                </span>
+                          {getPendingItems().map((item, index) => (
+                            <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
+                              <div className="flex-1">
+                                <p className="text-gray-900 font-medium">{item.name}</p>
+                                <p className="text-muted-foreground text-sm">₹{item.price} each</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="size-8"
+                                  onClick={() => updateQuantity(item.id, -1, false)}
+                                >
+                                  <Minus className="size-3" />
+                                </Button>
+                                <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="size-8"
+                                  onClick={() => updateQuantity(item.id, 1, false)}
+                                >
+                                  <Plus className="size-3" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => removeFromOrder(item.id, false)}
+                                >
+                                  <Trash2 className="size-3" />
+                                </Button>
                               </div>
                             </div>
-                          )}
+                          ))}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
+                      )}
 
-            {/* Show menu items when order type is selected and (takeaway or table selected for dine-in) */}
-            {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-              <>
-                <div className="mb-6">
-                  <div>
-                    <h2 className="text-gray-900 mb-2">
-                      {orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}
-                    </h2>
-                    <p className="text-muted-foreground">Select items to add to order</p>
-                  </div>
-                </div>
-
-                {/* Search Bar */}
-                <div className="mb-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Search menu items by name, code, or description..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                {/* Category Filter */}
-                <div className="flex gap-2 mb-6 flex-wrap">
-                  {categories.map(category => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
-                      onClick={() => setSelectedCategory(category)}
-                      className={selectedCategory === category 
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                        : ""
-                      }
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Menu Items Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredItems.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-muted-foreground">
-                      <Search className="size-12 mx-auto mb-4 opacity-20" />
-                      <p>No items found matching your search</p>
+                      {/* Sent to Kitchen Items */}
+                      {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-medium text-muted-foreground">Sent to Kitchen</h4>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                              {currentOrder.filter(item => item.sentToKitchen).reduce((sum, item) => sum + item.quantity, 0)} items
+                            </span>
+                          </div>
+                          {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
+                            <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-70">
+                              <div className="flex-1">
+                                <p className="text-gray-900 font-medium">{item.name}</p>
+                                <p className="text-muted-foreground text-sm">₹{item.price} each</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-8 text-center">x{item.quantity}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
-                  {filteredItems.map(item => (
-                    <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-gray-900">{item.name}</CardTitle>
-                            <Badge variant="secondary" className="mt-1">{item.category}</Badge>
-                          </div>
-                          <p className="text-purple-600">₹{item.price}</p>
-                        </div>
-                        <CardDescription>{item.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Button
-                          onClick={() => addToOrder(item)}
-                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                        >
-                          <Plus className="size-4 mr-2" />
-                          Add to Order
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
                 </div>
-              </>
-            )}
+              </ScrollArea>
+            </div>
+
+            {/* Footer - Fixed at bottom */}
+            <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0 bg-white">
+              <div className="space-y-2">
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground text-sm">
+                  <span>GST (5%)</span>
+                  <span>₹{tax.toFixed(2)}</span>
+                </div>
+                <div className="pt-2 border-t border-gray-200">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  onClick={placeOrder}
+                  disabled={getPendingItems().length === 0}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  <Printer className="size-4 mr-2" />
+                  {existingTableOrder ? "Add More Items" : "Place Order"}
+                </Button>
+                {orderType === "dine-in" && existingTableOrder && (
+                  <Button
+                    onClick={() => setShowBillDialog(true)}
+                    disabled={currentOrder.length === 0}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  >
+                    <Printer className="size-4 mr-2" />
+                    Generate Bill
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Bill Generation Dialog */}
         <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
@@ -630,151 +775,6 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
         </Dialog>
       </div>
 
-      {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
-      {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <div className="w-96 bg-white border-l border-gray-200 flex flex-col flex-shrink-0 fixed right-0 top-0 h-full">
-          {/* Header - Fixed at top */}
-          <div className="p-6 border-b border-gray-200 flex-shrink-0">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-gray-900 font-semibold">Current Order</h3>
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="size-5 text-purple-600" />
-                <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
-                  {getAllItems().length}
-                </span>
-              </div>
-            </div>
-            <p className="text-muted-foreground text-sm mt-1">
-              {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
-            </p>
-          </div>
-
-          {/* Scrollable Items Area - Only this section will scroll */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-6">
-              {currentOrder.length === 0 ? (
-                <div className="text-center text-muted-foreground py-12">
-                  <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
-                  <p>No items in order</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Pending Items */}
-                  {getPendingItems().length > 0 && (
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-medium text-muted-foreground">New Items</h4>
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          {getPendingItems().reduce((sum, item) => sum + item.quantity, 0)} items
-                        </span>
-                      </div>
-                      {getPendingItems().map((item, index) => (
-                        <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
-                          <div className="flex-1">
-                            <p className="text-gray-900 font-medium">{item.name}</p>
-                            <p className="text-muted-foreground text-sm">₹{item.price} each</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              className="size-8"
-                              onClick={() => updateQuantity(item.id, -1, false)}
-                            >
-                              <Minus className="size-3" />
-                            </Button>
-                            <span className="w-8 text-center font-medium">{item.quantity}</span>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              className="size-8"
-                              onClick={() => updateQuantity(item.id, 1, false)}
-                            >
-                              <Plus className="size-3" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => removeFromOrder(item.id, false)}
-                            >
-                              <Trash2 className="size-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Sent to Kitchen Items */}
-                  {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-medium text-muted-foreground">Sent to Kitchen</h4>
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                          {currentOrder.filter(item => item.sentToKitchen).reduce((sum, item) => sum + item.quantity, 0)} items
-                        </span>
-                      </div>
-                      {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
-                        <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-70">
-                          <div className="flex-1">
-                            <p className="text-gray-900 font-medium">{item.name}</p>
-                            <p className="text-muted-foreground text-sm">₹{item.price} each</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="w-8 text-center">x{item.quantity}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Footer - Fixed at bottom */}
-          <div className="p-6 border-t border-gray-200 space-y-4 flex-shrink-0 bg-white">
-            <div className="space-y-2">
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>GST (5%)</span>
-                <span>₹{tax.toFixed(2)}</span>
-              </div>
-              <div className="pt-2 border-t border-gray-200">
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span className="text-purple-600">₹{total.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Button
-                onClick={placeOrder}
-                disabled={getPendingItems().length === 0}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Printer className="size-4 mr-2" />
-                {existingTableOrder ? "Add More Items" : "Place Order"}
-              </Button>
-              {orderType === "dine-in" && existingTableOrder && (
-                <Button
-                  onClick={() => setShowBillDialog(true)}
-                  disabled={currentOrder.length === 0}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                >
-                  <Printer className="size-4 mr-2" />
-                  Generate Bill
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
