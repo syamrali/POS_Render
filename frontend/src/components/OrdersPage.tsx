@@ -426,9 +426,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Left Section - Menu Items */}
         <div className="flex-1 p-6 overflow-auto">
           {!orderType && (
@@ -590,9 +590,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col h-screen">
+        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col h-full">
           {/* Header - Fixed at top */}
-          <header className="p-6 border-b border-gray-200 bg-white flex-shrink-0">
+          <header className="py-4 px-6 border-b border-gray-200 bg-white flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-gray-900 font-semibold">Current Order</h3>
               <div className="flex items-center gap-2">
@@ -608,8 +608,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </header>
 
           {/* Scrollable Items Area - Only this section will scroll */}
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-            <div className="p-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="p-4">
                 {currentOrder.length === 0 ? (
                   <div className="text-center text-muted-foreground py-12">
                     <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
@@ -693,7 +693,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
           {/* Footer - Fixed at bottom */}
           <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
-            <div className="p-6 space-y-4">
+            <div className="py-4 px-6 space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-muted-foreground text-sm">
                   <span>Subtotal</span>
