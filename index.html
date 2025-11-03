@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3-column POS layout</title>
+  <style>
+    :root{
+      --left-w: 260px;
+      --right-w: 340px;
+      --gap: 12px;
+      --bg: #f6f7fb;
+      --card: #fff;
+      --accent: #0b72ef;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial}
+    /* Full-height grid: left | center | right */
+    .app {
+      display: grid;
+      grid-template-columns: var(--left-w) 1fr var(--right-w);
+      gap: var(--gap);
+      height: 100vh;
+      padding: var(--gap);
+      background: var(--bg);
+      box-sizing: border-box;
+    }
+
+    /* Left nav: fixed, non-scrollable */
+    .sidenav {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden; /* prevent scroll on the left column */
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sidenav h2{margin:0 0 8px 0;font-size:16px}
+    .sidenav .menu-btn{display:block;padding:8px 10px;border-radius:6px;color:#111;text-decoration:none}
+    .sidenav .menu-btn:hover{background:#f0f4ff}
+
+    /* Center: menu items, scrollable */
+    .main {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 16px;
+      overflow: auto; /* full center scroll */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap:12px;
+    }
+    .menu-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill,minmax(160px,1fr));
+      gap:12px;
+    }
+    .menu-item{
+      background: #fff;
+      border-radius:8px;
+      padding:12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    /* Right: cart. header and footer stay fixed; items scroll inside */
+    .cart {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden; /* ensure cart container itself doesn't scroll */
+    }
+    .cart .cart-header, .cart .cart-footer {
+      padding: 14px;
+      border-bottom: 1px solid #eef2f7;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+    }
+    .cart .cart-header{display:flex;align-items:center;justify-content:space-between}
+    .cart .cart-items {
+      padding: 12px;
+      overflow: auto; /* only this area scrolls */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0; /* important for flex children to allow scrolling in some browsers */
+    }
+    .cart .cart-item{
+      background:#fff;
+      border-radius:6px;
+      padding:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.03);
+    }
+    .cart .cart-footer{
+      border-top:1px solid #eef2f7;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    /* Small screens: collapse to single column (optional) */
+    @media (max-width:900px){
+      .app{grid-template-columns: 1fr; padding:8px}
+      .sidenav,.cart{display:none} /* hide side columns on small screens, adapt as needed */
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidenav" aria-label="Side navigation">
+      <h2>Categories</h2>
+      <a class="menu-btn" href="#">Breakfast</a>
+      <a class="menu-btn" href="#">Lunch</a>
+      <a class="menu-btn" href="#">Drinks</a>
+      <a class="menu-btn" href="#">Desserts</a>
+      <div style="flex:1"></div>
+      <small style="color:#666">POS v1.0</small>
+    </aside>
+
+    <main class="main" role="main">
+      <h1 style="margin-top:0">Menu Items</h1>
+      <div class="menu-grid" id="menuGrid">
+        <!-- many items to demonstrate scrolling -->
+        <div class="menu-item">Item 1</div>
+        <div class="menu-item">Item 2</div>
+        <div class="menu-item">Item 3</div>
+        <div class="menu-item">Item 4</div>
+        <div class="menu-item">Item 5</div>
+        <div class="menu-item">Item 6</div>
+        <div class="menu-item">Item 7</div>
+        <div class="menu-item">Item 8</div>
+        <div class="menu-item">Item 9</div>
+        <div class="menu-item">Item 10</div>
+        <div class="menu-item">Item 11</div>
+        <div class="menu-item">Item 12</div>
+      </div>
+    </main>
+
+    <aside class="cart" aria-label="Cart">
+      <div class="cart-header">
+        <strong>Cart</strong>
+        <small id="cart-count">0 items</small>
+      </div>
+
+      <div class="cart-items" id="cartItems">
+        <!-- only this area scrolls when long -->
+        <div class="cart-item"><span>Example product A</span><span>$5.00</span></div>
+        <div class="cart-item"><span>Example product B</span><span>$3.50</span></div>
+        <div class="cart-item"><span>Example product C</span><span>$2.75</span></div>
+        <!-- add more to test scrolling -->
+      </div>
+
+      <div class="cart-footer">
+        <div>
+          <div style="font-weight:600">Total</div>
+          <div style="color:#666">$11.25</div>
+        </div>
+        <button style="background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer">
+          Checkout
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // small demo: add many cart items to show cart-items scrolling
+    const cartItems = document.getElementById('cartItems');
+    for(let i=4;i<=30;i++){
+      const d = document.createElement('div');
+      d.className = 'cart-item';
+      d.innerHTML = '<span>Product ' + i + '</span><span>$' + (Math.random()*10).toFixed(2) + '</span>';
+      cartItems.appendChild(d);
+    }
+    document.getElementById('cart-count').textContent = cartItems.children.length + ' items';
+  </script>
+</body>
+</html>
