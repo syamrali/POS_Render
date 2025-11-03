@@ -590,7 +590,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 bg-white border-l border-gray-200 flex flex-col h-screen">
+        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col h-screen">
           {/* Header - Fixed at top */}
           <header className="p-6 border-b border-gray-200 bg-white flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
@@ -608,7 +608,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </header>
 
           {/* Scrollable Items Area - Only this section will scroll */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
             <div className="p-6">
                 {currentOrder.length === 0 ? (
                   <div className="text-center text-muted-foreground py-12">
@@ -628,8 +628,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                         </div>
                         {getPendingItems().map((item, index) => (
                           <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
-                            <div className="flex-1">
-                              <p className="text-gray-900 font-medium">{item.name}</p>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-gray-900 font-medium truncate">{item.name}</p>
                               <p className="text-muted-foreground text-sm">₹{item.price} each</p>
                             </div>
                             <div className="flex items-center gap-2">
