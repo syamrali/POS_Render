@@ -428,9 +428,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex min-h-screen">
       {/* Main Content Area */}
-      <div className="flex-1 flex pr-96">
+      <div className="flex-1">
         {/* Left Section - Menu Items */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="p-6 overflow-y-auto" style={{ marginLeft: '256px', marginRight: '384px' }}>
           {!orderType && (
             <div className="flex flex-col items-center justify-center h-full">
               <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -590,7 +590,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 bottom-0">
+        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 bottom-0 shadow-lg">
           {/* Header - Fixed at top */}
           <header className="py-4 px-6 border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-2">
@@ -692,7 +692,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           </div>
 
           {/* Footer - Fixed at bottom */}
-          <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
+          <footer className="flex-shrink-0 border-t border-gray-200 bg-white sticky bottom-0 z-30">
             <div className="py-4 px-6 space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-muted-foreground text-sm">
