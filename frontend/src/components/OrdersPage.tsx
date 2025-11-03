@@ -426,9 +426,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex min-h-screen">
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex pr-96">
         {/* Left Section - Menu Items */}
         <div className="flex-1 p-6 overflow-auto">
           {!orderType && (
@@ -590,9 +590,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col h-full">
+        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 bottom-0">
           {/* Header - Fixed at top */}
-          <header className="py-4 px-6 border-b border-gray-200 bg-white flex-shrink-0">
+          <header className="py-4 px-6 border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-gray-900 font-semibold">Current Order</h3>
               <div className="flex items-center gap-2">
