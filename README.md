@@ -53,8 +53,3 @@ docker-compose up --build
 
 See `RENDER_DEPLOYMENT.md` for detailed deployment instructions.
 
-
-
-
-
-
