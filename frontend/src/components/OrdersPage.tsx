@@ -428,9 +428,9 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   return (
     <div className="flex min-h-screen">
       {/* Main Content Area - Three Panel Layout */}
-      <div className="flex flex-1">
-        {/* Middle Section - Menu Items (with proper spacing for side nav) */}
-        <div className="flex-1 p-6 overflow-y-auto" style={{ marginLeft: '256px' }}>
+      <div className="flex-1">
+        {/* Middle Section - Menu Items */}
+        <div className="p-6 overflow-y-auto" style={{ marginLeft: '256px', marginRight: '384px' }}>
           {!orderType && (
             <div className="flex flex-col items-center justify-center h-full">
               <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -590,7 +590,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
       {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col h-screen">
+        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 h-screen overflow-hidden shadow-xl">
           {/* Header - Fixed at top */}
           <header className="py-4 px-6 border-b border-gray-200 bg-white flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
