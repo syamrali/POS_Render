@@ -465,7 +465,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1">
+      <main className="flex-1">
         {/* Middle Section - Menu Items */}
         <div className="p-6 overflow-y-auto" style={{ marginLeft: '280px', marginRight: '340px' }}>
           {!orderType && (
@@ -757,35 +757,41 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                     )}
 
                     </div>
-                  </div>
-                )}
-                
-                {currentOrder.length > 0 && (
-                  <div className="mt-auto">
-                    <div className="p-4 border-t border-gray-200">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Subtotal</span>
-                          <span>₹{subtotal.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">GST (5%)</span>
-                          <span>₹{tax.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-base font-semibold pt-2 border-t">
-                          <span>Total</span>
-                          <span className="text-purple-600">₹{total.toFixed(2)}</span>
+
+                    {/* Totals and Place Order Button */}
+                    {currentOrder.length > 0 && (
+                      <div className="mt-auto border-t border-gray-200">
+                        <div className="p-4">
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Subtotal</span>
+                              <span>₹{subtotal.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">GST (5%)</span>
+                              <span>₹{tax.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-base font-semibold pt-2 border-t">
+                              <span>Total</span>
+                              <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                            </div>
+                          </div>
+                          <Button
+                            className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+                            onClick={() => setShowBillDialog(true)}
+                          >
+                            Place Order
+                          </Button>
                         </div>
                       </div>
-                      <Button
-                        className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
-                        onClick={() => setShowBillDialog(true)}
-                      >
-                        Place Order
-                      </Button>
-                    </div>
+                    )}
                   </div>
                 )}
+              </div>
+            </div>
+          </header>
+        </aside>
+      )}
             </div>
           </div>
 
