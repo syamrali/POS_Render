@@ -588,30 +588,80 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                 ))}
               </div>
 
+              {/* Page Title and Search */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h1 className="text-xl font-semibold">
+                    {orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}
+                  </h1>
+                  <div className="flex items-center">
+                    <button className="text-gray-500 hover:text-gray-700">
+                      Change Type
+                    </button>
+                  </div>
+                </div>
+                <p className="text-gray-500 mb-4">Select items to add to order</p>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search menu items by name, code, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 w-full bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Category Filters */}
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <Button
+                  variant={selectedCategory === "All" ? "default" : "outline"}
+                  onClick={() => setSelectedCategory("All")}
+                  className={selectedCategory === "All" ? "bg-purple-600 hover:bg-purple-700" : ""}
+                >
+                  All
+                </Button>
+                {categories.slice(1).map(category => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category)}
+                    className={selectedCategory === category ? "bg-purple-600 hover:bg-purple-700" : ""}
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+
               {/* Menu Items Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredItems.length === 0 && (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
+                  <div className="col-span-full text-center py-12 text-gray-500">
                     <Search className="size-12 mx-auto mb-4 opacity-20" />
                     <p>No items found matching your search</p>
                   </div>
                 )}
                 {filteredItems.map(item => (
-                  <Card key={item.id} className="bg-white hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg font-semibold">{item.name}</CardTitle>
-                          <p className="text-sm text-gray-500">{item.category}</p>
+                  <Card key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <CardHeader className="p-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg font-semibold">{item.name}</CardTitle>
+                            <p className="text-sm text-gray-500">{item.category}</p>
+                          </div>
+                          <p className="text-lg font-bold text-purple-600">₹{item.price}</p>
                         </div>
-                        <p className="text-lg font-bold text-purple-600">₹{item.price}</p>
+                        <p className="text-sm text-gray-500">{item.description}</p>
                       </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4 pt-0">
                       <Button
                         onClick={() => addToOrder(item)}
                         className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                       >
+                        <Plus className="size-4 mr-2" />
                         Add to Order
                       </Button>
                     </CardContent>
@@ -656,81 +706,84 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="p-4">
                 {currentOrder.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-12">
-                    <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
-                    <p>No items in order</p>
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="mb-4">
+                      <ShoppingCart className="size-16 text-gray-300" />
+                    </div>
+                    <p className="text-gray-500">No items in order</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* Pending Items */}
-                    {getPendingItems().length > 0 && (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-medium text-muted-foreground">New Items</h4>
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {getPendingItems().reduce((sum, item) => sum + item.quantity, 0)} items
-                          </span>
-                        </div>
-                        {getPendingItems().map((item, index) => (
-                          <div key={`${item.id}-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-gray-900 font-medium truncate">{item.name}</p>
-                              <p className="text-muted-foreground text-sm">₹{item.price} each</p>
+                    {/* Current Order Items */}
+                    <div>
+                      {getPendingItems().map((item, index) => (
+                          <div key={`${item.id}-${index}`} className="flex justify-between items-center p-4 border-b border-gray-100">
+                            <div className="flex-1">
+                              <p className="font-medium">{item.name}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 rounded-full"
+                                    onClick={() => updateQuantity(item.id, -1, false)}
+                                  >
+                                    <Minus className="size-3" />
+                                  </Button>
+                                  <span className="w-8 text-center">{item.quantity}</span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 rounded-full"
+                                    onClick={() => updateQuantity(item.id, 1, false)}
+                                  >
+                                    <Plus className="size-3" />
+                                  </Button>
+                                </div>
+                                <p className="text-purple-600 font-semibold">₹{item.price * item.quantity}</p>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="size-8"
-                                onClick={() => updateQuantity(item.id, -1, false)}
-                              >
-                                <Minus className="size-3" />
-                              </Button>
-                              <span className="w-8 text-center font-medium">{item.quantity}</span>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="size-8"
-                                onClick={() => updateQuantity(item.id, 1, false)}
-                              >
-                                <Plus className="size-3" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => removeFromOrder(item.id, false)}
-                              >
-                                <Trash2 className="size-3" />
-                              </Button>
-                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-400 hover:text-red-600"
+                              onClick={() => removeFromOrder(item.id, false)}
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {/* Sent to Kitchen Items */}
-                    {currentOrder.filter(item => item.sentToKitchen).length > 0 && (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-medium text-muted-foreground">Sent to Kitchen</h4>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                            {currentOrder.filter(item => item.sentToKitchen).reduce((sum, item) => sum + item.quantity, 0)} items
-                          </span>
+                    </div>
+                  </div>
+                )}
+                
+                {currentOrder.length > 0 && (
+                  <div className="mt-auto">
+                    <div className="p-4 border-t border-gray-200">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Subtotal</span>
+                          <span>₹{subtotal.toFixed(2)}</span>
                         </div>
-                        {currentOrder.filter(item => item.sentToKitchen).map((item, index) => (
-                          <div key={`${item.id}-sent-${index}`} className="flex items-start gap-3 pb-4 border-b border-gray-100 opacity-70">
-                            <div className="flex-1">
-                              <p className="text-gray-900 font-medium">{item.name}</p>
-                              <p className="text-muted-foreground text-sm">₹{item.price} each</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-8 text-center">x{item.quantity}</span>
-                            </div>
-                          </div>
-                        ))}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">GST (5%)</span>
+                          <span>₹{tax.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-base font-semibold pt-2 border-t">
+                          <span>Total</span>
+                          <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                        </div>
                       </div>
-                    )}
+                      <Button
+                        className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+                        onClick={() => setShowBillDialog(true)}
+                      >
+                        Place Order
+                      </Button>
+                    </div>
                   </div>
                 )}
             </div>
