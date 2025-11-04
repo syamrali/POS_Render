@@ -7,14 +7,70 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Plus, Minus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
-import { useRestaurant, type OrderItem } from "../contexts/RestaurantContext";
+import { useRestaurant } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
 
 interface OrdersPageProps {
   defaultOrderType?: "dine-in" | "takeaway";
 }
 
-export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
+interface Order {
+  id: string;
+  billNumber: string;
+  tableName?: string;
+  items: OrderItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  timestamp: Date;
+}
+
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  department?: string;
+  sentToKitchen?: boolean;
+}
+
+interface Table {
+  id: string;
+  name: string;
+  status: 'available' | 'occupied';
+  seats: number;
+  category: string;
+}
+
+// Type aliases for callback functions
+type OrderUpdateCallback = (prev: OrderItem[]) => OrderItem[];
+type FilterCallback<T> = (item: T) => boolean;
+
+interface OrdersPageProps {
+  defaultOrderType?: "dine-in" | "takeaway";
+}
+
+interface Table {
+  id: string;
+  name: string;
+  status: 'available' | 'occupied';
+  seats: number;
+  category: string;
+}
+
+interface MenuItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  department: string;
+  price: number;
+  productCode: string;
+}
+
+export function OrdersPage({ defaultOrderType = "dine-in" }: OrdersPageProps): React.ReactElement {
+  // ... existing state and handlers ...
+
   const { tables, addItemsToTable, getTableOrder, completeTableOrder, markItemsAsSent, addInvoice, kotConfig, billConfig } = useRestaurant();
   
   const [menuItems, setMenuItems] = useState<api.MenuItem[]>([]);
@@ -25,6 +81,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [showBillDialog, setShowBillDialog] = useState(false);
+
+  return (
 
   // Load menu items and categories from API
   useEffect(() => {
@@ -55,7 +113,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
     }
   }, [defaultOrderType]);
 
-  const filteredItems = menuItems.filter(item => {
+  const filteredItems = menuItems.filter((item: api.MenuItem) => {
     // Filter by category
     const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
     
@@ -68,7 +126,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
     return matchesCategory && matchesSearch;
   });
 
-  const selectedTableData = tables.find(t => t.id === selectedTable);
+  const selectedTableData = tables.find((t: Table) => t.id === selectedTable);
   const existingTableOrder = selectedTable ? getTableOrder(selectedTable) : undefined;
 
   // Load existing order when table is selected
@@ -96,8 +154,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   };
 
   const addToOrder = (item: api.MenuItem) => {
-    setCurrentOrder(prev => {
-      const existingItem = prev.find(orderItem => orderItem.id === item.id && !orderItem.sentToKitchen);
+    setCurrentOrder((prev: OrderItem[]) => {
+      const existingItem = prev.find((orderItem: OrderItem) => orderItem.id === item.id && !orderItem.sentToKitchen);
       if (existingItem) {
         return prev.map(orderItem =>
           orderItem.id === item.id && !orderItem.sentToKitchen
@@ -427,8 +485,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Left Sidebar - Fixed Width */}
-      <aside className="fixed left-0 top-0 w-[280px] h-screen bg-purple-600 text-white z-40">
+      {/* Left Sidebar */}
+      <div className="fixed left-0 top-0 w-[280px] h-screen bg-purple-600 text-white z-40">
         <div className="flex flex-col h-full">
           <div className="p-4">
             <h1 className="text-2xl font-semibold">Restaurant POS</h1>
@@ -462,7 +520,46 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
             </button>
           </div>
         </div>
-      </aside>
+      </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1"
+      {/* Left Sidebar */}
+      <div className="fixed left-0 top-0 w-[280px] h-screen bg-purple-600 text-white z-40">
+        <div className="flex flex-col h-full">
+          <div className="p-4">
+            <h1 className="text-2xl font-semibold">Restaurant POS</h1>
+            <p className="text-sm text-purple-200">Point of Sale System</p>
+          </div>
+          <nav className="flex-1 px-2">
+            <div className="space-y-1">
+              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+                <span className="flex-1">Orders</span>
+              </button>
+              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+                <span className="flex-1">Menu</span>
+              </button>
+              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+                <span className="flex-1">Tables</span>
+              </button>
+              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+                <span className="flex-1">Invoices</span>
+              </button>
+              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+                <span className="flex-1">Reports</span>
+              </button>
+              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+                <span className="flex-1">Settings</span>
+              </button>
+            </div>
+          </nav>
+          <div className="p-4">
+            <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg">
+              <span className="flex-1">Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content Area */}
       <main className="flex-1">
@@ -672,6 +769,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           )}
         </div>
       </div>
+      </div>
+      </main>
 
       {/* Right Section - Order Summary */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
@@ -716,7 +815,7 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
                 <div className="space-y-4">
                     {/* Current Order Items */}
                     <div>
-                      {getPendingItems().map((item, index) => (
+                      {getPendingItems().map((item: OrderItem, index: number) => (
                         <div key={`${item.id}-${index}`} className="flex justify-between items-center p-4 border-b border-gray-100">
                           <div className="flex-1">
                             <p className="font-medium">{item.name}</p>
