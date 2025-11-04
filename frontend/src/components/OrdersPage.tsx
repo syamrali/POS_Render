@@ -426,67 +426,8 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Left Sidebar */}
-      <aside className="fixed left-0 top-0 w-64 h-screen bg-purple-600 text-white">
-        <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-purple-500">
-            <h1 className="text-xl font-bold">Restaurant POS</h1>
-            <p className="text-sm text-purple-200">Point of Sale System</p>
-          </div>
-          
-          <nav className="flex-1 p-4">
-            <div className="space-y-2">
-              {/* Navigation Items */}
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">🍽️</span>
-                <span>Dine In</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">🥡</span>
-                <span>Take Away</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">📋</span>
-                <span>Menu</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">🏢</span>
-                <span>Departments</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">🗂️</span>
-                <span>Categories</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">🪑</span>
-                <span>Tables</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">📃</span>
-                <span>Invoices</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">📊</span>
-                <span>Reports</span>
-              </button>
-              <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-                <span className="mr-3">⚙️</span>
-                <span>Settings</span>
-              </button>
-            </div>
-          </nav>
-          
-          <div className="p-4 border-t border-purple-500">
-            <button className="flex items-center w-full px-4 py-3 text-left rounded-lg hover:bg-purple-700">
-              <span className="mr-3">🚪</span>
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
+    <div className="flex min-h-screen">
+      {/* Main Content Area - Three Panel Layout */}
       <div className="flex-1">
         {/* Middle Section - Menu Items */}
         <div className="p-6 overflow-y-auto" style={{ marginLeft: '256px', marginRight: '384px' }}>
@@ -645,26 +586,23 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
         </div>
       </div>
 
-      {/* Right Section - Order Summary */}
+      {/* Right Section - Order Summary (Fixed header, scrollable items, fixed footer) */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 h-screen shadow-xl">
-          <header className="py-4 px-6 border-b border-gray-200 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900">Current Order</h3>
-                <p className="text-sm text-gray-500">
-                  {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
-                </p>
-              </div>
-              <div className="flex items-center">
-                <ShoppingCart className="size-6 text-purple-600" />
-                {getAllItems().length > 0 && (
-                  <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
-                    {getAllItems().length}
-                  </span>
-                )}
+        <aside className="w-96 min-w-[384px] max-w-[384px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 h-screen overflow-hidden shadow-lg">
+          {/* Header - Fixed at top */}
+          <header className="py-4 px-6 border-b border-gray-200 bg-white flex-shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-gray-900 font-semibold">Current Order</h3>
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="size-5 text-purple-600" />
+                <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                  {getAllItems().length}
+                </span>
               </div>
             </div>
+            <p className="text-muted-foreground text-sm mt-1">
+              {getAllItems().length} {getAllItems().length === 1 ? "item" : "items"}
+            </p>
           </header>
 
           {/* Scrollable Items Area - Only this section will scroll */}
