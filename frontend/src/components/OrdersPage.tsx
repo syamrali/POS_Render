@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -705,137 +705,100 @@ export function OrdersPage({ defaultOrderType }: OrdersPageProps) {
           {/* Scrollable Items Area - Only this section will scroll */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="p-4">
-                {currentOrder.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <div className="mb-4">
-                      <ShoppingCart className="size-16 text-gray-300" />
-                    </div>
-                    <p className="text-gray-500">No items in order</p>
+              {currentOrder.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="mb-4">
+                    <ShoppingCart className="size-16 text-gray-300" />
                   </div>
-                ) : (
-                  <div className="space-y-4">
+                  <p className="text-gray-500">No items in order</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
                     {/* Current Order Items */}
                     <div>
                       {getPendingItems().map((item, index) => (
-                          <div key={`${item.id}-${index}`} className="flex justify-between items-center p-4 border-b border-gray-100">
-                            <div className="flex-1">
-                              <p className="font-medium">{item.name}</p>
-                              <div className="flex items-center gap-4 mt-2">
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 rounded-full"
-                                    onClick={() => updateQuantity(item.id, -1, false)}
-                                  >
-                                    <Minus className="size-3" />
-                                  </Button>
-                                  <span className="w-8 text-center">{item.quantity}</span>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 rounded-full"
-                                    onClick={() => updateQuantity(item.id, 1, false)}
-                                  >
-                                    <Plus className="size-3" />
-                                  </Button>
-                                </div>
-                                <p className="text-purple-600 font-semibold">₹{item.price * item.quantity}</p>
+                        <div key={`${item.id}-${index}`} className="flex justify-between items-center p-4 border-b border-gray-100">
+                          <div className="flex-1">
+                            <p className="font-medium">{item.name}</p>
+                            <div className="flex items-center gap-4 mt-2">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={() => updateQuantity(item.id, -1, false)}
+                                >
+                                  <Minus className="size-3" />
+                                </Button>
+                                <span className="w-8 text-center">{item.quantity}</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={() => updateQuantity(item.id, 1, false)}
+                                >
+                                  <Plus className="size-3" />
+                                </Button>
                               </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-gray-400 hover:text-red-600"
-                              onClick={() => removeFromOrder(item.id, false)}
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    </div>
-
-                    {/* Totals and Place Order Button */}
-                    {currentOrder.length > 0 && (
-                      <div className="mt-auto border-t border-gray-200">
-                        <div className="p-4">
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Subtotal</span>
-                              <span>₹{subtotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">GST (5%)</span>
-                              <span>₹{tax.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-base font-semibold pt-2 border-t">
-                              <span>Total</span>
-                              <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                              <p className="text-purple-600 font-semibold">₹{item.price * item.quantity}</p>
                             </div>
                           </div>
                           <Button
-                            className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
-                            onClick={() => setShowBillDialog(true)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-red-600"
+                            onClick={() => removeFromOrder(item.id, false)}
                           >
-                            Place Order
+                            <Trash2 className="size-4" />
                           </Button>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
-        </aside>
-      )}
-            </div>
-          </div>
+                      ))}
+                    </div>
 
-          {/* Footer - Fixed at bottom */}
-          <footer className="flex-shrink-0 border-t border-gray-200 bg-white mt-auto">
-            <div className="py-4 px-6 space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-muted-foreground text-sm">
-                  <span>Subtotal</span>
-                  <span>₹{subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground text-sm">
-                  <span>GST (5%)</span>
-                  <span>₹{tax.toFixed(2)}</span>
-                </div>
-                <div className="pt-2 border-t border-gray-200">
-                  <div className="flex justify-between font-semibold">
-                    <span>Total</span>
-                    <span className="text-purple-600">₹{total.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Button
-                  onClick={placeOrder}
-                  disabled={getPendingItems().length === 0}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                >
-                  <Printer className="size-4 mr-2" />
-                  {existingTableOrder ? "Add More Items" : "Place Order"}
-                </Button>
-                {orderType === "dine-in" && existingTableOrder && (
-                  <Button
-                    onClick={() => setShowBillDialog(true)}
-                    disabled={currentOrder.length === 0}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  >
-                    <Printer className="size-4 mr-2" />
-                    Generate Bill
-                  </Button>
-                )}
-              </div>
-            </div>
-          </footer>
+                    {/* Footer - Totals and Actions */}
+                    <div className="mt-auto">
+                      {currentOrder.length > 0 && (
+                        <div className="border-t border-gray-200">
+                          <div className="p-4 space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">Subtotal</span>
+                                <span>₹{subtotal.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">GST (5%)</span>
+                                <span>₹{tax.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-base font-semibold pt-2 border-t border-gray-100">
+                                <span>Total</span>
+                                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Button
+                                onClick={placeOrder}
+                                disabled={getPendingItems().length === 0}
+                                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                              >
+                                <Printer className="size-4 mr-2" />
+                                {existingTableOrder ? "Add More Items" : "Place Order"}
+                              </Button>
+                              {orderType === "dine-in" && existingTableOrder && (
+                                <Button
+                                  onClick={() => setShowBillDialog(true)}
+                                  disabled={currentOrder.length === 0}
+                                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                                >
+                                  <Printer className="size-4 mr-2" />
+                                  Generate Bill
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
         </aside>
       )}
 
