@@ -234,7 +234,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       orderType: orderType || "takeaway",
       tableName: orderType === "dine-in" ? selectedTableData?.name : undefined,
       items: getAllCombinedItems(),
-.      subtotal,
+      subtotal,
       tax,
       total,
       timestamp: new Date(),
