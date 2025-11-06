@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -7,9 +8,10 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Plus, Edit, Trash2, Download, Upload, FileSpreadsheet } from "lucide-react";
+import { Plus, Edit, Trash2, Download, Upload, FileSpreadsheet, ShoppingCart } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import * as api from "../services/api";
+import { useRestaurant } from "../contexts/RestaurantContext";
 
 interface MenuItem {
   id: string;
@@ -55,6 +57,9 @@ export function MenuPage() {
     description: "",
   });
 
+  const navigate = useNavigate();
+  const { addToOrder } = useRestaurant();
+
   useEffect(() => {
     loadData();
   }, []);
@@ -90,7 +95,7 @@ export function MenuPage() {
 
   const handleAdd = () => {
     setEditingItem(null);
-    setFormData({ 
+    setFormData({
       name: "", 
       productCode: "",
       price: "", 
@@ -150,7 +155,7 @@ export function MenuPage() {
         const updatedItem = await api.updateMenuItem(editingItem.id, {
           name: formData.name, 
           productCode: formData.productCode,
-          price, 
+          price,
           category: formData.category, 
           department: formData.department,
           description: formData.description 
@@ -253,6 +258,11 @@ export function MenuPage() {
         fileInputRef.current.value = '';
       }
     }
+  };
+
+  const handleAddToOrder = (item: MenuItem) => {
+    addToOrder(item);
+    navigate("/orders");
   };
 
   const categoryStats = categories.map(cat => ({
@@ -377,6 +387,14 @@ export function MenuPage() {
                     <Trash2 className="size-3 mr-1" />
                     Delete
                   </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleAddToOrder(item)}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <ShoppingCart className="size-3 mr-1" />
+                    Add to Order
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -430,7 +448,7 @@ export function MenuPage() {
 
             <div className="space-y-2">
               <Label htmlFor="department">Department *</Label>
-              <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value })}>
+              <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value }) }>
                 <SelectTrigger id="department">
                   <SelectValue />
                 </SelectTrigger>
@@ -444,7 +462,7 @@ export function MenuPage() {
 
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value }) }>
                 <SelectTrigger id="category">
                   <SelectValue />
                 </SelectTrigger>
