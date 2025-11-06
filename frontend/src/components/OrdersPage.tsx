@@ -276,8 +276,8 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
               <h2 className="text-gray-900 mb-4">Start New Order</h2>
               <p className="text-muted-foreground mb-6">Select order type to begin</p>
               <div className="flex gap-4">
-                <Button onClick={() => handleOrderTypeChange("dine-in")} className="px-8 py-6">Dine-In</Button>
-                <Button onClick={() => handleOrderTypeChange("takeaway")} className="px-8 py-6">Takeaway</Button>
+                <Button onClick={() => handleOrderTypeChange("dine-in")} className="px-8 py-6 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg shadow-md transition-transform transform hover:scale-105">Dine-In</Button>
+                <Button onClick={() => handleOrderTypeChange("takeaway")} className="px-8 py-6 text-lg font-semibold text-white bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 rounded-lg shadow-md transition-transform transform hover:scale-105">Takeaway</Button>
               </div>
             </div>
           )}
