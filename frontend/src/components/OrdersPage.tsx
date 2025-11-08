@@ -255,7 +255,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       <div 
         className="h-full overflow-y-auto w-full" 
         style={{ 
-          marginRight: ((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) ? '340px' : '0px',
+          marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px',
           transition: 'margin-right 0.3s ease'
         }}
       >
@@ -325,8 +325,8 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         </div>
       </div>
 
-      {/* Cart Sidebar - Fixed on right side - Show when order type is set or when there are items */}
-      {((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) && (
+      {/* Cart Sidebar - Fixed on right side - Always visible on takeaway page or when table is selected in dine-in */}
+      {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
         <aside 
           className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-2xl z-50" 
           style={{ zIndex: 50, backgroundColor: '#ffffff' }}
