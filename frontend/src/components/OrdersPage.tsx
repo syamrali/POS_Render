@@ -273,12 +273,12 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
 
   return (
     <>
-      {/* Main Content Area - accounts for cart width */}
+      {/* Main Content Area - accounts for cart width, no gap */}
       <div 
         className="h-full overflow-y-auto"
         style={{ 
-          marginRight: isCartVisible ? '420px' : '0px',
-          transition: 'margin-right 0.3s ease'
+          width: isCartVisible ? 'calc(100% - 420px)' : '100%',
+          transition: 'width 0.3s ease'
         }}
       >
         <div className="p-6">
@@ -365,7 +365,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           }}
         >
           {/* Cart Header - Fixed, no scroll */}
-          <header className="p-4 border-b flex-shrink-0 bg-white">
+          <header className="p-5 border-b-2 flex-shrink-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold">Current Order</h3>
@@ -390,36 +390,36 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
 
           {/* Cart Items - Scrollable section only */}
           <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-4">
               {currentOrder.length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
                   <div>No items in order</div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {getPendingItems().map((it, idx) => (
-                    <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-4 border rounded-lg bg-gray-50">
+                    <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-base mb-2">{it.name}</div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-8 w-8 p-0">
+                        <div className="font-semibold text-lg mb-3">{it.name}</div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-9 p-0 text-base font-bold">
                               -
                             </Button>
-                            <div className="w-10 text-center font-medium">{it.quantity}</div>
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-8 w-8 p-0">
+                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-9 p-0 text-base font-bold">
                               +
                             </Button>
                           </div>
-                          <div className="ml-auto text-purple-600 font-bold text-base">
+                          <div className="ml-auto text-purple-600 font-bold text-lg">
                             ₹{(it.price * it.quantity).toFixed(2)}
                           </div>
                         </div>
                       </div>
-                      <div className="ml-3">
-                        <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
-                          <Trash2 className="size-4" />
+                      <div className="ml-4">
+                        <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
+                          <Trash2 className="size-5" />
                         </Button>
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
 
           {/* Cart Footer - Fixed, no scroll */}
-          <div className="border-t p-4 flex-shrink-0 bg-white">
+          <div className="border-t-2 p-5 flex-shrink-0 bg-white">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
