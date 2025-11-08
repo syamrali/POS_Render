@@ -268,14 +268,17 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
     setShowBillDialog(false);
   }, [orderType, selectedTableData?.name, getAllCombinedItems, subtotal, tax, total, addInvoice, selectedTable, completeTableOrder, clearOrder]);
 
+  // Determine if cart should be visible
+  const isCartVisible = orderType === "takeaway" || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0;
+
   return (
-    <>
-      {/* Main Content Area - accounts for right cart (340px) when visible */}
+    <div className="flex h-full w-full relative">
+      {/* Main Content Area - flex to make room for cart */}
       <div 
-        className="h-full overflow-y-auto w-full" 
+        className="flex-1 h-full overflow-y-auto"
         style={{ 
-          marginRight: ((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) ? '340px' : '0px',
-          transition: 'margin-right 0.3s ease'
+          width: isCartVisible ? 'calc(100% - 340px)' : '100%',
+          transition: 'width 0.3s ease'
         }}
       >
         <div className="p-6">
@@ -348,11 +351,11 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         </div>
       </div>
 
-      {/* Cart Sidebar - Fixed on right side - Always visible on takeaway page or when table is selected in dine-in, or when items are added */}
-      {((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) && (
+      {/* Cart Sidebar - Fixed width on right side */}
+      {isCartVisible && (
         <aside 
-          className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-2xl z-50" 
-          style={{ zIndex: 50, backgroundColor: '#ffffff' }}
+          className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col h-full shadow-2xl flex-shrink-0"
+          style={{ backgroundColor: '#ffffff' }}
         >
           {/* Cart Header - Fixed, no scroll */}
           <header className="p-4 border-b flex-shrink-0 bg-white">
@@ -465,7 +468,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
