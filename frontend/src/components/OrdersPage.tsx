@@ -247,10 +247,10 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   }, [orderType, selectedTableData?.name, getAllCombinedItems, subtotal, tax, total, addInvoice, selectedTable, completeTableOrder, clearOrder]);
 
   return (
-    <div className="relative w-full h-full">
+    <>
       {/* Main Content Area - accounts for right cart (340px) when visible */}
       <div 
-        className="h-full overflow-y-auto" 
+        className="h-full overflow-y-auto w-full" 
         style={{ 
           marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px',
           transition: 'margin-right 0.3s ease'
@@ -304,7 +304,16 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
                 {filteredItems.map((item) => (
                   <Card key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                     <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold text-purple-600">₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
-                    <CardContent className="p-4 pt-0"><Button onClick={() => addToOrder(item)} className="w-full bg-purple-600 hover:bg-purple-700 text-white"><Plus className="size-4 mr-2" /> Add to Order</Button></CardContent>
+                    <CardContent className="p-4 pt-0">
+                      <Button 
+                        onClick={() => addToOrder(item)} 
+                        variant="default"
+                        className="w-full !bg-purple-600 hover:!bg-purple-700 !text-white border-0"
+                        style={{ backgroundColor: '#9333ea', color: 'white' }}
+                      >
+                        <Plus className="size-4 mr-2" /> Add to Order
+                      </Button>
+                    </CardContent>
                   </Card>
                 ))}
               </div>
@@ -315,7 +324,10 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
 
       {/* Cart Sidebar - Fixed on right side */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-[340px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-lg z-30">
+        <aside 
+          className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-2xl z-50" 
+          style={{ zIndex: 50, backgroundColor: '#ffffff' }}
+        >
           {/* Cart Header - Fixed, no scroll */}
           <header className="p-4 border-b flex-shrink-0 bg-white">
             <div className="flex items-center justify-between">
@@ -427,7 +439,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
