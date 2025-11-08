@@ -247,29 +247,16 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   }, [orderType, selectedTableData?.name, getAllCombinedItems, subtotal, tax, total, addInvoice, selectedTable, completeTableOrder, clearOrder]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div className="grid grid-cols-[280px_1fr_340px] w-full h-screen">
-      <div className="fixed left-0 top-0 w-[280px] h-screen bg-purple-600 text-white z-40">
-        <div className="flex flex-col h-full">
-          <div className="p-4">
-            <h1 className="text-2xl font-semibold">Restaurant POS</h1>
-            <p className="text-sm text-purple-200">Point of Sale System</p>
-          </div>
-          <nav className="flex-1 px-2">
-            <div className="space-y-1">
-              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg"><span className="flex-1">Orders</span></button>
-              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg"><span className="flex-1">Menu</span></button>
-              <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg"><span className="flex-1">Tables</span></button>
-            </div>
-          </nav>
-          <div className="p-4">
-            <button className="flex items-center w-full px-4 py-3 text-left hover:bg-purple-700 rounded-lg"><span className="flex-1">Logout</span></button>
-          </div>
-        </div>
-      </div>
-
-      <main className="flex-1" style={{ marginLeft: 280, marginRight: 340 }}>
-        <div className="p-6 overflow-y-auto">
+    <div className="flex h-screen w-full bg-gray-50 relative">
+      {/* Main Content Area - accounts for left sidebar (256px) and right cart (340px) */}
+      <main 
+        className="flex-1 h-full overflow-y-auto" 
+        style={{ 
+          marginLeft: '256px',
+          marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px'
+        }}
+      >
+        <div className="p-6">
           {!orderType && (
             <div className="flex flex-col items-center justify-center h-full">
               <ShoppingCart className="size-16 text-purple-300 mb-6" />
@@ -326,15 +313,104 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         </div>
       </main>
 
+      {/* Cart Sidebar - Fixed on right side */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
         <aside className="w-[340px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 h-screen shadow-lg z-30">
-          <header className="p-4 border-b"><div className="flex items-center justify-between"><div><h3 className="text-xl font-semibold">Current Order</h3><p className="text-sm text-gray-500">{getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}</p></div><div>{getAllCombinedItems().length > 0 ? (<div className="flex items-center gap-2"><ShoppingCart className="size-6 text-purple-600" /><span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">{getAllCombinedItems().length}</span></div>) : (<ShoppingCart className="size-6 text-gray-400" />)}</div></div></header>
+          {/* Cart Header - Fixed, no scroll */}
+          <header className="p-4 border-b flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold">Current Order</h3>
+                <p className="text-sm text-gray-500">
+                  {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
+                </p>
+              </div>
+              <div>
+                {getAllCombinedItems().length > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="size-6 text-purple-600" />
+                    <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                      {getAllCombinedItems().length}
+                    </span>
+                  </div>
+                ) : (
+                  <ShoppingCart className="size-6 text-gray-400" />
+                )}
+              </div>
+            </div>
+          </header>
 
-          <div className="flex-1 overflow-y-auto"><div className="p-4 space-y-4">{currentOrder.length === 0 ? (<div className="text-center py-10 text-gray-500"><ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" /><div>No items in order</div></div>) : (<div className="space-y-3">{getPendingItems().map((it, idx) => (<div key={`${it.id}-${idx}`} className="flex items-center justify-between p-3 border rounded"><div className="flex-1"><div className="font-medium">{it.name}</div><div className="flex items-center gap-2 mt-2"><Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)}>-</Button><div className="w-8 text-center">{it.quantity}</div><Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)}>+</Button><div className="ml-4 text-purple-600 font-semibold">₹{(it.price * it.quantity).toFixed(2)}</div></div></div><div><Button variant="ghost" onClick={() => removeFromOrder(it.id, false)}><Trash2 /></Button></div></div>))}</div>)}</div></div>
+          {/* Cart Items - Scrollable section only */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="p-4 space-y-4">
+              {currentOrder.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">
+                  <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
+                  <div>No items in order</div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {getPendingItems().map((it, idx) => (
+                    <div key={`${it.id}-${idx}`} className="flex items-center justify-between p-3 border rounded">
+                      <div className="flex-1">
+                        <div className="font-medium">{it.name}</div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)}>
+                            -
+                          </Button>
+                          <div className="w-8 text-center">{it.quantity}</div>
+                          <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)}>
+                            +
+                          </Button>
+                          <div className="ml-4 text-purple-600 font-semibold">
+                            ₹{(it.price * it.quantity).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <Button variant="ghost" onClick={() => removeFromOrder(it.id, false)}>
+                          <Trash2 />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-          <div className="border-t p-4"><div className="space-y-2"><div className="flex justify-between text-sm"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div><div className="flex justify-between text-sm"><span>GST (5%)</span><span>₹{tax.toFixed(2)}</span></div><div className="flex justify-between text-base font-semibold pt-2 border-t"><span>Total</span><span className="text-purple-600">₹{total.toFixed(2)}</span></div></div>
+          {/* Cart Footer - Fixed, no scroll */}
+          <div className="border-t p-4 flex-shrink-0">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>GST (5%)</span>
+                <span>₹{tax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-base font-semibold pt-2 border-t">
+                <span>Total</span>
+                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+              </div>
+            </div>
 
-            <div className="mt-4 space-y-2"><Button onClick={placeOrder} disabled={getPendingItems().length === 0} className="w-full"><Printer className="mr-2" /> {existingTableOrder ? 'Add More Items' : 'Place Order'}</Button>{orderType === "dine-in" && existingTableOrder && (<Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">Generate Bill</Button>)}</div>
+            <div className="mt-4 space-y-2">
+              <Button 
+                onClick={placeOrder} 
+                disabled={getPendingItems().length === 0} 
+                className="w-full"
+              >
+                <Printer className="mr-2" /> 
+                {existingTableOrder ? 'Add More Items' : 'Place Order'}
+              </Button>
+              {orderType === "dine-in" && existingTableOrder && (
+                <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
+                  Generate Bill
+                </Button>
+              )}
+            </div>
           </div>
         </aside>
       )}
@@ -351,7 +427,6 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
     </div>
   );
 };
