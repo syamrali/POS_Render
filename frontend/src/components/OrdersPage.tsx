@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Plus, Minus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
+import { Plus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
-import { MenuItem, Table, OrderItem } from "../types";
+import { MenuItem, Table } from "../types";
 
 type OrderType = "dine-in" | "takeaway";
 
@@ -106,6 +106,9 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
 
   const addToOrder = useCallback((item: MenuItem) => {
+    // If orderType is not set, set it to takeaway by default when adding items
+    setOrderType((prev) => prev || "takeaway");
+    
     setCurrentOrder((prev) => {
       const existing = prev.find((p) => p.id === item.id && !p.sentToKitchen);
       if (existing) return prev.map((p) => (p.id === item.id && !p.sentToKitchen ? { ...p, quantity: p.quantity + 1 } : p));
@@ -252,7 +255,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       <div 
         className="h-full overflow-y-auto w-full" 
         style={{ 
-          marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px',
+          marginRight: ((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) ? '340px' : '0px',
           transition: 'margin-right 0.3s ease'
         }}
       >
@@ -273,7 +276,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
             <div>
               <div className="mb-6"><h2 className="text-gray-900 mb-2">Select Table</h2><p className="text-muted-foreground">Choose a table for dine-in order</p></div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {tables.map((table) => (
+                {tables.map((table: Table) => (
                   <Card key={table.id} onClick={() => handleTableSelect(table.id)} className={`cursor-pointer`}>
                     <CardHeader className="p-4">
                       <div className="text-center space-y-3">
@@ -322,8 +325,8 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         </div>
       </div>
 
-      {/* Cart Sidebar - Fixed on right side */}
-      {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+      {/* Cart Sidebar - Fixed on right side - Show when order type is set or when there are items */}
+      {((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) && (
         <aside 
           className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-2xl z-50" 
           style={{ zIndex: 50, backgroundColor: '#ffffff' }}
