@@ -247,13 +247,13 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   }, [orderType, selectedTableData?.name, getAllCombinedItems, subtotal, tax, total, addInvoice, selectedTable, completeTableOrder, clearOrder]);
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 relative">
-      {/* Main Content Area - accounts for left sidebar (256px) and right cart (340px) */}
-      <main 
-        className="flex-1 h-full overflow-y-auto" 
+    <div className="relative w-full h-full">
+      {/* Main Content Area - accounts for right cart (340px) when visible */}
+      <div 
+        className="h-full overflow-y-auto" 
         style={{ 
-          marginLeft: '256px',
-          marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px'
+          marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px',
+          transition: 'margin-right 0.3s ease'
         }}
       >
         <div className="p-6">
@@ -311,13 +311,13 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
             </>
           )}
         </div>
-      </main>
+      </div>
 
       {/* Cart Sidebar - Fixed on right side */}
       {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-        <aside className="w-[340px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 h-screen shadow-lg z-30">
+        <aside className="w-[340px] bg-white border-l border-gray-200 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-lg z-30">
           {/* Cart Header - Fixed, no scroll */}
-          <header className="p-4 border-b flex-shrink-0">
+          <header className="p-4 border-b flex-shrink-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold">Current Order</h3>
@@ -380,7 +380,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
 
           {/* Cart Footer - Fixed, no scroll */}
-          <div className="border-t p-4 flex-shrink-0">
+          <div className="border-t p-4 flex-shrink-0 bg-white">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
