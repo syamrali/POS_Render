@@ -370,7 +370,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           }}
         >
           {/* Cart Header - Fixed, no scroll */}
-          <header className="p-5 border-b-2 flex-shrink-0 bg-white">
+          <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold">Current Order</h3>
@@ -395,7 +395,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
 
           {/* Cart Items - Scrollable section only */}
           <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
-            <div className="p-5 space-y-4">
+            <div className="px-8 py-5 space-y-4">
               {currentOrder.length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
@@ -435,7 +435,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
 
           {/* Cart Footer - Fixed, no scroll */}
-          <div className="border-t-2 p-5 flex-shrink-0 bg-white">
+          <div className="border-t-2 px-8 py-5 flex-shrink-0 bg-white">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
