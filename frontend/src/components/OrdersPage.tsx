@@ -278,7 +278,10 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         className="h-full overflow-y-auto"
         style={{ 
           width: isCartVisible ? 'calc(100% - 420px)' : '100%',
-          transition: 'width 0.3s ease'
+          transition: 'width 0.3s ease',
+          marginRight: 0,
+          paddingRight: 0,
+          boxSizing: 'border-box'
         }}
       >
         <div className="p-6">
@@ -354,14 +357,15 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       {/* Cart Sidebar - Fixed at viewport level, same height as side nav */}
       {isCartVisible && (
         <aside 
-          className="w-[420px] bg-white border-l-2 border-gray-300 flex flex-col shadow-2xl"
+          className="w-[420px] bg-white flex flex-col shadow-2xl"
           style={{ 
             position: 'fixed',
             top: '0',
             right: '0',
             height: '100vh',
             backgroundColor: '#ffffff',
-            zIndex: 30
+            zIndex: 30,
+            borderLeft: '2px solid #e5e7eb'
           }}
         >
           {/* Cart Header - Fixed, no scroll */}
