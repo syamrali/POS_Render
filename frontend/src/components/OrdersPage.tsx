@@ -106,14 +106,33 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
 
   const addToOrder = useCallback((item: MenuItem) => {
+    console.log('Adding item to order:', item);
+    
     // If orderType is not set, set it to takeaway by default when adding items
-    setOrderType((prev) => prev || "takeaway");
+    setOrderType((prev) => {
+      const newType = prev || "takeaway";
+      console.log('Setting orderType to:', newType);
+      return newType;
+    });
     
     setCurrentOrder((prev) => {
       const existing = prev.find((p) => p.id === item.id && !p.sentToKitchen);
-      if (existing) return prev.map((p) => (p.id === item.id && !p.sentToKitchen ? { ...p, quantity: p.quantity + 1 } : p));
-      const orderItem: CartItem = { ...item, quantity: 1, sentToKitchen: false };
-      return [...prev, orderItem];
+      if (existing) {
+        const updated = prev.map((p) => (p.id === item.id && !p.sentToKitchen ? { ...p, quantity: p.quantity + 1 } : p));
+        console.log('Updated existing item, new order:', updated);
+        return updated;
+      }
+      const orderItem: CartItem = { 
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: 1, 
+        sentToKitchen: false,
+        department: item.department
+      };
+      const newOrder = [...prev, orderItem];
+      console.log('Added new item, new order:', newOrder);
+      return newOrder;
     });
   }, []);
 
@@ -255,7 +274,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       <div 
         className="h-full overflow-y-auto w-full" 
         style={{ 
-          marginRight: (orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) ? '340px' : '0px',
+          marginRight: ((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) ? '340px' : '0px',
           transition: 'margin-right 0.3s ease'
         }}
       >
@@ -309,10 +328,14 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
                     <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold text-purple-600">₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
                     <CardContent className="p-4 pt-0">
                       <Button 
-                        onClick={() => addToOrder(item)} 
+                        onClick={() => {
+                          console.log('Button clicked for item:', item);
+                          addToOrder(item);
+                        }}
                         variant="default"
+                        type="button"
                         className="w-full !bg-purple-600 hover:!bg-purple-700 !text-white border-0"
-                        style={{ backgroundColor: '#9333ea', color: 'white' }}
+                        style={{ backgroundColor: '#9333ea', color: 'white', cursor: 'pointer' }}
                       >
                         <Plus className="size-4 mr-2" /> Add to Order
                       </Button>
@@ -325,8 +348,8 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         </div>
       </div>
 
-      {/* Cart Sidebar - Fixed on right side - Always visible on takeaway page or when table is selected in dine-in */}
-      {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
+      {/* Cart Sidebar - Fixed on right side - Always visible on takeaway page or when table is selected in dine-in, or when items are added */}
+      {((orderType === "takeaway") || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0) && (
         <aside 
           className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col fixed right-0 top-0 bottom-0 h-screen shadow-2xl z-50" 
           style={{ zIndex: 50, backgroundColor: '#ffffff' }}
