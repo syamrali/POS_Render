@@ -362,7 +362,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
             position: 'fixed',
             top: '0',
             right: '0',
-            width: '480px',
+            width: '420px',
             height: '100vh',
             backgroundColor: '#ffffff',
             zIndex: 30,
