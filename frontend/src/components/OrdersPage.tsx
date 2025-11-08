@@ -272,13 +272,13 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   const isCartVisible = orderType === "takeaway" || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0;
 
   return (
-    <div className="flex h-full w-full relative">
-      {/* Main Content Area - flex to make room for cart */}
+    <>
+      {/* Main Content Area - accounts for cart width */}
       <div 
-        className="flex-1 h-full overflow-y-auto"
+        className="h-full overflow-y-auto"
         style={{ 
-          width: isCartVisible ? 'calc(100% - 420px)' : '100%',
-          transition: 'width 0.3s ease'
+          marginRight: isCartVisible ? '420px' : '0px',
+          transition: 'margin-right 0.3s ease'
         }}
       >
         <div className="p-6">
@@ -351,11 +351,18 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
         </div>
       </div>
 
-      {/* Cart Sidebar - Fixed width on right side */}
+      {/* Cart Sidebar - Fixed at viewport level, same height as side nav */}
       {isCartVisible && (
         <aside 
-          className="w-[420px] bg-white border-l-2 border-gray-300 flex flex-col h-full shadow-2xl flex-shrink-0"
-          style={{ backgroundColor: '#ffffff', height: '100%' }}
+          className="w-[420px] bg-white border-l-2 border-gray-300 flex flex-col shadow-2xl"
+          style={{ 
+            position: 'fixed',
+            top: '0',
+            right: '0',
+            height: '100vh',
+            backgroundColor: '#ffffff',
+            zIndex: 30
+          }}
         >
           {/* Cart Header - Fixed, no scroll */}
           <header className="p-4 border-b flex-shrink-0 bg-white">
@@ -470,7 +477,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
