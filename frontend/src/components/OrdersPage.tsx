@@ -277,7 +277,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       <div 
         className="flex-1 h-full overflow-y-auto"
         style={{ 
-          width: isCartVisible ? 'calc(100% - 340px)' : '100%',
+          width: isCartVisible ? 'calc(100% - 420px)' : '100%',
           transition: 'width 0.3s ease'
         }}
       >
@@ -354,8 +354,8 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       {/* Cart Sidebar - Fixed width on right side */}
       {isCartVisible && (
         <aside 
-          className="w-[340px] bg-white border-l-2 border-gray-300 flex flex-col h-full shadow-2xl flex-shrink-0"
-          style={{ backgroundColor: '#ffffff' }}
+          className="w-[420px] bg-white border-l-2 border-gray-300 flex flex-col h-full shadow-2xl flex-shrink-0"
+          style={{ backgroundColor: '#ffffff', height: '100%' }}
         >
           {/* Cart Header - Fixed, no scroll */}
           <header className="p-4 border-b flex-shrink-0 bg-white">
@@ -382,8 +382,8 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           </header>
 
           {/* Cart Items - Scrollable section only */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
+            <div className="p-4 space-y-3">
               {currentOrder.length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
@@ -392,25 +392,27 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
               ) : (
                 <div className="space-y-3">
                   {getPendingItems().map((it, idx) => (
-                    <div key={`${it.id}-${idx}`} className="flex items-center justify-between p-3 border rounded">
-                      <div className="flex-1">
-                        <div className="font-medium">{it.name}</div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)}>
-                            -
-                          </Button>
-                          <div className="w-8 text-center">{it.quantity}</div>
-                          <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)}>
-                            +
-                          </Button>
-                          <div className="ml-4 text-purple-600 font-semibold">
+                    <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-4 border rounded-lg bg-gray-50">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-base mb-2">{it.name}</div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-8 w-8 p-0">
+                              -
+                            </Button>
+                            <div className="w-10 text-center font-medium">{it.quantity}</div>
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-8 w-8 p-0">
+                              +
+                            </Button>
+                          </div>
+                          <div className="ml-auto text-purple-600 font-bold text-base">
                             ₹{(it.price * it.quantity).toFixed(2)}
                           </div>
                         </div>
                       </div>
-                      <div>
-                        <Button variant="ghost" onClick={() => removeFromOrder(it.id, false)}>
-                          <Trash2 />
+                      <div className="ml-3">
+                        <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                          <Trash2 className="size-4" />
                         </Button>
                       </div>
                     </div>
