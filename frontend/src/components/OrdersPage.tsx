@@ -370,7 +370,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           }}
         >
           {/* Cart Header - Fixed, no scroll */}
-          <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white">
+          <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold">Current Order</h3>
