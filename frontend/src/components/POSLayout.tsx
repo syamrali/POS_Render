@@ -4,11 +4,12 @@ import { Button } from "./ui/button";
 import { MenuPage } from "./MenuPage";
 import { TablesPage } from "./TablesPage";
 import { SettingsPage } from "./SettingsPage";
-import { OrdersPage } from "./OrdersPage";
 import { InvoicesPage } from "./InvoicesPage";
 import { ReportsPage } from "./ReportsPage";
 import { DepartmentsPage } from "./DepartmentsPage";
 import { CategoriesPage } from "./CategoriesPage";
+import { DineInPage } from "./DineInPage";
+import { TakeawayPage } from "./TakeawayPage";
 
 interface POSLayoutProps {
   onLogout: () => void;
@@ -34,9 +35,9 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
   const renderPage = () => {
     switch (currentPage) {
       case "dine-in":
-        return <OrdersPage defaultOrderType="dine-in" />;
+        return <DineInPage />;
       case "takeaway":
-        return <OrdersPage defaultOrderType="takeaway" />;
+        return <TakeawayPage />;
       case "menu":
         return <MenuPage />;
       case "departments":
@@ -52,7 +53,7 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
       case "settings":
         return <SettingsPage />;
       default:
-        return <OrdersPage defaultOrderType="dine-in" />;
+        return <DineInPage />;
     }
   };
 

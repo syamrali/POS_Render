@@ -9,12 +9,6 @@ import { useRestaurant } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
 import { MenuItem, Table } from "../types";
 
-type OrderType = "dine-in" | "takeaway";
-
-interface Props {
-  defaultOrderType?: OrderType;
-}
-
 interface CartItem {
   id: string;
   name: string;
@@ -24,7 +18,7 @@ interface CartItem {
   department?: string;
 }
 
-export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) => {
+export const TakeawayPage: React.FC = () => {
   const {
     tables,
     addItemsToTable,
@@ -40,8 +34,6 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [orderType, setOrderType] = useState<OrderType | null>(defaultOrderType);
-  const [selectedTable, setSelectedTable] = useState<string>("");
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
 
@@ -62,9 +54,6 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       mounted = false;
     };
   }, []);
-
-  const selectedTableData = useMemo(() => tables.find((t: Table) => t.id === selectedTable), [tables, selectedTable]);
-  const existingTableOrder = useMemo(() => (selectedTable ? getTableOrder(selectedTable) : undefined), [selectedTable, getTableOrder]);
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -95,26 +84,11 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
 
-  const handleOrderTypeChange = useCallback((type: OrderType) => {
-    setOrderType(type);
-    setCurrentOrder([]);
-    setSelectedTable("");
-    setSearchQuery("");
-  }, []);
-
-  const handleTableSelect = useCallback((tableId: string) => setSelectedTable(tableId), []);
   const handleCategorySelect = useCallback((c: string) => setSelectedCategory(c), []);
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
 
   const addToOrder = useCallback((item: MenuItem) => {
     console.log('Adding item to order:', item);
-    
-    // If orderType is not set, set it to takeaway by default when adding items
-    setOrderType((prev) => {
-      const newType = prev || "takeaway";
-      console.log('Setting orderType to:', newType);
-      return newType;
-    });
     
     setCurrentOrder((prev) => {
       const existing = prev.find((p) => p.id === item.id && !p.sentToKitchen);
@@ -151,8 +125,6 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
 
   const clearOrder = useCallback(() => {
     setCurrentOrder([]);
-    setOrderType(null);
-    setSelectedTable("");
     setSearchQuery("");
   }, []);
 
@@ -220,7 +192,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           (department ? `<div style="text-align:center">[${department}]</div>` : "") +
           (isAdditional ? `<div style="text-align:center;font-weight:700;margin:5px 0">*** ADDITIONAL ***</div>` : "") +
           `<div>${now.toLocaleString()}</div>` +
-          `<div>${orderType}${orderType === "dine-in" && selectedTableData ? ` - ${selectedTableData.name}` : ""}</div>` +
+          `<div>Takeaway</div>` +
           `<hr/>` +
           items
             .map((it) => `<div>${it.name} x ${it.quantity}</div>`)
@@ -271,7 +243,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           `<div class="h">KITCHEN ORDER TICKET</div>` +
           (isAdditional ? `<div style="text-align:center;font-weight:700;margin:5px 0">*** ADDITIONAL ITEMS ***</div>` : "") +
           `<div>Date: ${now.toLocaleString()}</div>` +
-          `<div>Type: ${orderType}${orderType === "dine-in" && selectedTableData ? ` - Table ${selectedTableData.name}` : ""}</div>` +
+          `<div>Type: Takeaway</div>` +
           `<hr/>`;
           
         Object.entries(groupedItems).forEach(([dept, deptItems]) => {
@@ -319,8 +291,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           (department ? `<div style="text-align:center">[${department}]</div>` : "") +
           (isAdditional ? `<div style="text-align:center;font-weight:700;margin:5px 0">*** ADDITIONAL ITEMS ***</div>` : "") +
           `<div>Date: ${now.toLocaleString()}</div>` +
-          `<div>Type: ${orderType}</div>` +
-          (orderType === "dine-in" && selectedTableData ? `<div>Table: ${selectedTableData.name}</div>` : "") +
+          `<div>Type: Takeaway</div>` +
           `<hr/>` +
           items
             .map((it) => `<div><strong>${it.name}</strong> x ${it.quantity} <span style="float:right">[${it.department || "General"}]</span></div>`)
@@ -330,7 +301,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       
       return content;
     },
-    [orderType, selectedTableData, kotConfig]
+    [kotConfig]
   );
 
   const printKOT = useCallback(
@@ -440,6 +411,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       </style></head><body>` +
         `<div style="text-align:center;font-weight:700">TAX INVOICE</div>` +
         `<div>Bill: ${billNumber}</div><div>${now.toLocaleString()}</div>` +
+        `<div>Type: Takeaway</div>` +
         `<hr/>` +
         items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) ₹${(i.quantity * i.price).toFixed(2)}</div>`).join("") +
         `<hr/>` +
@@ -478,7 +450,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       </style></head><body>` +
         `<div style="text-align:center;font-weight:700">RESTAURANT POS - TAX INVOICE</div>` +
         `<div>Bill No: ${billNumber}</div><div>Date: ${now.toLocaleString()}</div>` +
-        (orderType === "dine-in" && selectedTableData ? `<div>Table: ${selectedTableData.name}</div>` : `<div>Order Type: Takeaway</div>`) +
+        `<div>Type: Takeaway</div>` +
         `<hr/>` +
         items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
         `<hr/>` +
@@ -517,6 +489,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
       </style></head><body>` +
         `<div style="text-align:center;font-weight:700">RESTAURANT POS - TAX INVOICE</div>` +
         `<div>Bill No: ${billNumber}</div><div>Date: ${now.toLocaleString()}</div>` +
+        `<div>Type: Takeaway</div>` +
         `<hr/>` +
         items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
         `<hr/>` +
@@ -527,7 +500,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
     }
     
     return content;
-  }, [getAllCombinedItems, orderType, selectedTableData, billConfig]);
+  }, [getAllCombinedItems, billConfig]);
 
   const printBill = useCallback(() => {
     const popup = window.open("", "_blank", "width=400,height=600");
@@ -577,38 +550,28 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
     const pending = getPendingItems();
     if (!pending.length) return;
 
-    const isAdditional = !!existingTableOrder;
-
-    if (orderType === "dine-in" && selectedTable) {
-      await addItemsToTable(selectedTable, pending);
-      if (kotConfig.printByDepartment !== undefined) await printKOT(pending, isAdditional);
-      setCurrentOrder((prev) => prev.map((it) => (pending.some((p) => p.id === it.id && !p.sentToKitchen) ? { ...it, sentToKitchen: true } : it)));
-      await markItemsAsSent(selectedTable, pending);
-    } else if (orderType === "takeaway") {
-      if (kotConfig.printByDepartment !== undefined) await printKOT(pending);
-      const invoice = {
-        id: Date.now().toString(),
-        billNumber: `BILL-${Date.now()}`,
-        orderType: "takeaway",
-        items: getAllCombinedItems(),
-        subtotal,
-        tax,
-        total,
-        timestamp: new Date(),
-      } as any;
-      await addInvoice(invoice);
-      clearOrder();
-    }
+    if (kotConfig.printByDepartment !== undefined) await printKOT(pending);
+    const invoice = {
+      id: Date.now().toString(),
+      billNumber: `BILL-${Date.now()}`,
+      orderType: "takeaway",
+      items: getAllCombinedItems(),
+      subtotal,
+      tax,
+      total,
+      timestamp: new Date(),
+    } as any;
+    await addInvoice(invoice);
+    clearOrder();
 
     alert("Order placed successfully");
-  }, [getPendingItems, existingTableOrder, orderType, selectedTable, addItemsToTable, kotConfig, printKOT, markItemsAsSent, addInvoice, getAllCombinedItems, subtotal, tax, total, clearOrder]);
+  }, [getPendingItems, kotConfig, printKOT, addInvoice, getAllCombinedItems, subtotal, tax, total, clearOrder]);
 
   const completeBill = useCallback(async () => {
     const invoice = {
       id: Date.now().toString(),
       billNumber: `BILL-${Date.now()}`,
-      orderType: orderType || "takeaway",
-      tableName: orderType === "dine-in" ? selectedTableData?.name : undefined,
+      orderType: "takeaway",
       items: getAllCombinedItems(),
       subtotal,
       tax,
@@ -617,13 +580,12 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
     } as any;
 
     await addInvoice(invoice);
-    if (orderType === "dine-in" && selectedTable) await completeTableOrder(selectedTable);
     clearOrder();
     setShowBillDialog(false);
-  }, [orderType, selectedTableData?.name, getAllCombinedItems, subtotal, tax, total, addInvoice, selectedTable, completeTableOrder, clearOrder]);
+  }, [getAllCombinedItems, subtotal, tax, total, addInvoice, clearOrder]);
 
   // Determine if cart should be visible
-  const isCartVisible = orderType === "takeaway" || (orderType === "dine-in" && selectedTable) || currentOrder.length > 0;
+  const isCartVisible = currentOrder.length > 0;
 
   return (
     <>
@@ -634,210 +596,183 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
           width: isCartVisible ? 'calc(100% - 420px)' : '100%',
           transition: 'width 0.3s ease',
           marginRight: 0,
-          paddingRight: 0,
-          boxSizing: 'border-box'
+          paddingRight: 0
         }}
       >
         <div className="p-6">
-          {!orderType && (
-            <div className="flex flex-col items-center justify-center h-full">
-              <ShoppingCart className="size-16 text-purple-300 mb-6" />
-              <h2 className="text-gray-900 mb-4">Start New Order</h2>
-              <p className="text-muted-foreground mb-6">Select order type to begin</p>
-              <div className="flex gap-4">
-                <Button onClick={() => handleOrderTypeChange("dine-in")} className="px-8 py-6 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg shadow-md transition-transform transform hover:scale-105">Dine-In</Button>
-                <Button onClick={() => handleOrderTypeChange("takeaway")} className="px-8 py-6 text-lg font-semibold text-white bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 rounded-lg shadow-md transition-transform transform hover:scale-105">Takeaway</Button>
-              </div>
-            </div>
-          )}
+          <div className="mb-6"><h2 className="text-gray-900 mb-2">Takeaway Order</h2><p className="text-muted-foreground">Select items for takeaway order</p></div>
 
-          {orderType === "dine-in" && !selectedTable && (
-            <div>
-              <div className="mb-6"><h2 className="text-gray-900 mb-2">Select Table</h2><p className="text-muted-foreground">Choose a table for dine-in order</p></div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {tables.map((table: Table) => (
-                  <Card key={table.id} onClick={() => handleTableSelect(table.id)} className={`cursor-pointer`}>
-                    <CardHeader className="p-4">
-                      <div className="text-center space-y-3">
-                        <div><p className="text-gray-900 mb-1">Table {table.name}</p><Badge variant="outline">{table.status}</Badge></div>
-                        <div className="text-muted-foreground">{table.seats} seats • {table.category}</div>
-                        {table.status === "occupied" && getTableOrder(table.id) && (
-                          <div className="pt-2 border-t border-gray-200"><div className="flex items-center justify-center gap-1 text-orange-600"><Clock className="size-3" /><span className="text-sm">{Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins</span></div></div>
-                        )}
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
-          {(orderType === "takeaway" || (orderType === "dine-in" && selectedTable)) && (
-            <>
-              <div className="mb-6"><h2 className="text-gray-900 mb-2">{orderType === "dine-in" ? `Table ${selectedTableData?.name}` : "Takeaway Order"}</h2><p className="text-muted-foreground">Select items to add to order</p></div>
+          <div className="flex gap-2 mb-6 flex-wrap">{categories.map((c) => (<Button key={c} variant={selectedCategory === c ? "default" : "outline"} onClick={() => handleCategorySelect(c)}>{c}</Button>))}</div>
 
-              <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredItems.length === 0 && (<div className="col-span-full text-center py-12 text-gray-500"><Search className="size-12 mx-auto mb-4 opacity-20" /><p>No items found</p></div>)}
 
-              <div className="flex gap-2 mb-6 flex-wrap">{categories.map((c) => (<Button key={c} variant={selectedCategory === c ? "default" : "outline"} onClick={() => handleCategorySelect(c)}>{c}</Button>))}</div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredItems.length === 0 && (<div className="col-span-full text-center py-12 text-gray-500"><Search className="size-12 mx-auto mb-4 opacity-20" /><p>No items found</p></div>)}
-
-                {filteredItems.map((item) => (
-                  <Card key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold text-purple-600">₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <Button 
-                        onClick={() => {
-                          console.log('Button clicked for item:', item);
-                          addToOrder(item);
-                        }}
-                        variant="default"
-                        type="button"
-                        className="w-full !bg-purple-600 hover:!bg-purple-700 !text-white border-0"
-                        style={{ backgroundColor: '#9333ea', color: 'white', cursor: 'pointer' }}
-                      >
-                        <Plus className="size-4 mr-2" /> Add to Order
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </>
-          )}
+            {filteredItems.map((item) => (
+              <Card key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold text-purple-600">₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <Button 
+                    onClick={() => {
+                      console.log('Button clicked for item:', item);
+                      addToOrder(item);
+                    }}
+                    variant="default"
+                    type="button"
+                    className="w-full !bg-purple-600 hover:!bg-purple-700 !text-white border-0"
+                    style={{ backgroundColor: '#9333ea', color: 'white', cursor: 'pointer' }}
+                  >
+                    <Plus className="size-4 mr-2" /> Add to Order
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Cart Sidebar - Fixed at viewport level, same height as side nav */}
+      {/* Cart Panel - Fixed position on right side */}
       {isCartVisible && (
-        <aside 
-          className="w-[420px] bg-white flex flex-col shadow-2xl"
+        <div 
+          className="fixed top-0 right-0 h-full w-[420px] bg-white border-l border-gray-200 shadow-lg flex flex-col z-30"
           style={{ 
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            width: '420px',
-            height: '100vh',
-            backgroundColor: '#ffffff',
-            zIndex: 30,
-            borderLeft: '2px solid #e5e7eb'
+            marginTop: 0,
+            paddingTop: '1rem'
           }}
         >
-          {/* Cart Header - Fixed, no scroll */}
-          <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold">Current Order</h3>
-                <p className="text-sm text-gray-500">
-                  {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
-                </p>
-              </div>
-              <div>
-                {getAllCombinedItems().length > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart className="size-6 text-purple-600" />
-                    <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
-                      {getAllCombinedItems().length}
-                    </span>
-                  </div>
-                ) : (
-                  <ShoppingCart className="size-6 text-gray-400" />
-                )}
-              </div>
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-gray-900 text-xl font-semibold">Takeaway Order</h2>
+              <Button variant="ghost" size="sm" onClick={clearOrder}>
+                <Trash2 className="size-4" />
+              </Button>
             </div>
-          </header>
-
-          {/* Cart Items - Scrollable section only */}
-          <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
-            <div className="px-8 py-5 space-y-4">
-              {currentOrder.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">
-                  <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
-                  <div>No items in order</div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {getPendingItems().map((it, idx) => (
-                    <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-lg mb-3">{it.name}</div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
-                              -
-                            </Button>
-                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
-                              +
-                            </Button>
-                          </div>
-                          <div className="ml-auto text-purple-600 font-bold text-lg">
-                            ₹{(it.price * it.quantity).toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
-                          <Trash2 className="size-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="text-muted-foreground">
+              <p>Takeaway Order</p>
             </div>
           </div>
 
-          {/* Cart Footer - Fixed, no scroll */}
-          <div className="border-t-2 px-8 py-5 flex-shrink-0 bg-white">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+          <div className="flex-1 overflow-y-auto p-6">
+            {currentOrder.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
+                <p>No items in order</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {currentOrder.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-sm text-muted-foreground">₹{item.price.toFixed(2)} each</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => updateQuantity(item.id, -1, item.sentToKitchen)}
+                        disabled={item.sentToKitchen}
+                      >
+                        -
+                      </Button>
+                      <span className="w-8 text-center">{item.quantity}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => updateQuantity(item.id, 1, item.sentToKitchen)}
+                        disabled={item.sentToKitchen}
+                      >
+                        +
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => removeFromOrder(item.id, item.sentToKitchen)}
+                        disabled={item.sentToKitchen}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {currentOrder.length > 0 && (
+            <div className="p-6 border-t border-gray-200 space-y-4">
+              <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between">
                 <span>GST (5%)</span>
                 <span>₹{tax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-base font-semibold pt-2 border-t">
+              <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
-            </div>
-
-            <div className="mt-4 space-y-2 mb-6">
               <Button 
-                onClick={placeOrder} 
-                disabled={getPendingItems().length === 0} 
+                onClick={placeOrder}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                disabled={currentOrder.every(item => item.sentToKitchen)}
+              >
+                Place Order
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowBillDialog(true)}
                 className="w-full"
               >
-                <Printer className="mr-2" /> 
-                {existingTableOrder ? 'Add More Items' : 'Place Order'}
+                <Printer className="size-4 mr-2" /> Complete Bill
               </Button>
-              {orderType === "dine-in" && existingTableOrder && (
-                <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
-                  Generate Bill
-                </Button>
-              )}
             </div>
-          </div>
-        </aside>
+          )}
+        </div>
       )}
 
+      {/* Bill Dialog */}
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Generate Bill</DialogTitle>
-            <DialogDescription>Would you like to print the bill?</DialogDescription>
+            <DialogTitle>Complete Bill</DialogTitle>
+            <DialogDescription>
+              Review and print the final bill for this order
+            </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{total.toFixed(2)}</span></div>
-            <div className="flex gap-2"><Button onClick={() => { printBill(); completeBill(); }} className="flex-1"> <Printer className="mr-2" /> Print Bill</Button><Button onClick={completeBill} variant="outline" className="flex-1">Complete Without Printing</Button></div>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₹{subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>GST (5%)</span>
+              <span>₹{tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold">
+              <span>Total</span>
+              <span>₹{total.toFixed(2)}</span>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={printBill}
+                className="flex-1"
+              >
+                <Printer className="size-4 mr-2" /> Print
+              </Button>
+              <Button 
+                onClick={completeBill}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              >
+                Complete
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
     </>
   );
 };
-
-export default OrdersPage;
