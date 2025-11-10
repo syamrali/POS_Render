@@ -45,6 +45,7 @@ export const TakeawayPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [showBillDialog, setShowBillDialog] = useState(false);
+  const [showHoldDialog, setShowHoldDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
   const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
   const [selectedPendingOrder, setSelectedPendingOrder] = useState<PendingOrder | null>(null);
@@ -576,10 +577,43 @@ export const TakeawayPage: React.FC = () => {
     };
     
     setPendingOrders(prev => [...prev, newPendingOrder]);
-    clearOrder();
+    
+    // Show dialog to ask user whether to generate bill or hold
+    setShowHoldDialog(true);
+  }, [getPendingItems, kotConfig, printKOT, currentOrder, subtotal, tax, total]);
 
-    alert("Order placed successfully. KOT generated. You can generate the bill later.");
-  }, [getPendingItems, kotConfig, printKOT, currentOrder, subtotal, tax, total, clearOrder]);
+  const holdOrder = useCallback(() => {
+    clearOrder();
+    setShowHoldDialog(false);
+    alert("Order held. You can recall it later using the Recall button.");
+  }, [clearOrder]);
+
+  const generateBillNow = useCallback(async () => {
+    if (pendingOrders.length === 0) return;
+    
+    // Get the most recent pending order
+    const mostRecentOrder = pendingOrders[pendingOrders.length - 1];
+    
+    const invoice = {
+      id: Date.now().toString(),
+      billNumber: `BILL-${Date.now()}`,
+      orderType: "takeaway",
+      items: mostRecentOrder.items,
+      subtotal: mostRecentOrder.subtotal,
+      tax: mostRecentOrder.tax,
+      total: mostRecentOrder.total,
+      timestamp: new Date(),
+    } as any;
+
+    await addInvoice(invoice);
+    
+    // Remove the pending order
+    setPendingOrders(prev => prev.filter(order => order.id !== mostRecentOrder.id));
+    clearOrder();
+    setShowHoldDialog(false);
+    
+    alert("Bill generated and order completed.");
+  }, [pendingOrders, addInvoice, clearOrder]);
 
   const completeBill = useCallback(async () => {
     if (!selectedPendingOrder) return;
@@ -616,6 +650,26 @@ export const TakeawayPage: React.FC = () => {
 
   return (
     <>
+      {/* Recall Button - Fixed position at top right corner */}
+      {pendingOrders.length > 0 && (
+        <Button 
+          onClick={() => {
+            // Recall the most recent pending order
+            const mostRecent = pendingOrders.reduce((latest, current) => 
+              current.timestamp > latest.timestamp ? current : latest
+            );
+            recallOrder(mostRecent);
+          }}
+          className="fixed top-4 right-4 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+          style={{
+            background: 'linear-gradient(to right, #9333ea, #ec4899)',
+          }}
+        >
+          <RotateCcw className="size-4 mr-2" />
+          Recall Order ({pendingOrders.length})
+        </Button>
+      )}
+
       {/* Main Content Area - accounts for cart width, no gap */}
       <div 
         className="h-full overflow-y-auto"
@@ -631,30 +685,6 @@ export const TakeawayPage: React.FC = () => {
             <h2 className="text-gray-900 mb-2">Takeaway Order</h2>
             <p className="text-muted-foreground">Select items for takeaway order</p>
           </div>
-
-          {/* Recall Button */}
-          {pendingOrders.length > 0 && (
-            <div className="mb-4">
-              <Button 
-                onClick={() => {
-                  // Show a simple dialog or dropdown to select which order to recall
-                  if (pendingOrders.length === 1) {
-                    recallOrder(pendingOrders[0]);
-                  } else {
-                    // For now, just recall the most recent pending order
-                    const mostRecent = pendingOrders.reduce((latest, current) => 
-                      current.timestamp > latest.timestamp ? current : latest
-                    );
-                    recallOrder(mostRecent);
-                  }
-                }}
-                className="flex items-center gap-2"
-              >
-                <RotateCcw className="size-4" />
-                Recall Pending Order ({pendingOrders.length})
-              </Button>
-            </div>
-          )}
 
           <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
@@ -802,6 +832,35 @@ export const TakeawayPage: React.FC = () => {
         </aside>
       )}
 
+      {/* Hold or Generate Bill Dialog */}
+      <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Order Placed</DialogTitle>
+            <DialogDescription>What would you like to do with this order?</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center">KOT has been generated. Would you like to generate the bill now or hold the order?</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={holdOrder}
+                variant="outline"
+                className="flex-1"
+              >
+                Hold Order
+              </Button>
+              <Button 
+                onClick={generateBillNow}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                Generate Bill
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Bill Dialog */}
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
