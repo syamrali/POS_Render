@@ -697,7 +697,7 @@ export const TakeawayPage: React.FC = () => {
       {/* Recall Button - Fixed position at top right corner, always visible */}
       <Button 
         onClick={() => setShowRecallDialog(true)}
-        className="fixed top-4 right-4 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+        className="fixed top-8 right-50 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
         style={{
           background: 'linear-gradient(to right, #9333ea, #ec4899)',
         }}

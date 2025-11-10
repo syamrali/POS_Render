@@ -641,10 +641,30 @@ export const DineInPage: React.FC = () => {
               <div className="mb-6"><h2 className="text-gray-900 mb-2">Select Table</h2><p className="text-muted-foreground">Choose a table for dine-in order</p></div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {tables.map((table: Table) => (
-                  <Card key={table.id} onClick={() => handleTableSelect(table.id)} className={`cursor-pointer`}>
+                  <Card 
+                    key={table.id} 
+                    onClick={() => handleTableSelect(table.id)} 
+                    className={`cursor-pointer ${
+                      table.status === "available" 
+                        ? "bg-green-100 border-green-300" 
+                        : "bg-red-100 border-red-300"
+                    }`}
+                  >
                     <CardHeader className="p-4">
                       <div className="text-center space-y-3">
-                        <div><p className="text-gray-900 mb-1">Table {table.name}</p><Badge variant="outline">{table.status}</Badge></div>
+                        <div>
+                          <p className="text-gray-900 mb-1">Table {table.name}</p>
+                          <Badge 
+                            variant="outline" 
+                            className={
+                              table.status === "available" 
+                                ? "bg-green-200 text-green-800 border-green-300" 
+                                : "bg-red-200 text-red-800 border-red-300"
+                            }
+                          >
+                            {table.status}
+                          </Badge>
+                        </div>
                         <div className="text-muted-foreground">{table.seats} seats • {table.category}</div>
                         {table.status === "occupied" && getTableOrder(table.id) && (
                           <div className="pt-2 border-t border-gray-200">
