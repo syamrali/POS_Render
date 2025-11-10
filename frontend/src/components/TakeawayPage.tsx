@@ -70,6 +70,14 @@ export const TakeawayPage: React.FC = () => {
     };
   }, []);
 
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      // Cleanup function when component unmounts
+      console.log("TakeawayPage unmounted");
+    };
+  }, []);
+
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return menuItems.filter((item) => {

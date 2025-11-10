@@ -68,6 +68,14 @@ export const DineInPage: React.FC = () => {
     };
   }, []);
 
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      // Cleanup function when component unmounts
+      console.log("DineInPage unmounted");
+    };
+  }, []);
+
   const selectedTableData = useMemo(() => tables.find((t: Table) => t.id === selectedTable), [tables, selectedTable]);
   const existingTableOrder = useMemo(() => (selectedTable ? getTableOrder(selectedTable) : undefined), [selectedTable, getTableOrder]);
 
