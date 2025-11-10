@@ -451,7 +451,7 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
               </div>
             </div>
 
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-2 mb-6">
               <Button 
                 onClick={placeOrder} 
                 disabled={getPendingItems().length === 0} 
