@@ -632,144 +632,129 @@ export const TakeawayPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Cart Panel - Fixed position on right side */}
+      {/* Cart Sidebar - Fixed at viewport level, same height as side nav */}
       {isCartVisible && (
-        <div 
-          className="fixed top-0 right-0 h-full w-[420px] bg-white border-l border-gray-200 shadow-lg flex flex-col z-30"
+        <aside 
+          className="w-[420px] bg-white flex flex-col shadow-2xl"
           style={{ 
-            marginTop: 0,
-            paddingTop: '1rem'
+            position: 'fixed',
+            top: '0',
+            right: '0',
+            width: '420px',
+            height: '100vh',
+            backgroundColor: '#ffffff',
+            zIndex: 30,
+            borderLeft: '2px solid #e5e7eb'
           }}
         >
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-gray-900 text-xl font-semibold">Takeaway Order</h2>
-              <Button variant="ghost" size="sm" onClick={clearOrder}>
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-            <div className="text-muted-foreground">
-              <p>Takeaway Order</p>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6">
-            {currentOrder.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <ShoppingCart className="size-12 mx-auto mb-4 opacity-20" />
-                <p>No items in order</p>
+          {/* Cart Header - Fixed, no scroll */}
+          <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold">Current Order</h3>
+                <p className="text-sm text-gray-500">
+                  {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
+                </p>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {currentOrder.map((item: CartItem, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-sm text-muted-foreground">₹{item.price.toFixed(2)} each</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => updateQuantity(item.id, -1, item.sentToKitchen)}
-                        disabled={item.sentToKitchen}
-                      >
-                        -
-                      </Button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => updateQuantity(item.id, 1, item.sentToKitchen)}
-                        disabled={item.sentToKitchen}
-                      >
-                        +
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => removeFromOrder(item.id, item.sentToKitchen)}
-                        disabled={item.sentToKitchen}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+              <div>
+                {getAllCombinedItems().length > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="size-6 text-purple-600" />
+                    <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                      {getAllCombinedItems().length}
+                    </span>
                   </div>
-                ))}
+                ) : (
+                  <ShoppingCart className="size-6 text-gray-400" />
+                )}
               </div>
-            )}
+            </div>
+          </header>
+
+          {/* Cart Items - Scrollable section only */}
+          <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
+            <div className="px-8 py-5 space-y-4">
+              {currentOrder.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">
+                  <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
+                  <div>No items in order</div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {getPendingItems().map((it, idx) => (
+                    <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-lg mb-3">{it.name}</div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
+                              -
+                            </Button>
+                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
+                              +
+                            </Button>
+                          </div>
+                          <div className="ml-auto text-purple-600 font-bold text-lg">
+                            ₹{(it.price * it.quantity).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
+                          <Trash2 className="size-5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {currentOrder.length > 0 && (
-            <div className="p-6 border-t border-gray-200 space-y-4">
-              <div className="flex justify-between">
+          {/* Cart Footer - Fixed, no scroll */}
+          <div className="border-t-2 px-8 py-5 flex-shrink-0 bg-white">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm">
                 <span>GST (5%)</span>
                 <span>₹{tax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold">
+              <div className="flex justify-between text-base font-semibold pt-2 border-t">
                 <span>Total</span>
-                <span>₹{total.toFixed(2)}</span>
+                <span className="text-purple-600">₹{total.toFixed(2)}</span>
               </div>
+            </div>
+
+            <div className="mt-4 space-y-2 mb-6">
               <Button 
-                onClick={placeOrder}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                disabled={currentOrder.every((item: CartItem) => item.sentToKitchen)}
-              >
-                Place Order
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowBillDialog(true)}
+                onClick={placeOrder} 
+                disabled={getPendingItems().length === 0} 
                 className="w-full"
               >
-                <Printer className="size-4 mr-2" /> Complete Bill
+                <Printer className="mr-2" /> 
+                Place Order
+              </Button>
+              <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
+                Generate Bill
               </Button>
             </div>
-          )}
-        </div>
+          </div>
+        </aside>
       )}
 
-      {/* Bill Dialog */}
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Complete Bill</DialogTitle>
-            <DialogDescription>
-              Review and print the final bill for this order
-            </DialogDescription>
+            <DialogTitle>Generate Bill</DialogTitle>
+            <DialogDescription>Would you like to print the bill?</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>₹{subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>GST (5%)</span>
-              <span>₹{tax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span>₹{total.toFixed(2)}</span>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={printBill}
-                className="flex-1"
-              >
-                <Printer className="size-4 mr-2" /> Print
-              </Button>
-              <Button 
-                onClick={completeBill}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-              >
-                Complete
-              </Button>
-            </div>
+          <div className="py-4">
+            <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{total.toFixed(2)}</span></div>
+            <div className="flex gap-2"><Button onClick={() => { printBill(); completeBill(); }} className="flex-1"> <Printer className="mr-2" /> Print Bill</Button><Button onClick={completeBill} variant="outline" className="flex-1">Complete Without Printing</Button></div>
           </div>
         </DialogContent>
       </Dialog>
