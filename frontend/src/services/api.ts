@@ -208,15 +208,22 @@ export const updateBillConfig = async (config: BillConfig): Promise<BillConfig> 
 
 // Auth API
 export const login = async (email: string, password: string): Promise<boolean> => {
-  const response = await fetch(`${API_BASE_URL}/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  
-  return response.ok;
+  try {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    // For now, we'll consider any successful response as a successful login
+    // In a real application, you would check the response content
+    return response.ok;
+  } catch (error) {
+    console.error("Login error:", error);
+    return false;
+  }
 };
 
 // Menu Item API
