@@ -21,6 +21,7 @@ interface CartItem {
 // Define interface for pending orders
 interface PendingOrder {
   id: string;
+  invoiceNumber: string;
   items: CartItem[];
   subtotal: number;
   tax: number;
@@ -46,6 +47,7 @@ export const TakeawayPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [showHoldDialog, setShowHoldDialog] = useState(false);
+  const [showRecallDialog, setShowRecallDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
   const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
   const [selectedPendingOrder, setSelectedPendingOrder] = useState<PendingOrder | null>(null);
@@ -566,9 +568,13 @@ export const TakeawayPage: React.FC = () => {
     // Generate KOT when placing order
     if (kotConfig.printByDepartment !== undefined) await printKOT(pending);
     
+    // Generate invoice number for pending order
+    const invoiceNumber = `INV-${Date.now()}`;
+    
     // Store the order as pending (without generating invoice yet)
     const newPendingOrder: PendingOrder = {
       id: `PENDING-${Date.now()}`,
+      invoiceNumber,
       items: [...currentOrder],
       subtotal,
       tax,
@@ -642,34 +648,41 @@ export const TakeawayPage: React.FC = () => {
   const recallOrder = useCallback((order: PendingOrder) => {
     setCurrentOrder([...order.items]);
     setSelectedPendingOrder(order);
-    alert("Order recalled. You can now modify or generate a bill for this order.");
+    setShowRecallDialog(false);
+    alert(`Order ${order.invoiceNumber} recalled. You can now modify or generate a bill for this order.`);
   }, []);
 
+  const addMoreItemsToRecalledOrder = useCallback(() => {
+    if (!selectedPendingOrder) return;
+    
+    // Merge current order with recalled order
+    const mergedOrder = [...selectedPendingOrder.items, ...currentOrder];
+    
+    // Update the selected pending order with merged items
+    const updatedOrder = {
+      ...selectedPendingOrder,
+      items: mergedOrder,
+      subtotal: mergedOrder.reduce((s, i) => s + i.price * i.quantity, 0),
+      tax: mergedOrder.reduce((s, i) => s + i.price * i.quantity, 0) * 0.05,
+      total: mergedOrder.reduce((s, i) => s + i.price * i.quantity, 0) * 1.05
+    };
+    
+    setSelectedPendingOrder(updatedOrder);
+    setCurrentOrder([]);
+    
+    // Update the pending orders list
+    setPendingOrders(prev => prev.map(order => 
+      order.id === selectedPendingOrder.id ? updatedOrder : order
+    ));
+    
+    alert("Items added to recalled order.");
+  }, [selectedPendingOrder, currentOrder]);
+
   // Determine if cart should be visible
-  const isCartVisible = currentOrder.length > 0;
+  const isCartVisible = currentOrder.length > 0 || selectedPendingOrder !== null;
 
   return (
     <>
-      {/* Recall Button - Fixed position at top right corner */}
-      {pendingOrders.length > 0 && (
-        <Button 
-          onClick={() => {
-            // Recall the most recent pending order
-            const mostRecent = pendingOrders.reduce((latest, current) => 
-              current.timestamp > latest.timestamp ? current : latest
-            );
-            recallOrder(mostRecent);
-          }}
-          className="fixed top-4 right-4 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
-          style={{
-            background: 'linear-gradient(to right, #9333ea, #ec4899)',
-          }}
-        >
-          <RotateCcw className="size-4 mr-2" />
-          Recall Order ({pendingOrders.length})
-        </Button>
-      )}
-
       {/* Main Content Area - accounts for cart width, no gap */}
       <div 
         className="h-full overflow-y-auto"
@@ -685,6 +698,22 @@ export const TakeawayPage: React.FC = () => {
             <h2 className="text-gray-900 mb-2">Takeaway Order</h2>
             <p className="text-muted-foreground">Select items for takeaway order</p>
           </div>
+
+          {/* Recall Button - Positioned properly in main content area */}
+          {pendingOrders.length > 0 && (
+            <div className="mb-4">
+              <Button 
+                onClick={() => setShowRecallDialog(true)}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                style={{
+                  background: 'linear-gradient(to right, #9333ea, #ec4899)',
+                }}
+              >
+                <RotateCcw className="size-4 mr-2" />
+                Recall Orders ({pendingOrders.length})
+              </Button>
+            </div>
+          )}
 
           <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
@@ -735,7 +764,9 @@ export const TakeawayPage: React.FC = () => {
           <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold">Current Order</h3>
+                <h3 className="text-xl font-semibold">
+                  {selectedPendingOrder ? `Recalled Order: ${selectedPendingOrder.invoiceNumber}` : "Current Order"}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
                 </p>
@@ -758,13 +789,31 @@ export const TakeawayPage: React.FC = () => {
           {/* Cart Items - Scrollable section only */}
           <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
             <div className="px-8 py-5 space-y-4">
-              {currentOrder.length === 0 ? (
+              {currentOrder.length === 0 && (!selectedPendingOrder || selectedPendingOrder.items.length === 0) ? (
                 <div className="text-center py-10 text-gray-500">
                   <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
                   <div>No items in order</div>
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Show recalled order items if any */}
+                  {selectedPendingOrder && selectedPendingOrder.items.map((it, idx) => (
+                    <div key={`recalled-${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-lg mb-3">{it.name} (Recalled)</div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                          </div>
+                          <div className="ml-auto text-purple-600 font-bold text-lg">
+                            ₹{(it.price * it.quantity).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Show current order items */}
                   {getPendingItems().map((it, idx) => (
                     <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                       <div className="flex-1 min-w-0">
@@ -801,36 +850,106 @@ export const TakeawayPage: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
+                <span>₹{
+                  selectedPendingOrder 
+                    ? (selectedPendingOrder.subtotal + subtotal).toFixed(2) 
+                    : subtotal.toFixed(2)
+                }</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>GST (5%)</span>
-                <span>₹{tax.toFixed(2)}</span>
+                <span>₹{
+                  selectedPendingOrder 
+                    ? ((selectedPendingOrder.subtotal + subtotal) * 0.05).toFixed(2) 
+                    : tax.toFixed(2)
+                }</span>
               </div>
               <div className="flex justify-between text-base font-semibold pt-2 border-t">
                 <span>Total</span>
-                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                <span className="text-purple-600">₹{
+                  selectedPendingOrder 
+                    ? ((selectedPendingOrder.subtotal + subtotal) * 1.05).toFixed(2) 
+                    : total.toFixed(2)
+                }</span>
               </div>
             </div>
 
             <div className="mt-4 space-y-2 mb-6">
-              <Button 
-                onClick={placeOrder} 
-                disabled={getPendingItems().length === 0} 
-                className="w-full"
-              >
-                <Printer className="mr-2" /> 
-                Place Order
-              </Button>
+              {selectedPendingOrder && currentOrder.length > 0 ? (
+                <Button 
+                  onClick={addMoreItemsToRecalledOrder} 
+                  className="w-full"
+                >
+                  Add Items to Recalled Order
+                </Button>
+              ) : (
+                <Button 
+                  onClick={placeOrder} 
+                  disabled={getPendingItems().length === 0} 
+                  className="w-full"
+                >
+                  <Printer className="mr-2" /> 
+                  Place Order
+                </Button>
+              )}
+              
               {selectedPendingOrder && (
                 <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
                   Generate Bill
+                </Button>
+              )}
+              
+              {selectedPendingOrder && (
+                <Button 
+                  onClick={() => {
+                    setSelectedPendingOrder(null);
+                    setCurrentOrder([]);
+                  }} 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Start New Order
                 </Button>
               )}
             </div>
           </div>
         </aside>
       )}
+
+      {/* Recall Orders Dialog */}
+      <Dialog open={showRecallDialog} onOpenChange={setShowRecallDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Recall Orders</DialogTitle>
+            <DialogDescription>Select an order to recall</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 max-h-60 overflow-y-auto">
+            {pendingOrders.length === 0 ? (
+              <p className="text-center text-gray-500">No pending orders</p>
+            ) : (
+              <div className="space-y-2">
+                {pendingOrders.map((order) => (
+                  <div 
+                    key={order.id} 
+                    className="p-3 border rounded-lg cursor-pointer hover:bg-gray-100"
+                    onClick={() => recallOrder(order)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">{order.invoiceNumber}</span>
+                      <span className="text-sm text-gray-500">
+                        ₹{order.total.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {order.items.length} items • {order.timestamp.toLocaleTimeString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Hold or Generate Bill Dialog */}
       <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
@@ -868,7 +987,14 @@ export const TakeawayPage: React.FC = () => {
             <DialogDescription>Would you like to print the bill?</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{selectedPendingOrder?.total.toFixed(2) || '0.00'}</span></div>
+            <div className="flex justify-between mb-4">
+              <span>Total Amount:</span>
+              <span className="text-purple-600">₹{
+                selectedPendingOrder 
+                  ? selectedPendingOrder.total.toFixed(2) 
+                  : '0.00'
+              }</span>
+            </div>
             <div className="flex gap-2">
               <Button 
                 onClick={() => { 
