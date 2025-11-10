@@ -9,39 +9,82 @@ import { Calendar, Printer, Search, Filter } from "lucide-react";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 
+// Define the invoice type
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  department: string;
+  quantity: number;
+  sentToKitchen?: boolean;
+}
+
+interface Invoice {
+  id: string;
+  billNumber: string;
+  orderType: 'dine-in' | 'takeaway';
+  tableName?: string;
+  items: OrderItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  timestamp: string | Date;
+}
+
 export function InvoicesPage() {
   const { invoices } = useRestaurant();
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [selectedInvoice, setSelectedInvoice] = useState<typeof invoices[0] | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
 
-  const filteredInvoices = invoices.filter(invoice => {
+  const filteredInvoices = invoices.filter((invoice: Invoice) => {
+    // Handle potential timestamp conversion issues
+    let invoiceTimestamp: Date;
+    try {
+      if (typeof invoice.timestamp === 'string') {
+        // Handle ISO string format
+        invoiceTimestamp = new Date(invoice.timestamp);
+      } else {
+        // Assume it's already a Date object
+        invoiceTimestamp = new Date(invoice.timestamp);
+      }
+    } catch (e) {
+      console.error("Error parsing timestamp for invoice:", invoice, e);
+      return false; // Skip this invoice if timestamp is invalid
+    }
+
     const matchesSearch = invoice.billNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.tableName?.toLowerCase().includes(searchTerm.toLowerCase());
+                         (invoice.tableName && invoice.tableName.toLowerCase().includes(searchTerm.toLowerCase()));
     
     let matchesDate = true;
     if (startDate) {
       const start = new Date(startDate);
       start.setHours(0, 0, 0, 0);
-      matchesDate = matchesDate && invoice.timestamp >= start;
+      matchesDate = matchesDate && invoiceTimestamp >= start;
     }
     if (endDate) {
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
-      matchesDate = matchesDate && invoice.timestamp <= end;
+      matchesDate = matchesDate && invoiceTimestamp <= end;
     }
 
     return matchesSearch && matchesDate;
   });
 
-  const totalRevenue = filteredInvoices.reduce((sum, inv) => sum + inv.total, 0);
+  const totalRevenue = filteredInvoices.reduce((sum: number, inv: Invoice) => {
+    // Handle potential NaN values
+    const total = isNaN(inv.total) ? 0 : inv.total;
+    return sum + total;
+  }, 0);
+  
   const totalOrders = filteredInvoices.length;
-  const dineInOrders = filteredInvoices.filter(inv => inv.orderType === "dine-in").length;
-  const takeawayOrders = filteredInvoices.filter(inv => inv.orderType === "takeaway").length;
+  const dineInOrders = filteredInvoices.filter((inv: Invoice) => inv.orderType === "dine-in").length;
+  const takeawayOrders = filteredInvoices.filter((inv: Invoice) => inv.orderType === "takeaway").length;
 
-  const printInvoice = (invoice: typeof invoices[0]) => {
+  const printInvoice = (invoice: Invoice) => {
     const billWindow = window.open('', '', 'width=300,height=600');
     if (!billWindow) return;
 
@@ -51,7 +94,20 @@ export function InvoicesPage() {
     billWindow.print();
   };
 
-  const generateBillContent = (invoice: typeof invoices[0]) => {
+  const generateBillContent = (invoice: Invoice) => {
+    // Handle timestamp conversion
+    let invoiceTimestamp: Date;
+    try {
+      if (typeof invoice.timestamp === 'string') {
+        invoiceTimestamp = new Date(invoice.timestamp);
+      } else {
+        invoiceTimestamp = new Date(invoice.timestamp);
+      }
+    } catch (e) {
+      console.error("Error parsing timestamp for invoice:", invoice, e);
+      invoiceTimestamp = new Date();
+    }
+
     return `
       <!DOCTYPE html>
       <html>
@@ -87,25 +143,25 @@ export function InvoicesPage() {
         </div>
         <div class="info">
           <div class="info-row"><span>Bill No:</span><span>${invoice.billNumber}</span></div>
-          <div class="info-row"><span>Date:</span><span>${invoice.timestamp.toLocaleDateString()} ${invoice.timestamp.toLocaleTimeString()}</span></div>
+          <div class="info-row"><span>Date:</span><span>${invoiceTimestamp.toLocaleDateString()} ${invoiceTimestamp.toLocaleTimeString()}</span></div>
           <div class="info-row"><span>Type:</span><span>${invoice.orderType.toUpperCase()}</span></div>
           ${invoice.tableName ? `<div class="info-row"><span>Table:</span><span>${invoice.tableName}</span></div>` : ''}
         </div>
         <div class="items">
-          ${invoice.items.map(item => `
+          ${(invoice.items || []).map((item: OrderItem) => `
             <div class="item-row">
               <div style="flex: 2;">
-                <div>${item.name}</div>
-                <div style="font-size: 10px;">${item.quantity} x ₹${item.price.toFixed(2)}</div>
+                <div>${item.name || 'Unknown Item'}</div>
+                <div style="font-size: 10px;">${item.quantity || 0} x ₹${(item.price || 0).toFixed(2)}</div>
               </div>
-              <div style="text-align: right;">₹${(item.quantity * item.price).toFixed(2)}</div>
+              <div style="text-align: right;">₹${((item.quantity || 0) * (item.price || 0)).toFixed(2)}</div>
             </div>
           `).join('')}
         </div>
         <div class="totals">
-          <div class="total-row"><span>Subtotal:</span><span>₹${invoice.subtotal.toFixed(2)}</span></div>
-          <div class="total-row"><span>GST (5%):</span><span>₹${invoice.tax.toFixed(2)}</span></div>
-          <div class="total-row grand-total"><span>TOTAL:</span><span>₹${invoice.total.toFixed(2)}</span></div>
+          <div class="total-row"><span>Subtotal:</span><span>₹${(invoice.subtotal || 0).toFixed(2)}</span></div>
+          <div class="total-row"><span>GST (5%):</span><span>₹${(invoice.tax || 0).toFixed(2)}</span></div>
+          <div class="total-row grand-total"><span>TOTAL:</span><span>₹${(invoice.total || 0).toFixed(2)}</span></div>
         </div>
         <div class="footer">
           <div>Thank you for dining with us!</div>
@@ -173,7 +229,7 @@ export function InvoicesPage() {
                   id="search"
                   placeholder="Bill number, table..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -187,7 +243,7 @@ export function InvoicesPage() {
                   id="start-date"
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -201,7 +257,7 @@ export function InvoicesPage() {
                   id="end-date"
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -225,53 +281,68 @@ export function InvoicesPage() {
         <CardContent>
           <ScrollArea className="h-[calc(100vh-500px)]">
             <div className="space-y-3">
-              {filteredInvoices.map(invoice => (
-                <div
-                  key={invoice.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => {
-                    setSelectedInvoice(invoice);
-                    setShowInvoiceDialog(true);
-                  }}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <p className="text-gray-900">{invoice.billNumber}</p>
-                      <Badge
+              {filteredInvoices.map((invoice: Invoice) => {
+                // Handle timestamp conversion
+                let invoiceTimestamp: Date;
+                try {
+                  if (typeof invoice.timestamp === 'string') {
+                    invoiceTimestamp = new Date(invoice.timestamp);
+                  } else {
+                    invoiceTimestamp = new Date(invoice.timestamp);
+                  }
+                } catch (e) {
+                  console.error("Error parsing timestamp for invoice:", invoice, e);
+                  invoiceTimestamp = new Date();
+                }
+
+                return (
+                  <div
+                    key={invoice.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      setSelectedInvoice(invoice);
+                      setShowInvoiceDialog(true);
+                    }}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <p className="text-gray-900">{invoice.billNumber}</p>
+                        <Badge
+                          variant="outline"
+                          className={
+                            invoice.orderType === "dine-in"
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-orange-50 text-orange-700 border-orange-200"
+                          }
+                        >
+                          {invoice.orderType}
+                        </Badge>
+                        {invoice.tableName && (
+                          <Badge variant="secondary">{invoice.tableName}</Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-4 text-muted-foreground">
+                        <span>{invoiceTimestamp.toLocaleDateString()}</span>
+                        <span>{invoiceTimestamp.toLocaleTimeString()}</span>
+                        <span>{(invoice.items || []).length} items</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <p className="text-purple-600">₹{(invoice.total || 0).toFixed(2)}</p>
+                      <Button
+                        size="sm"
                         variant="outline"
-                        className={
-                          invoice.orderType === "dine-in"
-                            ? "bg-green-50 text-green-700 border-green-200"
-                            : "bg-orange-50 text-orange-700 border-orange-200"
-                        }
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation();
+                          printInvoice(invoice);
+                        }}
                       >
-                        {invoice.orderType}
-                      </Badge>
-                      {invoice.tableName && (
-                        <Badge variant="secondary">{invoice.tableName}</Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-4 text-muted-foreground">
-                      <span>{invoice.timestamp.toLocaleDateString()}</span>
-                      <span>{invoice.timestamp.toLocaleTimeString()}</span>
-                      <span>{invoice.items.length} items</span>
+                        <Printer className="size-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-purple-600">₹{invoice.total.toFixed(2)}</p>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        printInvoice(invoice);
-                      }}
-                    >
-                      <Printer className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
 
               {filteredInvoices.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground">
@@ -289,7 +360,19 @@ export function InvoicesPage() {
           <DialogHeader>
             <DialogTitle>{selectedInvoice?.billNumber}</DialogTitle>
             <DialogDescription>
-              {selectedInvoice?.timestamp.toLocaleString()}
+              {selectedInvoice && (
+                (() => {
+                  try {
+                    if (typeof selectedInvoice.timestamp === 'string') {
+                      return new Date(selectedInvoice.timestamp).toLocaleString();
+                    } else {
+                      return new Date(selectedInvoice.timestamp).toLocaleString();
+                    }
+                  } catch (e) {
+                    return "Invalid Date";
+                  }
+                })()
+              )}
             </DialogDescription>
           </DialogHeader>
           {selectedInvoice && (
@@ -319,10 +402,10 @@ export function InvoicesPage() {
               <div className="border-t pt-4">
                 <p className="text-gray-900 mb-3">Items:</p>
                 <div className="space-y-2">
-                  {selectedInvoice.items.map((item, idx) => (
+                  {(selectedInvoice.items || []).map((item: OrderItem, idx: number) => (
                     <div key={idx} className="flex justify-between text-muted-foreground">
-                      <span>{item.name} x{item.quantity}</span>
-                      <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                      <span>{item.name || 'Unknown Item'} x{item.quantity || 0}</span>
+                      <span>₹{((item.price || 0) * (item.quantity || 0)).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -331,15 +414,15 @@ export function InvoicesPage() {
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal:</span>
-                  <span>₹{selectedInvoice.subtotal.toFixed(2)}</span>
+                  <span>₹{(selectedInvoice.subtotal || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>GST (5%):</span>
-                  <span>₹{selectedInvoice.tax.toFixed(2)}</span>
+                  <span>₹{(selectedInvoice.tax || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total:</span>
-                  <span className="text-purple-600">₹{selectedInvoice.total.toFixed(2)}</span>
+                  <span className="text-purple-600">₹{(selectedInvoice.total || 0).toFixed(2)}</span>
                 </div>
               </div>
 
