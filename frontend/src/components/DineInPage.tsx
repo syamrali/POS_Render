@@ -18,17 +18,6 @@ interface CartItem {
   department?: string;
 }
 
-// Define interface for pending orders
-interface PendingOrder {
-  id: string;
-  tableId: string;
-  items: CartItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  timestamp: Date;
-}
-
 export const DineInPage: React.FC = () => {
   const {
     tables,
@@ -48,7 +37,6 @@ export const DineInPage: React.FC = () => {
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
-  const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -380,8 +368,14 @@ export const DineInPage: React.FC = () => {
   const generateBillContent = useCallback(() => {
     const now = new Date();
     const billNumber = `BILL-${Date.now()}`;
-    const items = getAllCombinedItems();
-    const sub = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    
+    // Get all items from current order and existing table order
+    const allItems = [...getAllCombinedItems()];
+    if (existingTableOrder) {
+      allItems.push(...existingTableOrder.items);
+    }
+    
+    const sub = allItems.reduce((s, i) => s + i.price * i.quantity, 0);
     const t = sub * 0.05;
     const tot = sub + t;
     
@@ -439,7 +433,7 @@ export const DineInPage: React.FC = () => {
         `<div>Bill: ${billNumber}</div><div>${now.toLocaleString()}</div>` +
         `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
         `<hr/>` +
-        items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) ₹${(i.quantity * i.price).toFixed(2)}</div>`).join("") +
+        allItems.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) ₹${(i.quantity * i.price).toFixed(2)}</div>`).join("") +
         `<hr/>` +
         `<div>Subtotal: ₹${sub.toFixed(2)}</div>` +
         `<div>GST (5%): ₹${t.toFixed(2)}</div>` +
@@ -478,7 +472,7 @@ export const DineInPage: React.FC = () => {
         `<div>Bill No: ${billNumber}</div><div>Date: ${now.toLocaleString()}</div>` +
         `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
         `<hr/>` +
-        items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
+        allItems.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
         `<hr/>` +
         `<div>Subtotal <span style="float:right">₹${sub.toFixed(2)}</span></div>` +
         `<div>GST (5%) <span style="float:right">₹${t.toFixed(2)}</span></div>` +
@@ -517,7 +511,7 @@ export const DineInPage: React.FC = () => {
         `<div>Bill No: ${billNumber}</div><div>Date: ${now.toLocaleString()}</div>` +
         `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
         `<hr/>` +
-        items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
+        allItems.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
         `<hr/>` +
         `<div>Subtotal <span style="float:right">₹${sub.toFixed(2)}</span></div>` +
         `<div>GST (5%) <span style="float:right">₹${t.toFixed(2)}</span></div>` +
@@ -526,7 +520,7 @@ export const DineInPage: React.FC = () => {
     }
     
     return content;
-  }, [getAllCombinedItems, billConfig, selectedTableData?.name]);
+  }, [getAllCombinedItems, billConfig, selectedTableData?.name, existingTableOrder]);
 
   const printBill = useCallback(() => {
     const popup = window.open("", "_blank", "width=400,height=600");
@@ -588,40 +582,21 @@ export const DineInPage: React.FC = () => {
       // Mark items as sent to kitchen
       setCurrentOrder((prev) => prev.map((it) => (pending.some((p) => p.id === it.id && !p.sentToKitchen) ? { ...it, sentToKitchen: true } : it)));
       await markItemsAsSent(selectedTable, pending);
-      
-      // Store as pending order until bill is generated
-      const newPendingOrder: PendingOrder = {
-        id: `PENDING-${Date.now()}`,
-        tableId: selectedTable,
-        items: [...pending],
-        subtotal: pending.reduce((s, i) => s + i.price * i.quantity, 0),
-        tax: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 0.05,
-        total: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 1.05,
-        timestamp: new Date()
-      };
-      
-      setPendingOrders(prev => [...prev, newPendingOrder]);
     }
 
     alert("Order placed successfully. KOT generated.");
   }, [getPendingItems, existingTableOrder, selectedTable, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
 
   const completeBill = useCallback(async () => {
-    // Get all pending orders for this table
-    const tablePendingOrders = pendingOrders.filter(order => order.tableId === selectedTable);
+    // Get all items from current order and existing table order
+    const allItems = [...getAllCombinedItems()];
+    if (existingTableOrder) {
+      allItems.push(...existingTableOrder.items);
+    }
     
-    // Combine all items from pending orders
-    const allItems: CartItem[] = [];
-    let totalSubtotal = 0;
-    let totalTax = 0;
-    let totalAmount = 0;
-    
-    tablePendingOrders.forEach(order => {
-      allItems.push(...order.items);
-      totalSubtotal += order.subtotal;
-      totalTax += order.tax;
-      totalAmount += order.total;
-    });
+    const sub = allItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    const t = sub * 0.05;
+    const tot = sub + t;
 
     const invoice = {
       id: Date.now().toString(),
@@ -629,16 +604,13 @@ export const DineInPage: React.FC = () => {
       orderType: "dine-in",
       tableName: selectedTableData?.name,
       items: allItems,
-      subtotal: totalSubtotal,
-      tax: totalTax,
-      total: totalAmount,
+      subtotal: sub,
+      tax: t,
+      total: tot,
       timestamp: new Date(),
     } as any;
 
     await addInvoice(invoice);
-    
-    // Remove all pending orders for this table
-    setPendingOrders(prev => prev.filter(order => order.tableId !== selectedTable));
     
     // Complete the table order
     if (selectedTable) await completeTableOrder(selectedTable);
@@ -646,7 +618,7 @@ export const DineInPage: React.FC = () => {
     setShowBillDialog(false);
     
     alert("Bill generated and order completed.");
-  }, [selectedTableData?.name, pendingOrders, selectedTable, addInvoice, completeTableOrder, clearOrder]);
+  }, [selectedTableData?.name, getAllCombinedItems, existingTableOrder, addInvoice, selectedTable, completeTableOrder, clearOrder]);
 
   // Determine if cart should be visible
   const isCartVisible = selectedTable || currentOrder.length > 0;
@@ -675,7 +647,15 @@ export const DineInPage: React.FC = () => {
                         <div><p className="text-gray-900 mb-1">Table {table.name}</p><Badge variant="outline">{table.status}</Badge></div>
                         <div className="text-muted-foreground">{table.seats} seats • {table.category}</div>
                         {table.status === "occupied" && getTableOrder(table.id) && (
-                          <div className="pt-2 border-t border-gray-200"><div className="flex items-center justify-center gap-1 text-orange-600"><Clock className="size-3" /><span className="text-sm">{Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins</span></div></div>
+                          <div className="pt-2 border-t border-gray-200">
+                            <div className="flex items-center justify-center gap-1 text-orange-600">
+                              <Clock className="size-3" />
+                              <span className="text-sm">{Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins</span>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {getTableOrder(table.id)?.items.length || 0} items
+                            </div>
+                          </div>
                         )}
                       </div>
                     </CardHeader>
@@ -763,6 +743,24 @@ export const DineInPage: React.FC = () => {
           {/* Cart Items - Scrollable section only */}
           <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
             <div className="px-8 py-5 space-y-4">
+              {/* Show existing table order items if any */}
+              {existingTableOrder && existingTableOrder.items.map((it: CartItem, idx: number) => (
+                <div key={`existing-${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-lg mb-3">{it.name} (Previous)</div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                      </div>
+                      <div className="ml-auto text-purple-600 font-bold text-lg">
+                        ₹{(it.price * it.quantity).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Show current order items */}
               {currentOrder.length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
