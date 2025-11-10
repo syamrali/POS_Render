@@ -30,13 +30,23 @@ def init_database():
         
         # Check if we have KOT config
         if KOTConfig.query.first() is None:
-            kot_config = KOTConfig(print_by_department=False, number_of_copies=1)
+            kot_config = KOTConfig(
+                print_by_department=False, 
+                number_of_copies=1,
+                paper_size="80mm",
+                format_type="detailed"
+            )
             db.session.add(kot_config)
             print("Added default KOT configuration")
         
         # Check if we have Bill config
         if BillConfig.query.first() is None:
-            bill_config = BillConfig(auto_print_dine_in=False, auto_print_takeaway=False)
+            bill_config = BillConfig(
+                auto_print_dine_in=False, 
+                auto_print_takeaway=False,
+                paper_size="80mm",
+                format_type="standard"
+            )
             db.session.add(bill_config)
             print("Added default Bill configuration")
         

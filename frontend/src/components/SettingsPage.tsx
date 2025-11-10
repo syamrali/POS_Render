@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -30,6 +30,27 @@ export function SettingsPage() {
     "Thermal Printer 2",
     "Network Printer",
     "USB Printer"
+  ];
+
+  // Thermal printer paper sizes
+  const paperSizes = [
+    { value: "58mm", label: "58mm (2.3\") - Small Receipt" },
+    { value: "80mm", label: "80mm (3.1\") - Standard Receipt" },
+    { value: "112mm", label: "112mm (4.4\") - Large Receipt" }
+  ];
+
+  // KOT formats based on paper size
+  const kotFormats = [
+    { value: "compact", label: "Compact Format" },
+    { value: "detailed", label: "Detailed Format" },
+    { value: "grouped", label: "Grouped by Department" }
+  ];
+
+  // Bill formats based on paper size
+  const billFormats = [
+    { value: "standard", label: "Standard Bill Format" },
+    { value: "detailed", label: "Detailed Bill Format" },
+    { value: "compact", label: "Compact Bill Format" }
   ];
 
   // Load restaurant settings from API on component mount
@@ -127,7 +148,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={kotConfig.printByDepartment}
-                  onCheckedChange={(checked) => updateKotConfig({ ...kotConfig, printByDepartment: checked })}
+                  onCheckedChange={(checked: boolean) => updateKotConfig({ ...kotConfig, printByDepartment: checked })}
                 />
               </div>
 
@@ -140,7 +161,7 @@ export function SettingsPage() {
                 </p>
                 <Select 
                   value={kotConfig.numberOfCopies.toString()} 
-                  onValueChange={(value) => updateKotConfig({ ...kotConfig, numberOfCopies: parseInt(value) })}
+                  onValueChange={(value: string) => updateKotConfig({ ...kotConfig, numberOfCopies: parseInt(value) })}
                 >
                   <SelectTrigger id="kot-copies">
                     <SelectValue />
@@ -163,7 +184,7 @@ export function SettingsPage() {
                 </p>
                 <Select 
                   value={kotConfig.selectedPrinter || "none"} 
-                  onValueChange={(value) => updateKotConfig({ ...kotConfig, selectedPrinter: value === "none" ? null : value })}
+                  onValueChange={(value: string) => updateKotConfig({ ...kotConfig, selectedPrinter: value === "none" ? null : value })}
                 >
                   <SelectTrigger id="kot-printer">
                     <SelectValue placeholder="Select printer" />
@@ -181,13 +202,63 @@ export function SettingsPage() {
 
               <Separator />
 
+              <div className="space-y-2">
+                <Label htmlFor="kot-paper-size">Thermal Printer Paper Size</Label>
+                <p className="text-muted-foreground mb-2">
+                  Select the paper size for your thermal printer
+                </p>
+                <Select 
+                  value={kotConfig.paperSize || "80mm"} 
+                  onValueChange={(value: string) => updateKotConfig({ ...kotConfig, paperSize: value })}
+                >
+                  <SelectTrigger id="kot-paper-size">
+                    <SelectValue placeholder="Select paper size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paperSizes.map((size) => (
+                      <SelectItem key={size.value} value={size.value}>
+                        {size.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="kot-format">KOT Format</Label>
+                <p className="text-muted-foreground mb-2">
+                  Select the format for KOT printing based on paper size
+                </p>
+                <Select 
+                  value={kotConfig.formatType || "detailed"} 
+                  onValueChange={(value: string) => updateKotConfig({ ...kotConfig, formatType: value })}
+                >
+                  <SelectTrigger id="kot-format">
+                    <SelectValue placeholder="Select KOT format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kotFormats.map((format) => (
+                      <SelectItem key={format.value} value={format.value}>
+                        {format.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator />
+
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-blue-900 mb-2">Current Settings:</p>
-                <ul className="text-blue-700 space-y-1">
-                  <li>• Department-wise printing: {kotConfig.printByDepartment ? 'Enabled' : 'Disabled'}</li>
-                  <li>• Copies per KOT: {kotConfig.numberOfCopies}</li>
-                  <li>• Selected Printer: {kotConfig.selectedPrinter || 'None'}</li>
-                </ul>
+                <div className="text-blue-700 space-y-1">
+                  <div>• Department-wise printing: {kotConfig.printByDepartment ? 'Enabled' : 'Disabled'}</div>
+                  <div>• Copies per KOT: {kotConfig.numberOfCopies}</div>
+                  <div>• Selected Printer: {kotConfig.selectedPrinter || 'None'}</div>
+                  <div>• Paper Size: {kotConfig.paperSize || '80mm'}</div>
+                  <div>• KOT Format: {kotConfig.formatType || 'Detailed'}</div>
+                </div>
               </div>
 
               <Button 
@@ -219,7 +290,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={billConfig.autoPrintDineIn}
-                  onCheckedChange={(checked) => updateBillConfig({ ...billConfig, autoPrintDineIn: checked })}
+                  onCheckedChange={(checked: boolean) => updateBillConfig({ ...billConfig, autoPrintDineIn: checked })}
                 />
               </div>
 
@@ -234,7 +305,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={billConfig.autoPrintTakeaway}
-                  onCheckedChange={(checked) => updateBillConfig({ ...billConfig, autoPrintTakeaway: checked })}
+                  onCheckedChange={(checked: boolean) => updateBillConfig({ ...billConfig, autoPrintTakeaway: checked })}
                 />
               </div>
 
@@ -247,7 +318,7 @@ export function SettingsPage() {
                 </p>
                 <Select 
                   value={billConfig.selectedPrinter || "none"} 
-                  onValueChange={(value) => updateBillConfig({ ...billConfig, selectedPrinter: value === "none" ? null : value })}
+                  onValueChange={(value: string) => updateBillConfig({ ...billConfig, selectedPrinter: value === "none" ? null : value })}
                 >
                   <SelectTrigger id="bill-printer">
                     <SelectValue placeholder="Select printer" />
@@ -265,13 +336,63 @@ export function SettingsPage() {
 
               <Separator />
 
+              <div className="space-y-2">
+                <Label htmlFor="bill-paper-size">Thermal Printer Paper Size</Label>
+                <p className="text-muted-foreground mb-2">
+                  Select the paper size for your thermal printer
+                </p>
+                <Select 
+                  value={billConfig.paperSize || "80mm"} 
+                  onValueChange={(value: string) => updateBillConfig({ ...billConfig, paperSize: value })}
+                >
+                  <SelectTrigger id="bill-paper-size">
+                    <SelectValue placeholder="Select paper size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paperSizes.map((size) => (
+                      <SelectItem key={size.value} value={size.value}>
+                        {size.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="bill-format">Bill Format</Label>
+                <p className="text-muted-foreground mb-2">
+                  Select the format for bill printing based on paper size
+                </p>
+                <Select 
+                  value={billConfig.formatType || "standard"} 
+                  onValueChange={(value: string) => updateBillConfig({ ...billConfig, formatType: value })}
+                >
+                  <SelectTrigger id="bill-format">
+                    <SelectValue placeholder="Select bill format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {billFormats.map((format) => (
+                      <SelectItem key={format.value} value={format.value}>
+                        {format.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator />
+
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <p className="text-green-900 mb-2">Current Settings:</p>
-                <ul className="text-green-700 space-y-1">
-                  <li>• Dine-In auto-print: {billConfig.autoPrintDineIn ? 'Enabled' : 'Disabled'}</li>
-                  <li>• Takeaway auto-print: {billConfig.autoPrintTakeaway ? 'Enabled' : 'Disabled'}</li>
-                  <li>• Selected Printer: {billConfig.selectedPrinter || 'None'}</li>
-                </ul>
+                <div className="text-green-700 space-y-1">
+                  <div>• Dine-In auto-print: {billConfig.autoPrintDineIn ? 'Enabled' : 'Disabled'}</div>
+                  <div>• Takeaway auto-print: {billConfig.autoPrintTakeaway ? 'Enabled' : 'Disabled'}</div>
+                  <div>• Selected Printer: {billConfig.selectedPrinter || 'None'}</div>
+                  <div>• Paper Size: {billConfig.paperSize || '80mm'}</div>
+                  <div>• Bill Format: {billConfig.formatType || 'Standard'}</div>
+                </div>
               </div>
 
               <Button 
@@ -299,7 +420,7 @@ export function SettingsPage() {
                 <Input
                   id="restaurant-name"
                   value={restaurantName}
-                  onChange={(e) => setRestaurantName(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setRestaurantName(e.target.value)}
                 />
               </div>
 
@@ -308,7 +429,7 @@ export function SettingsPage() {
                 <Input
                   id="address"
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setAddress(e.target.value)}
                   placeholder="123 Main St, City, State 12345"
                 />
               </div>
@@ -320,14 +441,14 @@ export function SettingsPage() {
                     id="phone"
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
-                  <Select value={currency} onValueChange={setCurrency}>
+                  <Select value={currency} onValueChange={(value: string) => setCurrency(value)}>
                     <SelectTrigger id="currency">
                       <SelectValue />
                     </SelectTrigger>
@@ -347,7 +468,7 @@ export function SettingsPage() {
                   id="tax-rate"
                   type="number"
                   value={taxRate}
-                  onChange={(e) => setTaxRate(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setTaxRate(e.target.value)}
                   min="0"
                   max="100"
                   step="0.1"
@@ -382,7 +503,7 @@ export function SettingsPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -397,7 +518,7 @@ export function SettingsPage() {
               <Separator />
 
               <div className="space-y-4">
-                <h4 className="text-gray-900">Change Password</h4>
+                <div className="text-gray-900 font-medium">Change Password</div>
                 <div className="space-y-2">
                   <Label htmlFor="current-password">Current Password</Label>
                   <Input
@@ -452,7 +573,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={notifications}
-                  onCheckedChange={setNotifications}
+                  onCheckedChange={(checked: boolean) => setNotifications(checked)}
                 />
               </div>
 
@@ -467,7 +588,7 @@ export function SettingsPage() {
                 </div>
                 <Switch
                   checked={soundEnabled}
-                  onCheckedChange={setSoundEnabled}
+                  onCheckedChange={(checked: boolean) => setSoundEnabled(checked)}
                 />
               </div>
 
@@ -520,7 +641,7 @@ export function SettingsPage() {
               <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h4 className="text-gray-900 mb-1">Professional Plan</h4>
+                    <div className="text-gray-900 font-medium mb-1">Professional Plan</div>
                     <p className="text-muted-foreground">
                       Unlimited tables and orders
                     </p>
@@ -538,7 +659,7 @@ export function SettingsPage() {
               <Separator />
 
               <div className="space-y-4">
-                <h4 className="text-gray-900">Payment Method</h4>
+                <div className="text-gray-900 font-medium">Payment Method</div>
                 <div className="p-4 border rounded-lg flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="size-10 rounded bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
@@ -556,7 +677,7 @@ export function SettingsPage() {
               <Separator />
 
               <div className="space-y-2">
-                <h4 className="text-gray-900">Billing History</h4>
+                <div className="text-gray-900 font-medium">Billing History</div>
                 <div className="space-y-2">
                   {[
                     { date: "Oct 1, 2025", amount: "$49.00", status: "Paid" },

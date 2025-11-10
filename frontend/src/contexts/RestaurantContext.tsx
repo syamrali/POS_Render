@@ -1,15 +1,16 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import * as React from "react";
 import * as api from "../services/api";
 
-export interface Table {
+// Define interfaces directly to avoid conflicts
+interface Table {
   id: string;
   name: string;
+  status: 'available' | 'occupied';
   seats: number;
   category: string;
-  status: "available" | "occupied";
 }
 
-export interface OrderItem {
+interface OrderItem {
   id: string;
   name: string;
   price: number;
@@ -19,35 +20,39 @@ export interface OrderItem {
   sentToKitchen?: boolean;
 }
 
-export interface TableOrder {
+interface TableOrder {
   tableId: string;
   tableName: string;
   items: OrderItem[];
-  startTime: Date;
+  startTime: string;
 }
 
-export interface Invoice {
+interface Invoice {
   id: string;
   billNumber: string;
-  orderType: "dine-in" | "takeaway";
+  orderType: 'dine-in' | 'takeaway';
   tableName?: string;
   items: OrderItem[];
   subtotal: number;
   tax: number;
   total: number;
-  timestamp: Date;
+  timestamp: string;
 }
 
 export interface KOTConfig {
   printByDepartment: boolean;
   numberOfCopies: number;
   selectedPrinter?: string | null;
+  paperSize?: string | null;
+  formatType?: string | null;
 }
 
 export interface BillConfig {
   autoPrintDineIn: boolean;
   autoPrintTakeaway: boolean;
   selectedPrinter?: string | null;
+  paperSize?: string | null;
+  formatType?: string | null;
 }
 
 interface RestaurantContextType {
@@ -66,25 +71,29 @@ interface RestaurantContextType {
   updateBillConfig: (config: BillConfig) => Promise<void>;
 }
 
-const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
+const RestaurantContext = React.createContext<RestaurantContextType | undefined>(undefined);
 
-export function RestaurantProvider({ children }: { children: ReactNode }) {
-  const [tables, setTables] = useState<Table[]>([]);
-  const [tableOrders, setTableOrders] = useState<Map<string, TableOrder>>(new Map());
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [kotConfig, setKotConfig] = useState<KOTConfig>({
+export function RestaurantProvider({ children }: { children: React.ReactNode }) {
+  const [tables, setTables] = React.useState<Table[]>([]);
+  const [tableOrders, setTableOrders] = React.useState<Map<string, TableOrder>>(new Map());
+  const [invoices, setInvoices] = React.useState<Invoice[]>([]);
+  const [kotConfig, setKotConfig] = React.useState<KOTConfig>({
     printByDepartment: false,
     numberOfCopies: 1,
     selectedPrinter: null,
+    paperSize: null,
+    formatType: null,
   });
-  const [billConfig, setBillConfig] = useState<BillConfig>({
+  const [billConfig, setBillConfig] = React.useState<BillConfig>({
     autoPrintDineIn: false,
     autoPrintTakeaway: false,
     selectedPrinter: null,
+    paperSize: null,
+    formatType: null,
   });
 
   // Load data from API on component mount
-  useEffect(() => {
+  React.useEffect(() => {
     const loadData = async () => {
       try {
         // Load tables
@@ -93,10 +102,7 @@ export function RestaurantProvider({ children }: { children: ReactNode }) {
         
         // Load invoices
         const invoicesData = await api.getInvoices();
-        setInvoices(invoicesData.map(inv => ({
-          ...inv,
-          timestamp: new Date(inv.timestamp)
-        })));
+        setInvoices(invoicesData);
         
         // Load configs
         const kotConfigData = await api.getKOTConfig();
@@ -129,10 +135,7 @@ export function RestaurantProvider({ children }: { children: ReactNode }) {
       
       setTableOrders(prev => {
         const newMap = new Map(prev);
-        newMap.set(tableId, {
-          ...updatedOrder,
-          startTime: new Date(updatedOrder.startTime)
-        });
+        newMap.set(tableId, updatedOrder);
         return newMap;
       });
 
@@ -155,10 +158,7 @@ export function RestaurantProvider({ children }: { children: ReactNode }) {
         const newMap = new Map(prev);
         const order = newMap.get(tableId);
         if (order) {
-          newMap.set(tableId, {
-            ...updatedOrder,
-            startTime: new Date(updatedOrder.startTime)
-          });
+          newMap.set(tableId, updatedOrder);
         }
         return newMap;
       });
@@ -194,16 +194,7 @@ export function RestaurantProvider({ children }: { children: ReactNode }) {
 
   const addInvoice = async (invoice: Invoice) => {
     try {
-      const newInvoice = await api.addInvoice({
-        billNumber: invoice.billNumber,
-        orderType: invoice.orderType,
-        tableName: invoice.tableName,
-        items: invoice.items,
-        subtotal: invoice.subtotal,
-        tax: invoice.tax,
-        total: invoice.total,
-        timestamp: invoice.timestamp.toISOString()
-      });
+      const newInvoice = await api.addInvoice(invoice);
       
       setInvoices(prev => [newInvoice, ...prev]);
     } catch (error) {
@@ -255,8 +246,8 @@ export function RestaurantProvider({ children }: { children: ReactNode }) {
 }
 
 export function useRestaurant() {
-  const context = useContext(RestaurantContext);
-  if (!context) {
+  const context = React.useContext(RestaurantContext);
+  if (context === undefined) {
     throw new Error("useRestaurant must be used within a RestaurantProvider");
   }
   return context;

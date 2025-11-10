@@ -74,12 +74,16 @@ class KOTConfig(db.Model):
     print_by_department = db.Column(db.Boolean, nullable=False, default=False)
     number_of_copies = db.Column(db.Integer, nullable=False, default=1)
     selected_printer = db.Column(db.String, nullable=True)  # Selected printer for KOT
+    paper_size = db.Column(db.String, nullable=True)  # Thermal printer paper size
+    format_type = db.Column(db.String, nullable=True)  # KOT format based on paper size
     
     def to_dict(self):
         return {
             'printByDepartment': self.print_by_department,
             'numberOfCopies': self.number_of_copies,
-            'selectedPrinter': self.selected_printer
+            'selectedPrinter': self.selected_printer,
+            'paperSize': self.paper_size,
+            'formatType': self.format_type
         }
 
 class BillConfig(db.Model):
@@ -89,12 +93,16 @@ class BillConfig(db.Model):
     auto_print_dine_in = db.Column(db.Boolean, nullable=False, default=False)
     auto_print_takeaway = db.Column(db.Boolean, nullable=False, default=False)
     selected_printer = db.Column(db.String, nullable=True)  # Selected printer for Bills
+    paper_size = db.Column(db.String, nullable=True)  # Thermal printer paper size
+    format_type = db.Column(db.String, nullable=True)  # Bill format based on paper size
     
     def to_dict(self):
         return {
             'autoPrintDineIn': self.auto_print_dine_in,
             'autoPrintTakeaway': self.auto_print_takeaway,
-            'selectedPrinter': self.selected_printer
+            'selectedPrinter': self.selected_printer,
+            'paperSize': self.paper_size,
+            'formatType': self.format_type
         }
 
 class MenuItem(db.Model):

@@ -22,3 +22,22 @@ export interface OrderItem extends MenuItem {
 }
 
 export type OrderType = 'dine-in' | 'takeaway';
+
+export interface TableOrder {
+  tableId: string;
+  tableName: string;
+  items: OrderItem[];
+  startTime: Date;
+}
+
+export interface Invoice {
+  id: string;
+  billNumber: string;
+  orderType: OrderType;
+  tableName?: string;
+  items: OrderItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  timestamp: Date;
+}
