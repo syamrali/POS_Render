@@ -36,6 +36,7 @@ export const DineInPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [showBillDialog, setShowBillDialog] = useState(false);
+  const [showHoldDialog, setShowHoldDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
 
   useEffect(() => {
@@ -582,12 +583,20 @@ export const DineInPage: React.FC = () => {
       // Mark items as sent to kitchen
       setCurrentOrder((prev) => prev.map((it) => (pending.some((p) => p.id === it.id && !p.sentToKitchen) ? { ...it, sentToKitchen: true } : it)));
       await markItemsAsSent(selectedTable, pending);
+      
+      // Show dialog to ask user whether to generate bill or hold order
+      setShowHoldDialog(true);
     }
-
-    alert("Order placed successfully. KOT generated.");
   }, [getPendingItems, existingTableOrder, selectedTable, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
 
-  const completeBill = useCallback(async () => {
+  const holdOrder = useCallback(() => {
+    // Keep the table occupied and clear the current order
+    clearOrder();
+    setShowHoldDialog(false);
+    alert("Order held. The table will remain occupied until the bill is generated.");
+  }, [clearOrder]);
+
+  const generateBillNow = useCallback(async () => {
     // Get all items from current order and existing table order
     const allItems = [...getAllCombinedItems()];
     if (existingTableOrder) {
@@ -615,7 +624,7 @@ export const DineInPage: React.FC = () => {
     // Complete the table order
     if (selectedTable) await completeTableOrder(selectedTable);
     clearOrder();
-    setShowBillDialog(false);
+    setShowHoldDialog(false);
     
     alert("Bill generated and order completed.");
   }, [selectedTableData?.name, getAllCombinedItems, existingTableOrder, addInvoice, selectedTable, completeTableOrder, clearOrder]);
@@ -855,6 +864,34 @@ export const DineInPage: React.FC = () => {
         </aside>
       )}
 
+      {/* Hold or Generate Bill Dialog */}
+      <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Order Placed</DialogTitle>
+            <DialogDescription>What would you like to do with this order?</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center">KOT has been generated. Would you like to generate the bill now or hold the order?</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={holdOrder}
+                variant="outline"
+                className="flex-1"
+              >
+                Hold Order
+              </Button>
+              <Button 
+                onClick={generateBillNow}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                Generate Bill
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -863,7 +900,7 @@ export const DineInPage: React.FC = () => {
           </DialogHeader>
           <div className="py-4">
             <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{total.toFixed(2)}</span></div>
-            <div className="flex gap-2"><Button onClick={() => { printBill(); completeBill(); }} className="flex-1"> <Printer className="mr-2" /> Print Bill</Button><Button onClick={completeBill} variant="outline" className="flex-1">Complete Without Printing</Button></div>
+            <div className="flex gap-2"><Button onClick={() => { printBill(); }} className="flex-1"> <Printer className="mr-2" /> Print Bill</Button><Button onClick={generateBillNow} variant="outline" className="flex-1">Complete Without Printing</Button></div>
           </div>
         </DialogContent>
       </Dialog>
