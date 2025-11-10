@@ -589,13 +589,22 @@ export const DineInPage: React.FC = () => {
     }
   }, [getPendingItems, existingTableOrder, selectedTable, selectedTableData, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
 
-  const holdOrder = useCallback(() => {
+  const holdOrder = useCallback(async () => {
     // Keep the table occupied and clear only the current order items
     // Don't clear the selected table
+    // Save the order to the backend so it persists when navigating away
+    if (selectedTable && selectedTableData) {
+      // Get all items (sent and pending) to save to backend
+      const allItems = getAllCombinedItems();
+      if (allItems.length > 0) {
+        await addItemsToTable(selectedTable, selectedTableData.name, allItems);
+      }
+    }
+    
     setCurrentOrder([]);
     setShowHoldDialog(false);
     alert("Order held. The table will remain occupied until the bill is generated.");
-  }, []);
+  }, [selectedTable, selectedTableData, getAllCombinedItems, addItemsToTable]);
 
   const generateBillNow = useCallback(async () => {
     // Get all items from current order and existing table order
