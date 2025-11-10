@@ -18,6 +18,17 @@ interface CartItem {
   department?: string;
 }
 
+// Define interface for pending orders
+interface PendingOrder {
+  id: string;
+  tableId: string;
+  items: CartItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  timestamp: Date;
+}
+
 export const DineInPage: React.FC = () => {
   const {
     tables,
@@ -37,6 +48,7 @@ export const DineInPage: React.FC = () => {
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
+  const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -198,7 +210,7 @@ export const DineInPage: React.FC = () => {
           (department ? `<div style="text-align:center">[${department}]</div>` : "") +
           (isAdditional ? `<div style="text-align:center;font-weight:700;margin:5px 0">*** ADDITIONAL ***</div>` : "") +
           `<div>${now.toLocaleString()}</div>` +
-          `<div>Dine-In${selectedTableData ? ` - ${selectedTableData.name}` : ""}</div>` +
+          `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
           `<hr/>` +
           items
             .map((it) => `<div>${it.name} x ${it.quantity}</div>`)
@@ -249,7 +261,7 @@ export const DineInPage: React.FC = () => {
           `<div class="h">KITCHEN ORDER TICKET</div>` +
           (isAdditional ? `<div style="text-align:center;font-weight:700;margin:5px 0">*** ADDITIONAL ITEMS ***</div>` : "") +
           `<div>Date: ${now.toLocaleString()}</div>` +
-          `<div>Type: Dine-In${selectedTableData ? ` - Table ${selectedTableData.name}` : ""}</div>` +
+          `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
           `<hr/>`;
           
         Object.entries(groupedItems).forEach(([dept, deptItems]) => {
@@ -297,8 +309,7 @@ export const DineInPage: React.FC = () => {
           (department ? `<div style="text-align:center">[${department}]</div>` : "") +
           (isAdditional ? `<div style="text-align:center;font-weight:700;margin:5px 0">*** ADDITIONAL ITEMS ***</div>` : "") +
           `<div>Date: ${now.toLocaleString()}</div>` +
-          `<div>Type: Dine-In</div>` +
-          (selectedTableData ? `<div>Table: ${selectedTableData.name}</div>` : "") +
+          `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
           `<hr/>` +
           items
             .map((it) => `<div><strong>${it.name}</strong> x ${it.quantity} <span style="float:right">[${it.department || "General"}]</span></div>`)
@@ -308,7 +319,7 @@ export const DineInPage: React.FC = () => {
       
       return content;
     },
-    [selectedTableData, kotConfig]
+    [kotConfig, selectedTableData?.name]
   );
 
   const printKOT = useCallback(
@@ -418,8 +429,7 @@ export const DineInPage: React.FC = () => {
       </style></head><body>` +
         `<div style="text-align:center;font-weight:700">TAX INVOICE</div>` +
         `<div>Bill: ${billNumber}</div><div>${now.toLocaleString()}</div>` +
-        `<div>Type: Dine-In</div>` +
-        (selectedTableData ? `<div>Table: ${selectedTableData.name}</div>` : "") +
+        `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
         `<hr/>` +
         items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) ₹${(i.quantity * i.price).toFixed(2)}</div>`).join("") +
         `<hr/>` +
@@ -458,8 +468,7 @@ export const DineInPage: React.FC = () => {
       </style></head><body>` +
         `<div style="text-align:center;font-weight:700">RESTAURANT POS - TAX INVOICE</div>` +
         `<div>Bill No: ${billNumber}</div><div>Date: ${now.toLocaleString()}</div>` +
-        `<div>Type: Dine-In</div>` +
-        (selectedTableData ? `<div>Table: ${selectedTableData.name}</div>` : "") +
+        `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
         `<hr/>` +
         items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
         `<hr/>` +
@@ -498,8 +507,7 @@ export const DineInPage: React.FC = () => {
       </style></head><body>` +
         `<div style="text-align:center;font-weight:700">RESTAURANT POS - TAX INVOICE</div>` +
         `<div>Bill No: ${billNumber}</div><div>Date: ${now.toLocaleString()}</div>` +
-        `<div>Type: Dine-In</div>` +
-        (selectedTableData ? `<div>Table: ${selectedTableData.name}</div>` : "") +
+        `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
         `<hr/>` +
         items.map(i => `<div>${i.name} (${i.quantity} x ₹${i.price.toFixed(2)}) <span style="float:right">₹${(i.quantity * i.price).toFixed(2)}</span></div>`).join("") +
         `<hr/>` +
@@ -510,7 +518,7 @@ export const DineInPage: React.FC = () => {
     }
     
     return content;
-  }, [getAllCombinedItems, selectedTableData, billConfig]);
+  }, [getAllCombinedItems, billConfig, selectedTableData?.name]);
 
   const printBill = useCallback(() => {
     const popup = window.open("", "_blank", "width=400,height=600");
@@ -563,33 +571,74 @@ export const DineInPage: React.FC = () => {
     const isAdditional = !!existingTableOrder;
 
     if (selectedTable) {
+      // Add items to table
       await addItemsToTable(selectedTable, pending);
+      
+      // Generate KOT for these items
       if (kotConfig.printByDepartment !== undefined) await printKOT(pending, isAdditional);
+      
+      // Mark items as sent to kitchen
       setCurrentOrder((prev) => prev.map((it) => (pending.some((p) => p.id === it.id && !p.sentToKitchen) ? { ...it, sentToKitchen: true } : it)));
       await markItemsAsSent(selectedTable, pending);
+      
+      // Store as pending order until bill is generated
+      const newPendingOrder: PendingOrder = {
+        id: `PENDING-${Date.now()}`,
+        tableId: selectedTable,
+        items: [...pending],
+        subtotal: pending.reduce((s, i) => s + i.price * i.quantity, 0),
+        tax: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 0.05,
+        total: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 1.05,
+        timestamp: new Date()
+      };
+      
+      setPendingOrders(prev => [...prev, newPendingOrder]);
     }
 
-    alert("Order placed successfully");
+    alert("Order placed successfully. KOT generated.");
   }, [getPendingItems, existingTableOrder, selectedTable, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
 
   const completeBill = useCallback(async () => {
+    // Get all pending orders for this table
+    const tablePendingOrders = pendingOrders.filter(order => order.tableId === selectedTable);
+    
+    // Combine all items from pending orders
+    const allItems: CartItem[] = [];
+    let totalSubtotal = 0;
+    let totalTax = 0;
+    let totalAmount = 0;
+    
+    tablePendingOrders.forEach(order => {
+      allItems.push(...order.items);
+      totalSubtotal += order.subtotal;
+      totalTax += order.tax;
+      totalAmount += order.total;
+    });
+
     const invoice = {
       id: Date.now().toString(),
       billNumber: `BILL-${Date.now()}`,
       orderType: "dine-in",
       tableName: selectedTableData?.name,
-      items: getAllCombinedItems(),
-      subtotal,
-      tax,
-      total,
+      items: allItems,
+      subtotal: totalSubtotal,
+      tax: totalTax,
+      total: totalAmount,
       timestamp: new Date(),
     } as any;
 
     await addInvoice(invoice);
+    
+    // Remove all pending orders for this table
+    setPendingOrders(prev => prev.filter(order => order.tableId !== selectedTable));
+    
+    // Complete the table order
     if (selectedTable) await completeTableOrder(selectedTable);
     clearOrder();
     setShowBillDialog(false);
-  }, [selectedTableData?.name, getAllCombinedItems, subtotal, tax, total, addInvoice, selectedTable, completeTableOrder, clearOrder]);
+    
+    alert("Bill generated and order completed.");
+  }, [selectedTableData?.name, pendingOrders, selectedTable, addInvoice, completeTableOrder, clearOrder]);
 
   // Determine if cart should be visible
   const isCartVisible = selectedTable || currentOrder.length > 0;
