@@ -59,14 +59,24 @@ export const DineInPage: React.FC = () => {
 
   // Reset state when component unmounts
   useEffect(() => {
+    console.log("DineInPage mounted");
     return () => {
       // Cleanup function when component unmounts
       console.log("DineInPage unmounted");
     };
   }, []);
 
-  const selectedTableData = useMemo(() => tables.find((t: Table) => t.id === selectedTable), [tables, selectedTable]);
-  const existingTableOrder = useMemo(() => (selectedTable ? getTableOrder(selectedTable) : undefined), [selectedTable, getTableOrder]);
+  const selectedTableData = useMemo(() => {
+    const data = tables.find((t: Table) => t.id === selectedTable);
+    console.log("Selected table data:", data);
+    return data;
+  }, [tables, selectedTable]);
+  
+  const existingTableOrder = useMemo(() => {
+    const order = selectedTable ? getTableOrder(selectedTable) : undefined;
+    console.log("Existing table order:", order);
+    return order;
+  }, [selectedTable, getTableOrder]);
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
