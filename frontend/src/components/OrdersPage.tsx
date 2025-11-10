@@ -409,11 +409,11 @@ export const OrdersPage: React.FC<Props> = ({ defaultOrderType = "dine-in" }) =>
                         <div className="font-semibold text-lg mb-3">{it.name}</div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 p-0 text-base font-bold">
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
                               -
                             </Button>
                             <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 p-0 text-base font-bold">
+                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
                               +
                             </Button>
                           </div>
