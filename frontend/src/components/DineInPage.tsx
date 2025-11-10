@@ -591,6 +591,7 @@ export const DineInPage: React.FC = () => {
 
   const holdOrder = useCallback(() => {
     // Keep the table occupied and clear only the current order items
+    // Don't clear the selected table
     setCurrentOrder([]);
     setShowHoldDialog(false);
     alert("Order held. The table will remain occupied until the bill is generated.");
