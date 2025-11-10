@@ -573,21 +573,21 @@ export const DineInPage: React.FC = () => {
 
     const isAdditional = !!existingTableOrder;
 
-    if (selectedTable) {
-      // Add items to table
-      await addItemsToTable(selectedTable, pending);
+    if (selectedTable && selectedTableData) {
+      // Add items to table - fix the parameter issue
+      await addItemsToTable(selectedTable, selectedTableData.name, pending);
       
       // Generate KOT for these items
       if (kotConfig.printByDepartment !== undefined) await printKOT(pending, isAdditional);
       
-      // Mark items as sent to kitchen
+      // Mark items as sent to kitchen - fix the parameter issue
       setCurrentOrder((prev) => prev.map((it) => (pending.some((p) => p.id === it.id && !p.sentToKitchen) ? { ...it, sentToKitchen: true } : it)));
-      await markItemsAsSent(selectedTable, pending);
+      await markItemsAsSent(selectedTable);
       
       // Show dialog to ask user whether to generate bill or hold order
       setShowHoldDialog(true);
     }
-  }, [getPendingItems, existingTableOrder, selectedTable, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
+  }, [getPendingItems, existingTableOrder, selectedTable, selectedTableData, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
 
   const holdOrder = useCallback(() => {
     // Keep the table occupied and clear the current order
