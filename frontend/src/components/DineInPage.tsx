@@ -107,7 +107,29 @@ export const DineInPage: React.FC = () => {
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
 
-  const handleTableSelect = useCallback((tableId: string) => setSelectedTable(tableId), []);
+  const handleTableSelect = useCallback((tableId: string) => {
+    setSelectedTable(tableId);
+    
+    // If the table is occupied, automatically load the existing order items
+    const table = tables.find((t: Table) => t.id === tableId);
+    if (table && table.status === "occupied") {
+      // Get the existing order for this table
+      const order = getTableOrder(tableId);
+      if (order && order.items) {
+        // Load the existing items into the current order state
+        // We need to convert the items to CartItem format
+        const cartItems: CartItem[] = order.items.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          sentToKitchen: item.sentToKitchen || false,
+          department: item.department
+        }));
+        setCurrentOrder(cartItems);
+      }
+    }
+  }, [tables, getTableOrder]);
   const handleCategorySelect = useCallback((c: string) => setSelectedCategory(c), []);
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
 
