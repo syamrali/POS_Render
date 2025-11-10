@@ -694,6 +694,18 @@ export const TakeawayPage: React.FC = () => {
 
   return (
     <>
+      {/* Recall Button - Fixed position at top right corner, always visible */}
+      <Button 
+        onClick={() => setShowRecallDialog(true)}
+        className="fixed top-4 right-4 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+        style={{
+          background: 'linear-gradient(to right, #9333ea, #ec4899)',
+        }}
+      >
+        <RotateCcw className="size-4 mr-2" />
+        Recall Orders ({pendingOrders.length})
+      </Button>
+
       {/* Main Content Area - accounts for cart width, no gap */}
       <div 
         className="h-full overflow-y-auto"
@@ -709,22 +721,6 @@ export const TakeawayPage: React.FC = () => {
             <h2 className="text-gray-900 mb-2">Takeaway Order</h2>
             <p className="text-muted-foreground">Select items for takeaway order</p>
           </div>
-
-          {/* Recall Button - Positioned properly in main content area */}
-          {pendingOrders.length > 0 && (
-            <div className="mb-4">
-              <Button 
-                onClick={() => setShowRecallDialog(true)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                style={{
-                  background: 'linear-gradient(to right, #9333ea, #ec4899)',
-                }}
-              >
-                <RotateCcw className="size-4 mr-2" />
-                Recall Orders ({pendingOrders.length})
-              </Button>
-            </div>
-          )}
 
           <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
