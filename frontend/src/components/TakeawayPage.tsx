@@ -637,9 +637,12 @@ export const TakeawayPage: React.FC = () => {
 
     await addInvoice(invoice);
     
-    // Remove the pending order
+    // Remove the pending order from the list
     setPendingOrders(prev => prev.filter(order => order.id !== selectedPendingOrder.id));
+    
+    // Clear the selected pending order and current order
     setSelectedPendingOrder(null);
+    setCurrentOrder([]);
     setShowBillDialog(false);
     
     alert("Bill generated and order completed.");
