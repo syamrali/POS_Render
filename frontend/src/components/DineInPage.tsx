@@ -139,8 +139,8 @@ export const DineInPage: React.FC = () => {
 
   const clearOrder = useCallback(() => {
     setCurrentOrder([]);
-    setSelectedTable("");
     setSearchQuery("");
+    // Don't clear the selected table when holding an order
   }, []);
 
   const generateKOTContent = useCallback(
@@ -590,11 +590,11 @@ export const DineInPage: React.FC = () => {
   }, [getPendingItems, existingTableOrder, selectedTable, selectedTableData, addItemsToTable, kotConfig, printKOT, markItemsAsSent]);
 
   const holdOrder = useCallback(() => {
-    // Keep the table occupied and clear the current order
-    clearOrder();
+    // Keep the table occupied and clear only the current order items
+    setCurrentOrder([]);
     setShowHoldDialog(false);
     alert("Order held. The table will remain occupied until the bill is generated.");
-  }, [clearOrder]);
+  }, []);
 
   const generateBillNow = useCallback(async () => {
     // Get all items from current order and existing table order
