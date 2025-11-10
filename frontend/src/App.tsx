@@ -4,7 +4,6 @@ import { POSLayout } from "./components/POSLayout";
 import { RestaurantProvider } from "./contexts/RestaurantContext";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { CartProvider } from "./hooks/useCart";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -61,13 +60,5 @@ export default function App() {
         )}
       </RestaurantProvider>
     </div>
-  );
-}
-
-function App() {
-  return (
-    <CartProvider defaultOrderType={null}>
-      {/* router or layout rendering DineInPage / TakeawayPage */}
-    </CartProvider>
   );
 }
