@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Plus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
+import { Plus, ShoppingCart, Trash2, Printer, Clock, Search, RotateCcw } from "lucide-react";
 import { Input } from "./ui/input";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
@@ -16,6 +16,16 @@ interface CartItem {
   quantity: number;
   sentToKitchen?: boolean;
   department?: string;
+}
+
+// Define interface for pending orders
+interface PendingOrder {
+  id: string;
+  items: CartItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  timestamp: Date;
 }
 
 export const TakeawayPage: React.FC = () => {
@@ -36,6 +46,8 @@ export const TakeawayPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
+  const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
+  const [selectedPendingOrder, setSelectedPendingOrder] = useState<PendingOrder | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -550,39 +562,54 @@ export const TakeawayPage: React.FC = () => {
     const pending = getPendingItems();
     if (!pending.length) return;
 
+    // Generate KOT when placing order
     if (kotConfig.printByDepartment !== undefined) await printKOT(pending);
-    const invoice = {
-      id: Date.now().toString(),
-      billNumber: `BILL-${Date.now()}`,
-      orderType: "takeaway",
-      items: getAllCombinedItems(),
+    
+    // Store the order as pending (without generating invoice yet)
+    const newPendingOrder: PendingOrder = {
+      id: `PENDING-${Date.now()}`,
+      items: [...currentOrder],
       subtotal,
       tax,
       total,
-      timestamp: new Date(),
-    } as any;
-    await addInvoice(invoice);
+      timestamp: new Date()
+    };
+    
+    setPendingOrders(prev => [...prev, newPendingOrder]);
     clearOrder();
 
-    alert("Order placed successfully");
-  }, [getPendingItems, kotConfig, printKOT, addInvoice, getAllCombinedItems, subtotal, tax, total, clearOrder]);
+    alert("Order placed successfully. KOT generated. You can generate the bill later.");
+  }, [getPendingItems, kotConfig, printKOT, currentOrder, subtotal, tax, total, clearOrder]);
 
   const completeBill = useCallback(async () => {
+    if (!selectedPendingOrder) return;
+    
     const invoice = {
       id: Date.now().toString(),
       billNumber: `BILL-${Date.now()}`,
       orderType: "takeaway",
-      items: getAllCombinedItems(),
-      subtotal,
-      tax,
-      total,
+      items: selectedPendingOrder.items,
+      subtotal: selectedPendingOrder.subtotal,
+      tax: selectedPendingOrder.tax,
+      total: selectedPendingOrder.total,
       timestamp: new Date(),
     } as any;
 
     await addInvoice(invoice);
-    clearOrder();
+    
+    // Remove the pending order
+    setPendingOrders(prev => prev.filter(order => order.id !== selectedPendingOrder.id));
+    setSelectedPendingOrder(null);
     setShowBillDialog(false);
-  }, [getAllCombinedItems, subtotal, tax, total, addInvoice, clearOrder]);
+    
+    alert("Bill generated and order completed.");
+  }, [selectedPendingOrder, addInvoice]);
+
+  const recallOrder = useCallback((order: PendingOrder) => {
+    setCurrentOrder([...order.items]);
+    setSelectedPendingOrder(order);
+    alert("Order recalled. You can now modify or generate a bill for this order.");
+  }, []);
 
   // Determine if cart should be visible
   const isCartVisible = currentOrder.length > 0;
@@ -600,7 +627,34 @@ export const TakeawayPage: React.FC = () => {
         }}
       >
         <div className="p-6">
-          <div className="mb-6"><h2 className="text-gray-900 mb-2">Takeaway Order</h2><p className="text-muted-foreground">Select items for takeaway order</p></div>
+          <div className="mb-6">
+            <h2 className="text-gray-900 mb-2">Takeaway Order</h2>
+            <p className="text-muted-foreground">Select items for takeaway order</p>
+          </div>
+
+          {/* Recall Button */}
+          {pendingOrders.length > 0 && (
+            <div className="mb-4">
+              <Button 
+                onClick={() => {
+                  // Show a simple dialog or dropdown to select which order to recall
+                  if (pendingOrders.length === 1) {
+                    recallOrder(pendingOrders[0]);
+                  } else {
+                    // For now, just recall the most recent pending order
+                    const mostRecent = pendingOrders.reduce((latest, current) => 
+                      current.timestamp > latest.timestamp ? current : latest
+                    );
+                    recallOrder(mostRecent);
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <RotateCcw className="size-4" />
+                Recall Pending Order ({pendingOrders.length})
+              </Button>
+            </div>
+          )}
 
           <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
@@ -738,9 +792,11 @@ export const TakeawayPage: React.FC = () => {
                 <Printer className="mr-2" /> 
                 Place Order
               </Button>
-              <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
-                Generate Bill
-              </Button>
+              {selectedPendingOrder && (
+                <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
+                  Generate Bill
+                </Button>
+              )}
             </div>
           </div>
         </aside>
@@ -753,8 +809,21 @@ export const TakeawayPage: React.FC = () => {
             <DialogDescription>Would you like to print the bill?</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{total.toFixed(2)}</span></div>
-            <div className="flex gap-2"><Button onClick={() => { printBill(); completeBill(); }} className="flex-1"> <Printer className="mr-2" /> Print Bill</Button><Button onClick={completeBill} variant="outline" className="flex-1">Complete Without Printing</Button></div>
+            <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{selectedPendingOrder?.total.toFixed(2) || '0.00'}</span></div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => { 
+                  printBill(); 
+                  completeBill(); 
+                }} 
+                className="flex-1"
+              > 
+                <Printer className="mr-2" /> Print Bill
+              </Button>
+              <Button onClick={completeBill} variant="outline" className="flex-1">
+                Complete Without Printing
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
