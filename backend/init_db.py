@@ -2,12 +2,68 @@ import os
 import sys
 from app import app, db
 from models import Table, KOTConfig, BillConfig, MenuItem, Category, Department, RestaurantSettings
+from sqlalchemy import inspect, text
+
+def column_exists(table_name, column_name):
+    """Check if a column exists in a table"""
+    inspector = inspect(db.engine)
+    columns = [column['name'] for column in inspector.get_columns(table_name)]
+    return column_name in columns
+
+def add_missing_columns():
+    """Add missing columns to existing tables"""
+    with app.app_context():
+        inspector = inspect(db.engine)
+        tables = inspector.get_table_names()
+        
+        # Check and add missing columns for kot_config table
+        if 'kot_config' in tables:
+            if not column_exists('kot_config', 'paper_size'):
+                try:
+                    with db.engine.connect() as conn:
+                        conn.execute(text('ALTER TABLE kot_config ADD COLUMN paper_size VARCHAR'))
+                        conn.commit()
+                    print("Added paper_size column to kot_config table")
+                except Exception as e:
+                    print(f"Error adding paper_size column to kot_config: {e}")
+            
+            if not column_exists('kot_config', 'format_type'):
+                try:
+                    with db.engine.connect() as conn:
+                        conn.execute(text('ALTER TABLE kot_config ADD COLUMN format_type VARCHAR'))
+                        conn.commit()
+                    print("Added format_type column to kot_config table")
+                except Exception as e:
+                    print(f"Error adding format_type column to kot_config: {e}")
+        
+        # Check and add missing columns for bill_config table
+        if 'bill_config' in tables:
+            if not column_exists('bill_config', 'paper_size'):
+                try:
+                    with db.engine.connect() as conn:
+                        conn.execute(text('ALTER TABLE bill_config ADD COLUMN paper_size VARCHAR'))
+                        conn.commit()
+                    print("Added paper_size column to bill_config table")
+                except Exception as e:
+                    print(f"Error adding paper_size column to bill_config: {e}")
+            
+            if not column_exists('bill_config', 'format_type'):
+                try:
+                    with db.engine.connect() as conn:
+                        conn.execute(text('ALTER TABLE bill_config ADD COLUMN format_type VARCHAR'))
+                        conn.commit()
+                    print("Added format_type column to bill_config table")
+                except Exception as e:
+                    print(f"Error adding format_type column to bill_config: {e}")
 
 def init_database():
     """Initialize the database with sample data"""
     with app.app_context():
         # Create all tables
         db.create_all()
+        
+        # Add missing columns to existing tables
+        add_missing_columns()
         
         # Check if we already have data
         if Table.query.first() is None:
@@ -103,8 +159,15 @@ def init_database():
             print("Added default restaurant settings")
         
         # Commit changes
-        db.session.commit()
-        print("Database initialized successfully!")
+        try:
+            db.session.commit()
+            print("Database initialized successfully!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error committing changes: {e}")
+            raise
 
 if __name__ == "__main__":
-    init_database()
+    # Ensure the Flask app is properly configured before initializing the database
+    with app.app_context():
+        init_database()
