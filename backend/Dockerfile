@@ -7,7 +7,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Make the startup script executable
+RUN chmod +x start.sh
+
 EXPOSE 5000
 
-# Use a simple command to run the initialization and start the app
-CMD ["sh", "-c", "python init_db.py && python app.py"]
+# Use the startup script to run the initialization and start the app
+CMD ["./start.sh"]

@@ -891,4 +891,5 @@ def not_found(error):
     return jsonify({'error': 'Endpoint not found. Please check API documentation.'}), 404
 
 if __name__ == '__main__':
+    # Bind to 0.0.0.0:5000 for Render deployment
     app.run(host='0.0.0.0', port=5000, debug=True)

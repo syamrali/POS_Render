@@ -3,7 +3,7 @@ services:
   - type: web
     name: pos-backend
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: ./backend
     plan: free
     envVars:
@@ -11,7 +11,8 @@ services:
         sync: false
       - key: FLASK_ENV
         value: production
-    healthCheckPath: /api/tables
+    healthCheckPath: /
+    autoDeploy: false
 
   # Frontend
   - type: web
@@ -23,3 +24,4 @@ services:
     envVars:
       - key: VITE_API_URL
         sync: false
+    autoDeploy: false
