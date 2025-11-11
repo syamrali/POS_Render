@@ -57,6 +57,22 @@ export const DineInPage: React.FC = () => {
     };
   }, []);
 
+  // Load data when component mounts
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        // Reload menu items and categories if needed
+        const [items, cats] = await Promise.all([api.getMenuItems(), api.getCategories()]);
+        setMenuItems(items || []);
+        setCategories(["All", ...(cats || []).map((c: any) => c.name || c)]);
+      } catch (err) {
+        console.error("Failed to load initial data", err);
+      }
+    };
+    
+    loadInitialData();
+  }, []);
+
   // Load table orders when component mounts
   useEffect(() => {
     const loadTableOrders = async () => {
@@ -169,6 +185,9 @@ export const DineInPage: React.FC = () => {
           console.error("Failed to fetch table order", err);
         });
       }
+    } else {
+      // If table is not occupied, clear the current order
+      setCurrentOrder([]);
     }
   }, [tables, getTableOrder]);
   const handleCategorySelect = useCallback((c: string) => setSelectedCategory(c), []);
@@ -178,12 +197,18 @@ export const DineInPage: React.FC = () => {
     console.log('Adding item to order:', item);
     
     setCurrentOrder((prev) => {
-      const existing = prev.find((p) => p.id === item.id && !p.sentToKitchen);
-      if (existing) {
-        const updated = prev.map((p) => (p.id === item.id && !p.sentToKitchen ? { ...p, quantity: p.quantity + 1 } : p));
+      // Check if we already have this item in the current order (not sent to kitchen)
+      const existingIndex = prev.findIndex((p) => p.id === item.id && !p.sentToKitchen);
+      
+      if (existingIndex !== -1) {
+        // Update quantity of existing item
+        const updated = [...prev];
+        updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + 1 };
         console.log('Updated existing item, new order:', updated);
         return updated;
       }
+      
+      // Add new item
       const orderItem: CartItem = { 
         id: item.id,
         name: item.name,
@@ -654,7 +679,14 @@ export const DineInPage: React.FC = () => {
       if (kotConfig.printByDepartment !== undefined) await printKOT(pending, isAdditional);
       
       // Mark items as sent to kitchen - fix the parameter issue
-      setCurrentOrder((prev) => prev.map((it) => (pending.some((p) => p.id === it.id && !p.sentToKitchen) ? { ...it, sentToKitchen: true } : it)));
+      setCurrentOrder((prev) => prev.map((it) => {
+        // Only mark items as sent if they were in the pending items and not already sent
+        const wasPending = pending.some((p) => p.id === it.id && !it.sentToKitchen);
+        if (wasPending) {
+          return { ...it, sentToKitchen: true };
+        }
+        return it;
+      }));
       await markItemsAsSent(selectedTable);
       
       // Show dialog to ask user whether to generate bill or hold order
@@ -680,11 +712,9 @@ export const DineInPage: React.FC = () => {
   }, [selectedTable, selectedTableData, getAllCombinedItems, addItemsToTable]);
 
   const generateBillNow = useCallback(async () => {
-    // Get all items from current order and existing table order
-    const allItems = [...getAllCombinedItems()];
-    if (existingTableOrder) {
-      allItems.push(...existingTableOrder.items);
-    }
+    // Get all items from current order - we no longer need to combine with existingTableOrder
+    // because existing items are already in currentOrder
+    const allItems = getAllCombinedItems();
     
     const sub = allItems.reduce((s, i) => s + i.price * i.quantity, 0);
     const t = sub * 0.05;
@@ -710,7 +740,7 @@ export const DineInPage: React.FC = () => {
     setShowHoldDialog(false);
     
     alert("Bill generated and order completed.");
-  }, [selectedTableData?.name, getAllCombinedItems, existingTableOrder, addInvoice, selectedTable, completeTableOrder, clearOrder]);
+  }, [selectedTableData?.name, getAllCombinedItems, addInvoice, selectedTable, completeTableOrder, clearOrder]);
 
   // Determine if cart should be visible
   const isCartVisible = selectedTable || currentOrder.length > 0;
@@ -856,21 +886,7 @@ export const DineInPage: React.FC = () => {
           <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
             <div className="px-8 py-5 space-y-4">
               {/* Show existing table order items if any */}
-              {existingTableOrder && existingTableOrder.items.map((it: CartItem, idx: number) => (
-                <div key={`existing-${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-lg mb-3">{it.name}</div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                      </div>
-                      <div className="ml-auto text-purple-600 font-bold text-lg">
-                        ₹{(it.price * it.quantity).toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {/* We no longer show existing items separately since they're merged into currentOrder */}
               
               {/* Show current order items */}
               {currentOrder.length === 0 ? (

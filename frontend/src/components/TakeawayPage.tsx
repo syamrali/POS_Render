@@ -78,16 +78,6 @@ export const TakeawayPage: React.FC = () => {
     };
   }, []);
 
-  // Persist pending orders to localStorage
-  useEffect(() => {
-    const savePendingOrders = () => {
-      localStorage.setItem('takeawayPendingOrders', JSON.stringify(pendingOrders));
-    };
-    
-    // Save pending orders whenever they change
-    savePendingOrders();
-  }, [pendingOrders]);
-
   // Load pending orders from localStorage on component mount
   useEffect(() => {
     const loadPendingOrders = () => {
@@ -109,6 +99,32 @@ export const TakeawayPage: React.FC = () => {
     
     loadPendingOrders();
   }, []);
+
+  // Load data when component mounts
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        // Reload menu items and categories if needed
+        const [items, cats] = await Promise.all([api.getMenuItems(), api.getCategories()]);
+        setMenuItems(items || []);
+        setCategories(["All", ...(cats || []).map((c: any) => c.name || c)]);
+      } catch (err) {
+        console.error("Failed to load initial data", err);
+      }
+    };
+    
+    loadInitialData();
+  }, []);
+
+  // Persist pending orders to localStorage
+  useEffect(() => {
+    const savePendingOrders = () => {
+      localStorage.setItem('takeawayPendingOrders', JSON.stringify(pendingOrders));
+    };
+    
+    // Save pending orders whenever they change
+    savePendingOrders();
+  }, [pendingOrders]);
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -146,12 +162,18 @@ export const TakeawayPage: React.FC = () => {
     console.log('Adding item to order:', item);
     
     setCurrentOrder((prev) => {
-      const existing = prev.find((p) => p.id === item.id && !p.sentToKitchen);
-      if (existing) {
-        const updated = prev.map((p) => (p.id === item.id && !p.sentToKitchen ? { ...p, quantity: p.quantity + 1 } : p));
+      // Check if we already have this item in the current order (not sent to kitchen)
+      const existingIndex = prev.findIndex((p) => p.id === item.id && !p.sentToKitchen);
+      
+      if (existingIndex !== -1) {
+        // Update quantity of existing item
+        const updated = [...prev];
+        updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + 1 };
         console.log('Updated existing item, new order:', updated);
         return updated;
       }
+      
+      // Add new item
       const orderItem: CartItem = { 
         id: item.id,
         name: item.name,
@@ -623,6 +645,9 @@ export const TakeawayPage: React.FC = () => {
     };
     
     setPendingOrders(prev => [...prev, newPendingOrder]);
+    
+    // Clear current order after placing it
+    setCurrentOrder([]);
     
     // Show dialog to ask user whether to generate bill or hold
     setShowHoldDialog(true);
