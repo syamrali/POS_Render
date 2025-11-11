@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Plus, ShoppingCart, Trash2, Printer, Clock, Search, RotateCcw } from "lucide-react";
+import { Plus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
@@ -50,7 +50,6 @@ export const DineInPage: React.FC = () => {
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [showHoldDialog, setShowHoldDialog] = useState(false);
-  const [showRecallDialog, setShowRecallDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
   const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
   const [selectedPendingOrder, setSelectedPendingOrder] = useState<PendingOrder | null>(null);
@@ -271,7 +270,25 @@ export const DineInPage: React.FC = () => {
 
   const handleTableSelect = useCallback((tableId: string) => {
     setSelectedTable(tableId);
-  }, []);
+    
+    // If table is occupied, automatically load existing order
+    const table = tables.find((t: Table) => t.id === tableId);
+    if (table && table.status === "occupied") {
+      const order = getTableOrder(tableId);
+      if (order && order.items) {
+        // Load the existing items into the current order state
+        const cartItems: CartItem[] = order.items.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          sentToKitchen: item.sentToKitchen || false,
+          department: item.department
+        }));
+        setCurrentOrder(cartItems);
+      }
+    }
+  }, [tables, getTableOrder]);
   const handleCategorySelect = useCallback((c: string) => setSelectedCategory(c), []);
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
 
@@ -754,20 +771,9 @@ export const DineInPage: React.FC = () => {
     // Generate KOT when placing order
     if (kotConfig.printByDepartment !== undefined) await printKOT(pending);
     
-    // Store the order as pending (without generating invoice yet)
+    // Add items to table order in context
     if (selectedTable && selectedTableData) {
-      const newPendingOrder: PendingOrder = {
-        id: `PENDING-${Date.now()}`,
-        tableId: selectedTable,
-        tableName: selectedTableData.name,
-        items: [...currentOrder],
-        subtotal: pending.reduce((s, i) => s + i.price * i.quantity, 0),
-        tax: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 0.05,
-        total: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 1.05,
-        timestamp: new Date()
-      };
-      
-      setPendingOrders(prev => [...prev, newPendingOrder]);
+      await addItemsToTable(selectedTable, selectedTableData.name, pending);
       
       // Clear current order after placing it
       setCurrentOrder([]);
@@ -775,7 +781,7 @@ export const DineInPage: React.FC = () => {
       // Show dialog to ask user whether to generate bill or hold
       setShowHoldDialog(true);
     }
-  }, [getPendingItems, kotConfig, printKOT, selectedTable, selectedTableData, currentOrder]);
+  }, [getPendingItems, kotConfig, printKOT, selectedTable, selectedTableData, currentOrder, addItemsToTable]);
 
   const holdOrder = useCallback(() => {
     setCurrentOrder([]);
@@ -942,27 +948,7 @@ export const DineInPage: React.FC = () => {
             <>
               <div className="mb-6"><h2 className="text-gray-900 mb-2">{selectedTableData ? `Table ${selectedTableData.name}` : "Dine-In Order"}</h2><p className="text-muted-foreground">Select items to add to order</p></div>
 
-              <div className="mb-6 flex items-center gap-4">
-                          <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <Input 
-                              value={searchQuery} 
-                              onChange={handleSearchChange} 
-                              placeholder="Search menu items..." 
-                              className="pl-10 w-full" 
-                            />
-                          </div>
-                          <Button 
-                            onClick={() => setShowRecallDialog(true)}
-                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                            style={{
-                              background: 'linear-gradient(to right, #9333ea, #ec4899)'
-                            }}
-                          >
-                            <RotateCcw className="size-4 mr-2" />
-                            Recall ({pendingOrders.length})
-                          </Button>
-                        </div>
+              <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
               <div className="flex gap-2 mb-6 flex-wrap">{categories.map((c) => (<Button key={c} variant={selectedCategory === c ? "default" : "outline"} onClick={() => handleCategorySelect(c)}>{c}</Button>))}</div>
 
@@ -1169,43 +1155,7 @@ export const DineInPage: React.FC = () => {
         </aside>
       )}
 
-      {/* Recall Orders Dialog */}
-      <Dialog open={showRecallDialog} onOpenChange={setShowRecallDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Recall Orders</DialogTitle>
-            <DialogDescription>Select an order to recall</DialogDescription>
-          </DialogHeader>
-          <div className="py-4 max-h-60 overflow-y-auto">
-            {pendingOrders.length === 0 ? (
-              <p className="text-center text-gray-500">No pending orders</p>
-            ) : (
-              <div className="space-y-2">
-                {pendingOrders.map((order) => (
-                  <div 
-                    key={order.id} 
-                    className="p-3 border rounded-lg cursor-pointer hover:bg-gray-100"
-                    onClick={() => {
-                      recallOrder(order);
-                      setShowRecallDialog(false);
-                    }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">Table {order.tableName}</span>
-                      <span className="text-sm text-gray-500">
-                        ₹{order.total.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {order.items.length} items • {order.timestamp.toLocaleTimeString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Hold or Generate Bill Dialog */}
       <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
