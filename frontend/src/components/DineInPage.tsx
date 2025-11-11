@@ -57,6 +57,30 @@ export const DineInPage: React.FC = () => {
     };
   }, []);
 
+  // Load table orders when component mounts
+  useEffect(() => {
+    const loadTableOrders = async () => {
+      try {
+        // Reload table orders for all tables
+        for (const table of tables) {
+          if (table.status === 'occupied') {
+            const order = await api.getTableOrder(table.id);
+            if (order) {
+              // Update the context with the loaded order
+              // This will be handled by the RestaurantContext
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load table orders", err);
+      }
+    };
+    
+    if (tables.length > 0) {
+      loadTableOrders();
+    }
+  }, [tables]);
+
   // Reset state when component unmounts
   useEffect(() => {
     console.log("DineInPage mounted");
@@ -127,6 +151,23 @@ export const DineInPage: React.FC = () => {
           department: item.department
         }));
         setCurrentOrder(cartItems);
+      } else {
+        // If no order in context, try to fetch from API
+        api.getTableOrder(tableId).then(fetchedOrder => {
+          if (fetchedOrder && fetchedOrder.items) {
+            const cartItems: CartItem[] = fetchedOrder.items.map((item: any) => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              sentToKitchen: item.sentToKitchen || false,
+              department: item.department
+            }));
+            setCurrentOrder(cartItems);
+          }
+        }).catch(err => {
+          console.error("Failed to fetch table order", err);
+        });
       }
     }
   }, [tables, getTableOrder]);
@@ -818,7 +859,7 @@ export const DineInPage: React.FC = () => {
               {existingTableOrder && existingTableOrder.items.map((it: CartItem, idx: number) => (
                 <div key={`existing-${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-lg mb-3">{it.name} (Previous)</div>
+                    <div className="font-semibold text-lg mb-3">{it.name}</div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>

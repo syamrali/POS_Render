@@ -309,18 +309,7 @@ export function MenuPage() {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {categoryStats.map(stat => (
-            <Card key={stat.name} className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">{stat.name}</p>
-                <p className="text-2xl font-bold text-purple-600">{stat.count}</p>
-                <p className="text-xs text-muted-foreground">items</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Stats - Removed category cards as requested */}
 
         {/* Category Filter */}
         <div className="flex gap-2 flex-wrap">

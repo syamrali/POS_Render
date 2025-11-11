@@ -20,26 +20,27 @@ export function ReportsPage() {
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
   const getReportData = (startDate: Date, endDate: Date) => {
-    const filtered = invoices.filter(inv => {
-      return inv.timestamp >= startDate && inv.timestamp <= endDate;
+    const filtered = invoices.filter((inv: any) => {
+      const invDate = new Date(inv.timestamp);
+      return invDate >= startDate && invDate <= endDate;
     });
 
-    const totalRevenue = filtered.reduce((sum, inv) => sum + inv.total, 0);
+    const totalRevenue = filtered.reduce((sum: number, inv: any) => sum + inv.total, 0);
     const totalOrders = filtered.length;
-    const dineInOrders = filtered.filter(inv => inv.orderType === "dine-in").length;
-    const takeawayOrders = filtered.filter(inv => inv.orderType === "takeaway").length;
+    const dineInOrders = filtered.filter((inv: any) => inv.orderType === "dine-in").length;
+    const takeawayOrders = filtered.filter((inv: any) => inv.orderType === "takeaway").length;
     const dineInRevenue = filtered
-      .filter(inv => inv.orderType === "dine-in")
-      .reduce((sum, inv) => sum + inv.total, 0);
+      .filter((inv: any) => inv.orderType === "dine-in")
+      .reduce((sum: number, inv: any) => sum + inv.total, 0);
     const takeawayRevenue = filtered
-      .filter(inv => inv.orderType === "takeaway")
-      .reduce((sum, inv) => sum + inv.total, 0);
+      .filter((inv: any) => inv.orderType === "takeaway")
+      .reduce((sum: number, inv: any) => sum + inv.total, 0);
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     // Get top selling items
     const itemSales = new Map<string, { name: string; quantity: number; revenue: number }>();
-    filtered.forEach(inv => {
-      inv.items.forEach(item => {
+    filtered.forEach((inv: any) => {
+      inv.items.forEach((item: any) => {
         const existing = itemSales.get(item.id);
         if (existing) {
           existing.quantity += item.quantity;
@@ -269,7 +270,7 @@ ${data.topItems.map((item, idx) => `${idx + 1}. ${item.name}
                         id="custom-start"
                         type="date"
                         value={customStartDate}
-                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomStartDate(e.target.value)}
                         className="pl-10"
                       />
                     </div>
@@ -282,7 +283,7 @@ ${data.topItems.map((item, idx) => `${idx + 1}. ${item.name}
                         id="custom-end"
                         type="date"
                         value={customEndDate}
-                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomEndDate(e.target.value)}
                         className="pl-10"
                       />
                     </div>

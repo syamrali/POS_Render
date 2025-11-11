@@ -78,6 +78,38 @@ export const TakeawayPage: React.FC = () => {
     };
   }, []);
 
+  // Persist pending orders to localStorage
+  useEffect(() => {
+    const savePendingOrders = () => {
+      localStorage.setItem('takeawayPendingOrders', JSON.stringify(pendingOrders));
+    };
+    
+    // Save pending orders whenever they change
+    savePendingOrders();
+  }, [pendingOrders]);
+
+  // Load pending orders from localStorage on component mount
+  useEffect(() => {
+    const loadPendingOrders = () => {
+      try {
+        const savedOrders = localStorage.getItem('takeawayPendingOrders');
+        if (savedOrders) {
+          const parsedOrders = JSON.parse(savedOrders);
+          // Convert timestamp strings back to Date objects
+          const ordersWithDates = parsedOrders.map((order: any) => ({
+            ...order,
+            timestamp: new Date(order.timestamp)
+          }));
+          setPendingOrders(ordersWithDates);
+        }
+      } catch (err) {
+        console.error("Failed to load pending orders from localStorage", err);
+      }
+    };
+    
+    loadPendingOrders();
+  }, []);
+
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return menuItems.filter((item) => {
