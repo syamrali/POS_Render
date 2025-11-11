@@ -143,15 +143,34 @@ export const TakeawayPage: React.FC = () => {
 
   const getAllCombinedItems = useCallback(() => {
     const map = new Map<string, CartItem>();
+    
+    // Add items from selected pending order if any
+    if (selectedPendingOrder) {
+      selectedPendingOrder.items.forEach((it) => {
+        const existing = map.get(it.id);
+        if (existing) existing.quantity += it.quantity;
+        else map.set(it.id, { ...it });
+      });
+    }
+    
+    // Add items from current order
     currentOrder.forEach((it) => {
       const existing = map.get(it.id);
       if (existing) existing.quantity += it.quantity;
       else map.set(it.id, { ...it });
     });
+    
     return Array.from(map.values());
-  }, [currentOrder]);
+  }, [currentOrder, selectedPendingOrder]);
 
-  const subtotal = useMemo(() => getAllCombinedItems().reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0), [getAllCombinedItems]);
+  const subtotal = useMemo(() => {
+    if (selectedPendingOrder) {
+      // When recalling an order, use the combined subtotal
+      return selectedPendingOrder.subtotal + getAllCombinedItems().reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0);
+    }
+    return getAllCombinedItems().reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0);
+  }, [getAllCombinedItems, selectedPendingOrder]);
+  
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
 
@@ -638,9 +657,9 @@ export const TakeawayPage: React.FC = () => {
       id: `PENDING-${Date.now()}`,
       invoiceNumber,
       items: [...currentOrder],
-      subtotal,
-      tax,
-      total,
+      subtotal: pending.reduce((s, i) => s + i.price * i.quantity, 0),
+      tax: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 0.05,
+      total: pending.reduce((s, i) => s + i.price * i.quantity, 0) * 1.05,
       timestamp: new Date()
     };
     
@@ -651,7 +670,7 @@ export const TakeawayPage: React.FC = () => {
     
     // Show dialog to ask user whether to generate bill or hold
     setShowHoldDialog(true);
-  }, [getPendingItems, kotConfig, printKOT, currentOrder, subtotal, tax, total]);
+  }, [getPendingItems, kotConfig, printKOT, currentOrder]);
 
   const holdOrder = useCallback(() => {
     clearOrder();
@@ -869,50 +888,64 @@ export const TakeawayPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Show recalled order items if any */}
-                  {selectedPendingOrder && selectedPendingOrder.items.map((it, idx) => (
-                    <div key={`recalled-${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-lg mb-3">{it.name}</div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                          </div>
-                          <div className="ml-auto text-purple-600 font-bold text-lg">
-                            ₹{(it.price * it.quantity).toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {/* Show current order items */}
-                  {getPendingItems().map((it, idx) => (
-                    <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-lg mb-3">{it.name}</div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
-                              -
-                            </Button>
-                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                            <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
-                              +
-                            </Button>
-                          </div>
-                          <div className="ml-auto text-purple-600 font-bold text-lg">
-                            ₹{(it.price * it.quantity).toFixed(2)}
+                  {/* When recalling an order, show all items together */}
+                  {selectedPendingOrder ? (
+                    // Show combined items from recalled order and current order
+                    getAllCombinedItems().map((it, idx) => (
+                      <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-lg mb-3">{it.name}</div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
+                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
+                                -
+                              </Button>
+                              <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
+                                +
+                              </Button>
+                            </div>
+                            <div className="ml-auto text-purple-600 font-bold text-lg">
+                              ₹{(it.price * it.quantity).toFixed(2)}
+                            </div>
                           </div>
                         </div>
+                        <div className="ml-4">
+                          <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
+                            <Trash2 className="size-5" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="ml-4">
-                        <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
-                          <Trash2 className="size-5" />
-                        </Button>
+                    ))
+                  ) : (
+                    // Show only current order items
+                    getPendingItems().map((it, idx) => (
+                      <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-lg mb-3">{it.name}</div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
+                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
+                                -
+                              </Button>
+                              <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
+                                +
+                              </Button>
+                            </div>
+                            <div className="ml-auto text-purple-600 font-bold text-lg">
+                              ₹{(it.price * it.quantity).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
+                            <Trash2 className="size-5" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               )}
             </div>
@@ -923,27 +956,15 @@ export const TakeawayPage: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
-                <span>₹{
-                  selectedPendingOrder 
-                    ? (selectedPendingOrder.subtotal + subtotal).toFixed(2) 
-                    : subtotal.toFixed(2)
-                }</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>GST (5%)</span>
-                <span>₹{
-                  selectedPendingOrder 
-                    ? ((selectedPendingOrder.subtotal + subtotal) * 0.05).toFixed(2) 
-                    : tax.toFixed(2)
-                }</span>
+                <span>₹{tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-base font-semibold pt-2 border-t">
                 <span>Total</span>
-                <span className="text-purple-600">₹{
-                  selectedPendingOrder 
-                    ? ((selectedPendingOrder.subtotal + subtotal) * 1.05).toFixed(2) 
-                    : total.toFixed(2)
-                }</span>
+                <span className="text-purple-600">₹{total.toFixed(2)}</span>
               </div>
             </div>
 

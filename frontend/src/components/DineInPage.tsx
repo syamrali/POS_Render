@@ -21,6 +21,7 @@ interface CartItem {
 export const DineInPage: React.FC = () => {
   const {
     tables,
+    setTables,
     addItemsToTable,
     getTableOrder,
     completeTableOrder,
@@ -43,31 +44,14 @@ export const DineInPage: React.FC = () => {
     let mounted = true;
     const load = async () => {
       try {
-        const [items, cats] = await Promise.all([api.getMenuItems(), api.getCategories()]);
+        const [items, cats, loadedTables] = await Promise.all([api.getMenuItems(), api.getCategories(), api.getTables()]);
         if (!mounted) return;
         setMenuItems(items || []);
         setCategories(["All", ...(cats || []).map((c: any) => c.name || c)]);
-      } catch (err) {
-        console.error("Failed to load menu data", err);
-      }
-    };
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Load data when component mounts
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Reload menu items and categories if needed
-        const [items, cats] = await Promise.all([api.getMenuItems(), api.getCategories()]);
-        setMenuItems(items || []);
-        setCategories(["All", ...(cats || []).map((c: any) => c.name || c)]);
+        setTables(loadedTables || []);
         
         // Also load table orders for all tables
-        for (const table of tables) {
+        for (const table of loadedTables) {
           if (table.status === 'occupied') {
             try {
               const order = await api.getTableOrder(table.id);
@@ -81,12 +65,14 @@ export const DineInPage: React.FC = () => {
           }
         }
       } catch (err) {
-        console.error("Failed to load initial data", err);
+        console.error("Failed to load menu data", err);
       }
     };
-    
-    loadInitialData();
-  }, [tables]);
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
 
 
