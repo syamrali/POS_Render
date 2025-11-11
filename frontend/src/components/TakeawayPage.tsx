@@ -720,7 +720,7 @@ export const TakeawayPage: React.FC = () => {
     alert(`Order ${order.invoiceNumber} recalled. You can now modify or generate a bill for this order.`);
   }, []);
 
-  const addMoreItemsToRecalledOrder = useCallback(() => {
+  const addMoreItemsToOrder = useCallback(() => {
     if (!selectedPendingOrder) return;
     
     // Merge current order with recalled order
@@ -838,7 +838,7 @@ export const TakeawayPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold">
-                  {selectedPendingOrder ? `Recalled Order: ${selectedPendingOrder.invoiceNumber}` : "Current Order"}
+                  {selectedPendingOrder ? `Order: ${selectedPendingOrder.invoiceNumber}` : "Current Order"}
                 </h3>
                 <p className="text-sm text-gray-500">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
@@ -873,7 +873,7 @@ export const TakeawayPage: React.FC = () => {
                   {selectedPendingOrder && selectedPendingOrder.items.map((it, idx) => (
                     <div key={`recalled-${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-lg mb-3">{it.name} (Recalled)</div>
+                        <div className="font-semibold text-lg mb-3">{it.name}</div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-3">
                             <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
@@ -950,10 +950,10 @@ export const TakeawayPage: React.FC = () => {
             <div className="mt-4 space-y-2 mb-6">
               {selectedPendingOrder && currentOrder.length > 0 ? (
                 <Button 
-                  onClick={addMoreItemsToRecalledOrder} 
+                  onClick={addMoreItemsToOrder} 
                   className="w-full"
                 >
-                  Add Items to Recalled Order
+                  Add Items to Order
                 </Button>
               ) : (
                 <Button 

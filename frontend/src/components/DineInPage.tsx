@@ -65,37 +65,30 @@ export const DineInPage: React.FC = () => {
         const [items, cats] = await Promise.all([api.getMenuItems(), api.getCategories()]);
         setMenuItems(items || []);
         setCategories(["All", ...(cats || []).map((c: any) => c.name || c)]);
+        
+        // Also load table orders for all tables
+        for (const table of tables) {
+          if (table.status === 'occupied') {
+            try {
+              const order = await api.getTableOrder(table.id);
+              if (order) {
+                // Update the context with the loaded order
+                // This will be handled by the RestaurantContext
+              }
+            } catch (err) {
+              console.error(`Failed to load order for table ${table.id}`, err);
+            }
+          }
+        }
       } catch (err) {
         console.error("Failed to load initial data", err);
       }
     };
     
     loadInitialData();
-  }, []);
-
-  // Load table orders when component mounts
-  useEffect(() => {
-    const loadTableOrders = async () => {
-      try {
-        // Reload table orders for all tables
-        for (const table of tables) {
-          if (table.status === 'occupied') {
-            const order = await api.getTableOrder(table.id);
-            if (order) {
-              // Update the context with the loaded order
-              // This will be handled by the RestaurantContext
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load table orders", err);
-      }
-    };
-    
-    if (tables.length > 0) {
-      loadTableOrders();
-    }
   }, [tables]);
+
+
 
   // Reset state when component unmounts
   useEffect(() => {
@@ -105,6 +98,52 @@ export const DineInPage: React.FC = () => {
       console.log("DineInPage unmounted");
     };
   }, []);
+
+  // Load existing table order when selectedTable changes
+  useEffect(() => {
+    if (selectedTable) {
+      const table = tables.find((t: Table) => t.id === selectedTable);
+      if (table && table.status === "occupied") {
+        // Try to load existing order from context first
+        const order = getTableOrder(selectedTable);
+        if (order && order.items) {
+          // Load the existing items into the current order state
+          const cartItems: CartItem[] = order.items.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            sentToKitchen: item.sentToKitchen || false,
+            department: item.department
+          }));
+          setCurrentOrder(cartItems);
+        } else {
+          // If no order in context, try to fetch from API
+          // Add a small delay to ensure context is fully loaded
+          setTimeout(() => {
+            api.getTableOrder(selectedTable).then(fetchedOrder => {
+              if (fetchedOrder && fetchedOrder.items) {
+                const cartItems: CartItem[] = fetchedOrder.items.map((item: any) => ({
+                  id: item.id,
+                  name: item.name,
+                  price: item.price,
+                  quantity: item.quantity,
+                  sentToKitchen: item.sentToKitchen || false,
+                  department: item.department
+                }));
+                setCurrentOrder(cartItems);
+              }
+            }).catch(err => {
+              console.error("Failed to fetch table order", err);
+            });
+          }, 100);
+        }
+      } else {
+        // If table is not occupied, clear the current order
+        setCurrentOrder([]);
+      }
+    }
+  }, [selectedTable, tables, getTableOrder]);
 
   const selectedTableData = useMemo(() => {
     const data = tables.find((t: Table) => t.id === selectedTable);
@@ -149,47 +188,7 @@ export const DineInPage: React.FC = () => {
 
   const handleTableSelect = useCallback((tableId: string) => {
     setSelectedTable(tableId);
-    
-    // If the table is occupied, automatically load the existing order items
-    const table = tables.find((t: Table) => t.id === tableId);
-    if (table && table.status === "occupied") {
-      // Get the existing order for this table
-      const order = getTableOrder(tableId);
-      if (order && order.items) {
-        // Load the existing items into the current order state
-        // We need to convert the items to CartItem format
-        const cartItems: CartItem[] = order.items.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          sentToKitchen: item.sentToKitchen || false,
-          department: item.department
-        }));
-        setCurrentOrder(cartItems);
-      } else {
-        // If no order in context, try to fetch from API
-        api.getTableOrder(tableId).then(fetchedOrder => {
-          if (fetchedOrder && fetchedOrder.items) {
-            const cartItems: CartItem[] = fetchedOrder.items.map((item: any) => ({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              sentToKitchen: item.sentToKitchen || false,
-              department: item.department
-            }));
-            setCurrentOrder(cartItems);
-          }
-        }).catch(err => {
-          console.error("Failed to fetch table order", err);
-        });
-      }
-    } else {
-      // If table is not occupied, clear the current order
-      setCurrentOrder([]);
-    }
-  }, [tables, getTableOrder]);
+  }, []);
   const handleCategorySelect = useCallback((c: string) => setSelectedCategory(c), []);
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
 
@@ -678,7 +677,7 @@ export const DineInPage: React.FC = () => {
       // Generate KOT for these items
       if (kotConfig.printByDepartment !== undefined) await printKOT(pending, isAdditional);
       
-      // Mark items as sent to kitchen - fix the parameter issue
+      // Mark items as sent to kitchen
       setCurrentOrder((prev) => prev.map((it) => {
         // Only mark items as sent if they were in the pending items and not already sent
         const wasPending = pending.some((p) => p.id === it.id && !it.sentToKitchen);
@@ -862,7 +861,9 @@ export const DineInPage: React.FC = () => {
           <header className="px-8 py-5 border-b-2 flex-shrink-0 bg-white pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-semibold">Current Order</h3>
+                <h3 className="text-xl font-semibold">
+                  {selectedTableData ? `Table ${selectedTableData.name}` : "Current Order"}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
                 </p>
