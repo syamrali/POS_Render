@@ -48,6 +48,23 @@ export const DineInPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState<string>("");
+
+  // Restore selected table from localStorage on mount
+  useEffect(() => {
+    const savedTableId = localStorage.getItem('dineInSelectedTable');
+    if (savedTableId) {
+      setSelectedTable(savedTableId);
+    }
+  }, []);
+
+  // Save selected table to localStorage when it changes
+  useEffect(() => {
+    if (selectedTable) {
+      localStorage.setItem('dineInSelectedTable', selectedTable);
+    } else {
+      localStorage.removeItem('dineInSelectedTable');
+    }
+  }, [selectedTable]);
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
 
@@ -243,14 +260,33 @@ export const DineInPage: React.FC = () => {
     console.log('Adding item to order:', item);
     
     setCurrentOrder((prev) => {
-      // Check if we already have this item in the current order (not sent to kitchen)
-      const existingIndex = prev.findIndex((p) => p.id === item.id && !p.sentToKitchen);
+      // Check if we already have this item in the current order
+      // We want to increase quantity regardless of sentToKitchen status
+      const existingPendingIndex = prev.findIndex((p) => p.id === item.id && !p.sentToKitchen);
       
-      if (existingIndex !== -1) {
-        // Update quantity of existing item
+      if (existingPendingIndex !== -1) {
+        // Update quantity of existing pending item
         const updated = [...prev];
-        updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + 1 };
-        console.log('Updated existing item, new order:', updated);
+        updated[existingPendingIndex] = { 
+          ...updated[existingPendingIndex], 
+          quantity: updated[existingPendingIndex].quantity + 1 
+        };
+        console.log('Updated existing pending item, new order:', updated);
+        return updated;
+      }
+      
+      // Check if this item was already sent to kitchen
+      const existingSentIndex = prev.findIndex((p) => p.id === item.id && p.sentToKitchen);
+      
+      if (existingSentIndex !== -1) {
+        // Item exists but was sent to kitchen
+        // Add the additional quantity to the sent item
+        const updated = [...prev];
+        updated[existingSentIndex] = {
+          ...updated[existingSentIndex],
+          quantity: updated[existingSentIndex].quantity + 1
+        };
+        console.log('Increased quantity of sent item, new order:', updated);
         return updated;
       }
       
@@ -777,9 +813,10 @@ export const DineInPage: React.FC = () => {
     // Complete the table order (clears order and makes table available)
     await completeTableOrder(selectedTable);
     
-    // Clear local state
+    // Clear local state and localStorage
     setCurrentOrder([]);
     setSelectedTable("");
+    localStorage.removeItem('dineInSelectedTable');
     setShowBillDialog(false);
     
     alert("Bill generated successfully! Table is now available.");
@@ -979,7 +1016,6 @@ export const DineInPage: React.FC = () => {
                               size="sm" 
                               onClick={() => updateQuantity(it.id, 1, it.sentToKitchen)} 
                               className="h-9 w-18 text-base font-bold"
-                              disabled={it.sentToKitchen}
                             >
                               +
                             </Button>
