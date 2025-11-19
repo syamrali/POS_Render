@@ -66,6 +66,7 @@ export const DineInPage: React.FC = () => {
     }
   }, [selectedTable]);
   const [showBillDialog, setShowBillDialog] = useState(false);
+  const [showHoldDialog, setShowHoldDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
 
   useEffect(() => {
@@ -148,9 +149,9 @@ export const DineInPage: React.FC = () => {
 
 
 
-  // Load existing table order when selectedTable changes
+  // Load existing table order when selectedTable changes OR when tableOrders in context changes
   useEffect(() => {
-    if (selectedTable) {
+    if (selectedTable && tables.length > 0) {
       const table = tables.find((t: Table) => t.id === selectedTable);
       if (table && table.status === "occupied") {
         // Try to load existing order from context first
@@ -168,27 +169,24 @@ export const DineInPage: React.FC = () => {
           setCurrentOrder(cartItems);
         } else {
           // If no order in context, try to fetch from API
-          // Add a small delay to ensure context is fully loaded
-          setTimeout(() => {
-            api.getTableOrder(selectedTable).then(fetchedOrder => {
-              if (fetchedOrder && fetchedOrder.items) {
-                const cartItems: CartItem[] = fetchedOrder.items.map((item: any) => ({
-                  id: item.id,
-                  name: item.name,
-                  price: item.price,
-                  quantity: item.quantity,
-                  sentToKitchen: item.sentToKitchen || false,
-                  department: item.department
-                }));
-                setCurrentOrder(cartItems);
-              }
-            }).catch(err => {
-              console.error("Failed to fetch table order", err);
-            });
-          }, 100);
+          api.getTableOrder(selectedTable).then(fetchedOrder => {
+            if (fetchedOrder && fetchedOrder.items) {
+              const cartItems: CartItem[] = fetchedOrder.items.map((item: any) => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                sentToKitchen: item.sentToKitchen || false,
+                department: item.department
+              }));
+              setCurrentOrder(cartItems);
+            }
+          }).catch(err => {
+            console.error("Failed to fetch table order", err);
+          });
         }
-      } else {
-        // If table is not occupied, clear the current order
+      } else if (table && table.status === "available") {
+        // If table is available, clear the current order
         setCurrentOrder([]);
       }
     }
@@ -775,11 +773,22 @@ export const DineInPage: React.FC = () => {
         setCurrentOrder(cartItems);
       }
       
-      alert("Order placed successfully! You can add more items or generate bill.");
+      // Show dialog asking whether to generate bill or hold
+      setShowHoldDialog(true);
     }
   }, [getPendingItems, kotConfig, printKOT, selectedTable, selectedTableData, addItemsToTable, markItemsAsSent, getTableOrder]);
 
 
+
+  const holdOrder = useCallback(() => {
+    setShowHoldDialog(false);
+    // Order is already held in the backend, just close the dialog
+  }, []);
+
+  const generateBillFromHold = useCallback(() => {
+    setShowHoldDialog(false);
+    setShowBillDialog(true);
+  }, []);
 
   const generateBill = useCallback(async () => {
     if (!selectedTable || !selectedTableData) return;
@@ -1085,6 +1094,33 @@ export const DineInPage: React.FC = () => {
       )}
 
 
+
+      <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Order Placed</DialogTitle>
+            <DialogDescription>What would you like to do with this order?</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-center">KOT has been sent to kitchen. Would you like to generate the bill now or hold the order?</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={holdOrder}
+                variant="outline"
+                className="flex-1"
+              >
+                Hold Order
+              </Button>
+              <Button 
+                onClick={generateBillFromHold}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                Generate Bill
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
         <DialogContent className="max-w-md">

@@ -100,6 +100,22 @@ export function RestaurantProvider({ children }: { children: React.ReactNode }) 
         const tablesData = await api.getTables();
         setTables(tablesData);
         
+        // Load all table orders from backend
+        const ordersMap = new Map<string, TableOrder>();
+        for (const table of tablesData) {
+          if (table.status === 'occupied') {
+            try {
+              const order = await api.getTableOrder(table.id);
+              if (order && order.items) {
+                ordersMap.set(table.id, order);
+              }
+            } catch (err) {
+              console.error(`Failed to load order for table ${table.id}:`, err);
+            }
+          }
+        }
+        setTableOrders(ordersMap);
+        
         // Load invoices
         const invoicesData = await api.getInvoices();
         setInvoices(invoicesData);
