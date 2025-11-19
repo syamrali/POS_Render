@@ -887,7 +887,7 @@ export const DineInPage: React.FC = () => {
                           <div className="pt-2 border-t border-gray-200">
                             <div className="flex items-center justify-center gap-1 text-orange-600">
                               <Clock className="size-3" />
-                              <span className="text-sm">{Math.floor((Date.now() - getTableOrder(table.id)!.startTime.getTime()) / 60000)} mins</span>
+                              <span className="text-sm">{Math.floor((Date.now() - new Date(getTableOrder(table.id)!.startTime).getTime()) / 60000)} mins</span>
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
                               {getTableOrder(table.id)?.items.length || 0} items
