@@ -93,7 +93,7 @@ export const DineInPage: React.FC = () => {
       try {
         const loadedTables = await api.getTables();
         setTables(loadedTables || []);
-        
+
         // Also load table orders for all tables
         for (const table of loadedTables) {
           if (table.status === 'occupied') {
@@ -112,11 +112,11 @@ export const DineInPage: React.FC = () => {
         console.error("Failed to load tables", err);
       }
     };
-    
+
     loadTables();
   }, []);
 
-  
+
 
 
 
@@ -143,7 +143,7 @@ export const DineInPage: React.FC = () => {
         console.error("Failed to load initial data", err);
       }
     };
-    
+
     loadInitialData();
   }, []);
 
@@ -197,7 +197,7 @@ export const DineInPage: React.FC = () => {
     console.log("Selected table data:", data);
     return data;
   }, [tables, selectedTable]);
-  
+
   const existingTableOrder = useMemo(() => {
     const order = selectedTable ? getTableOrder(selectedTable) : undefined;
     console.log("Existing table order:", order);
@@ -226,13 +226,13 @@ export const DineInPage: React.FC = () => {
   const subtotal = useMemo(() => {
     return getAllCombinedItems().reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0);
   }, [getAllCombinedItems]);
-  
+
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
 
   const handleTableSelect = useCallback((tableId: string) => {
     setSelectedTable(tableId);
-    
+
     // If table is occupied, automatically load existing order
     const table = tables.find((t: Table) => t.id === tableId);
     if (table && table.status === "occupied") {
@@ -256,26 +256,26 @@ export const DineInPage: React.FC = () => {
 
   const addToOrder = useCallback((item: MenuItem) => {
     console.log('Adding item to order:', item);
-    
+
     setCurrentOrder((prev) => {
       // Check if we already have this item in the current order
       // We want to increase quantity regardless of sentToKitchen status
       const existingPendingIndex = prev.findIndex((p) => p.id === item.id && !p.sentToKitchen);
-      
+
       if (existingPendingIndex !== -1) {
         // Update quantity of existing pending item
         const updated = [...prev];
-        updated[existingPendingIndex] = { 
-          ...updated[existingPendingIndex], 
-          quantity: updated[existingPendingIndex].quantity + 1 
+        updated[existingPendingIndex] = {
+          ...updated[existingPendingIndex],
+          quantity: updated[existingPendingIndex].quantity + 1
         };
         console.log('Updated existing pending item, new order:', updated);
         return updated;
       }
-      
+
       // Check if this item was already sent to kitchen
       const existingSentIndex = prev.findIndex((p) => p.id === item.id && p.sentToKitchen);
-      
+
       if (existingSentIndex !== -1) {
         // Item exists but was sent to kitchen
         // Add the additional quantity to the sent item
@@ -287,13 +287,13 @@ export const DineInPage: React.FC = () => {
         console.log('Increased quantity of sent item, new order:', updated);
         return updated;
       }
-      
+
       // Add new item
-      const orderItem: CartItem = { 
+      const orderItem: CartItem = {
         id: item.id,
         name: item.name,
         price: item.price,
-        quantity: 1, 
+        quantity: 1,
         sentToKitchen: false,
         department: item.department
       };
@@ -325,16 +325,16 @@ export const DineInPage: React.FC = () => {
     (items: CartItem[], isAdditional = false, department?: string) => {
       const now = new Date();
       const orderNumber = `KOT-${Date.now()}`;
-      
+
       // Get paper size and format from context
       const paperSize = kotConfig.paperSize || "80mm";
       const formatType = kotConfig.formatType || "detailed";
-      
+
       // Adjust styling based on paper size
       let fontSize = "12px";
       let padding = "8px";
       let maxWidth = "80mm";
-      
+
       if (paperSize === "58mm") {
         fontSize = "10px";
         padding = "5px";
@@ -344,10 +344,10 @@ export const DineInPage: React.FC = () => {
         padding = "12px";
         maxWidth = "112mm";
       }
-      
+
       // Generate content based on format type
       let content = "";
-      
+
       if (formatType === "compact") {
         // Compact format
         content = `<!doctype html><html><head><meta charset="utf-8"><title>${orderNumber}</title><style>
@@ -401,7 +401,7 @@ export const DineInPage: React.FC = () => {
           }
           groupedItems[dept].push(item);
         });
-        
+
         content = `<!doctype html><html><head><meta charset="utf-8"><title>${orderNumber}</title><style>
           body {
             font-family: Arial, Helvetica, sans-serif;
@@ -438,14 +438,14 @@ export const DineInPage: React.FC = () => {
           `<div>Date: ${now.toLocaleString()}</div>` +
           `<div>Table: ${selectedTableData?.name || 'N/A'}</div>` +
           `<hr/>`;
-          
+
         Object.entries(groupedItems).forEach(([dept, deptItems]) => {
           content += `<div style="font-weight:700;margin-top:10px">[${dept}]</div>`;
           deptItems.forEach(it => {
             content += `<div><strong>${it.name}</strong> x ${it.quantity}</div>`;
           });
         });
-          
+
         content += `<hr/><div style="text-align:center">Generated by Restaurant POS</div></body></html>`;
       } else {
         // Detailed format (default)
@@ -491,7 +491,7 @@ export const DineInPage: React.FC = () => {
             .join("") +
           `<hr/><div style="text-align:center">Generated by Restaurant POS</div></body></html>`;
       }
-      
+
       return content;
     },
     [kotConfig, selectedTableData?.name]
@@ -501,10 +501,10 @@ export const DineInPage: React.FC = () => {
     async (items: CartItem[], isAdditional = false) => {
       const popup = window.open("", "_blank", "width=400,height=600");
       if (!popup) return;
-      
+
       // Get paper size from context
       const paperSize = kotConfig.paperSize || "80mm";
-      
+
       // Set width based on paper size
       let windowWidth = 400;
       if (paperSize === "58mm") {
@@ -512,13 +512,13 @@ export const DineInPage: React.FC = () => {
       } else if (paperSize === "112mm") {
         windowWidth = 500;
       }
-      
+
       // Resize window to match paper size
       popup.resizeTo(windowWidth, 600);
-      
+
       popup.document.write(generateKOTContent(items, isAdditional));
       popup.document.close();
-      
+
       // Add print-specific styling
       const printStyle = popup.document.createElement('style');
       printStyle.innerHTML = `
@@ -535,7 +535,7 @@ export const DineInPage: React.FC = () => {
         }
       `;
       popup.document.head.appendChild(printStyle);
-      
+
       setTimeout(() => {
         popup.print();
         popup.close();
@@ -547,26 +547,26 @@ export const DineInPage: React.FC = () => {
   const generateBillContent = useCallback(() => {
     const now = new Date();
     const billNumber = `BILL-${Date.now()}`;
-    
+
     // Get all items from current order and existing table order
     const allItems = [...getAllCombinedItems()];
     if (existingTableOrder) {
       allItems.push(...existingTableOrder.items);
     }
-    
+
     const sub = allItems.reduce((s, i) => s + i.price * i.quantity, 0);
     const t = sub * 0.05;
     const tot = sub + t;
-    
+
     // Get paper size and format from context
     const paperSize = billConfig.paperSize || "80mm";
     const formatType = billConfig.formatType || "standard";
-    
+
     // Adjust styling based on paper size
     let fontSize = "12px";
     let padding = "8px";
     let maxWidth = "80mm";
-    
+
     if (paperSize === "58mm") {
       fontSize = "10px";
       padding = "5px";
@@ -576,9 +576,9 @@ export const DineInPage: React.FC = () => {
       padding = "12px";
       maxWidth = "112mm";
     }
-    
+
     let content = "";
-    
+
     if (formatType === "compact") {
       // Compact bill format
       content = `<!doctype html><html><head><meta charset="utf-8"><title>${billNumber}</title><style>
@@ -697,17 +697,17 @@ export const DineInPage: React.FC = () => {
         `<div style="font-weight:700">TOTAL <span style="float:right">₹${tot.toFixed(2)}</span></div>` +
         `</body></html>`;
     }
-    
+
     return content;
   }, [getAllCombinedItems, billConfig, selectedTableData?.name, existingTableOrder]);
 
   const printBill = useCallback(() => {
     const popup = window.open("", "_blank", "width=400,height=600");
     if (!popup) return;
-    
+
     // Get paper size from context
     const paperSize = billConfig.paperSize || "80mm";
-    
+
     // Set width based on paper size
     let windowWidth = 400;
     if (paperSize === "58mm") {
@@ -715,13 +715,13 @@ export const DineInPage: React.FC = () => {
     } else if (paperSize === "112mm") {
       windowWidth = 500;
     }
-    
+
     // Resize window to match paper size
     popup.resizeTo(windowWidth, 600);
-    
+
     popup.document.write(generateBillContent());
     popup.document.close();
-    
+
     // Add print-specific styling
     const printStyle = popup.document.createElement('style');
     printStyle.innerHTML = `
@@ -738,7 +738,7 @@ export const DineInPage: React.FC = () => {
       }
     `;
     popup.document.head.appendChild(printStyle);
-    
+
     setTimeout(() => {
       popup.print();
       popup.close();
@@ -751,14 +751,14 @@ export const DineInPage: React.FC = () => {
 
     // Generate KOT when placing order
     if (kotConfig.printByDepartment !== undefined) await printKOT(pending);
-    
+
     // Add items to table order in context
     if (selectedTable && selectedTableData) {
       await addItemsToTable(selectedTable, selectedTableData.name, pending);
-      
+
       // Mark items as sent to kitchen
       await markItemsAsSent(selectedTable);
-      
+
       // Reload the table order to show all items including sent ones
       const order = getTableOrder(selectedTable);
       if (order && order.items) {
@@ -772,7 +772,7 @@ export const DineInPage: React.FC = () => {
         }));
         setCurrentOrder(cartItems);
       }
-      
+
       // Show dialog asking whether to generate bill or hold
       setShowHoldDialog(true);
     }
@@ -792,19 +792,19 @@ export const DineInPage: React.FC = () => {
 
   const generateBill = useCallback(async () => {
     if (!selectedTable || !selectedTableData) return;
-    
+
     // Get all items from the table order
     const order = getTableOrder(selectedTable);
     if (!order || !order.items || order.items.length === 0) {
       alert("No items in order to generate bill.");
       return;
     }
-    
+
     const allItems = order.items;
     const sub = allItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0);
     const t = sub * 0.05;
     const tot = sub + t;
-    
+
     const invoice = {
       id: Date.now().toString(),
       billNumber: `BILL-${Date.now()}`,
@@ -818,16 +818,16 @@ export const DineInPage: React.FC = () => {
     } as any;
 
     await addInvoice(invoice);
-    
+
     // Complete the table order (clears order and makes table available)
     await completeTableOrder(selectedTable);
-    
+
     // Clear local state and localStorage
     setCurrentOrder([]);
     setSelectedTable("");
     localStorage.removeItem('dineInSelectedTable');
     setShowBillDialog(false);
-    
+
     alert("Bill generated successfully! Table is now available.");
   }, [selectedTable, selectedTableData, getTableOrder, addInvoice, completeTableOrder]);
 
@@ -843,9 +843,9 @@ export const DineInPage: React.FC = () => {
   return (
     <>
       {/* Main Content Area - accounts for cart width, no gap */}
-      <div 
+      <div
         className="h-full overflow-y-auto"
-        style={{ 
+        style={{
           width: isCartVisible ? 'calc(100% - 420px)' : '100%',
           transition: 'width 0.3s ease',
           marginRight: 0,
@@ -858,24 +858,23 @@ export const DineInPage: React.FC = () => {
               <div className="mb-6"><h2 className="text-gray-900 mb-2">Select Table</h2><p className="text-muted-foreground">Choose a table for dine-in order</p></div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {tables.map((table: Table) => (
-                  <Card 
-                    key={table.id} 
-                    onClick={() => handleTableSelect(table.id)} 
-                    className={`cursor-pointer ${
-                      table.status === "available" 
-                        ? "bg-green-100 border-green-300" 
-                        : "bg-red-100 border-red-300"
-                    }`}
+                  <Card
+                    key={table.id}
+                    onClick={() => handleTableSelect(table.id)}
+                    className={`cursor-pointer ${table.status === "available"
+                      ? "bg-green-100 border-green-300"
+                      : "bg-red-100 border-red-300"
+                      }`}
                   >
                     <CardHeader className="p-4">
                       <div className="text-center space-y-3">
                         <div>
                           <p className="text-gray-900 mb-1">Table {table.name}</p>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={
-                              table.status === "available" 
-                                ? "bg-green-200 text-green-800 border-green-300" 
+                              table.status === "available"
+                                ? "bg-green-200 text-green-800 border-green-300"
                                 : "bg-red-200 text-red-800 border-red-300"
                             }
                           >
@@ -917,7 +916,7 @@ export const DineInPage: React.FC = () => {
                   <Card key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                     <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold text-purple-600">₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
                     <CardContent className="p-4 pt-0">
-                      <Button 
+                      <Button
                         onClick={() => {
                           console.log('Button clicked for item:', item);
                           addToOrder(item);
@@ -940,9 +939,9 @@ export const DineInPage: React.FC = () => {
 
       {/* Cart Sidebar - Fixed at viewport level, same height as side nav */}
       {isCartVisible && (
-        <aside 
+        <aside
           className="w-[420px] bg-white flex flex-col shadow-2xl"
-          style={{ 
+          style={{
             position: 'fixed',
             top: '0',
             right: '0',
@@ -991,13 +990,12 @@ export const DineInPage: React.FC = () => {
                 <div className="space-y-4">
                   {/* Show all items - both pending and sent to kitchen */}
                   {currentOrder.map((it, idx) => (
-                    <div 
-                      key={`${it.id}-${idx}`} 
-                      className={`flex items-start justify-between p-5 border-2 rounded-lg transition-colors ${
-                        it.sentToKitchen 
-                          ? 'border-gray-300 bg-gray-100' 
-                          : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                      }`}
+                    <div
+                      key={`${it.id}-${idx}`}
+                      className={`flex items-start justify-between p-5 border-2 rounded-lg transition-colors ${it.sentToKitchen
+                        ? 'border-gray-300 bg-gray-100'
+                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                        }`}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-3">
@@ -1010,20 +1008,20 @@ export const DineInPage: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-3">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => updateQuantity(it.id, -1, it.sentToKitchen)} 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateQuantity(it.id, -1, it.sentToKitchen)}
                               className="h-9 w-18 text-base font-bold"
                               disabled={it.sentToKitchen}
                             >
                               -
                             </Button>
                             <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => updateQuantity(it.id, 1, it.sentToKitchen)} 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateQuantity(it.id, 1, it.sentToKitchen)}
                               className="h-9 w-18 text-base font-bold"
                             >
                               +
@@ -1035,10 +1033,10 @@ export const DineInPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => removeFromOrder(it.id, it.sentToKitchen)} 
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFromOrder(it.id, it.sentToKitchen)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9"
                           disabled={it.sentToKitchen}
                         >
@@ -1070,18 +1068,18 @@ export const DineInPage: React.FC = () => {
             </div>
 
             <div className="mt-4 space-y-2 mb-6">
-              <Button 
-                onClick={placeOrder} 
-                disabled={getPendingItems().length === 0} 
+              <Button
+                onClick={placeOrder}
+                disabled={getPendingItems().length === 0}
                 className="w-full"
               >
-                <Printer className="mr-2" /> 
+                <Printer className="mr-2" />
                 Place Order
               </Button>
-              
+
               {selectedTable && getTableOrder(selectedTable) && getTableOrder(selectedTable)!.items.length > 0 && (
-                <Button 
-                  onClick={() => setShowBillDialog(true)} 
+                <Button
+                  onClick={() => setShowBillDialog(true)}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 >
                   <Printer className="mr-2" />
@@ -1104,14 +1102,14 @@ export const DineInPage: React.FC = () => {
           <div className="py-4 space-y-4">
             <p className="text-center">KOT has been sent to kitchen. Would you like to generate the bill now or hold the order?</p>
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={holdOrder}
                 variant="outline"
                 className="flex-1"
               >
                 Hold Order
               </Button>
-              <Button 
+              <Button
                 onClick={generateBillFromHold}
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >
@@ -1134,18 +1132,18 @@ export const DineInPage: React.FC = () => {
               <span className="text-purple-600 font-bold">₹{total.toFixed(2)}</span>
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={() => { 
-                  printBill(); 
+              <Button
+                onClick={() => {
+                  printBill();
                   generateBill();
-                }} 
+                }}
                 className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >
                 <Printer className="mr-2" /> Print & Complete
               </Button>
-              <Button 
-                onClick={generateBill} 
-                variant="outline" 
+              <Button
+                onClick={generateBill}
+                variant="outline"
                 className="flex-1"
               >
                 Complete Without Printing
