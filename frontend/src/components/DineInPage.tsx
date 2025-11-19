@@ -49,10 +49,7 @@ export const DineInPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState<string>("");
   const [showBillDialog, setShowBillDialog] = useState(false);
-  const [showHoldDialog, setShowHoldDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
-  const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
-  const [selectedPendingOrder, setSelectedPendingOrder] = useState<PendingOrder | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -114,27 +111,7 @@ export const DineInPage: React.FC = () => {
     };
   }, []);
 
-  // Load pending orders from localStorage on component mount
-  useEffect(() => {
-    const loadPendingOrders = () => {
-      try {
-        const savedOrders = localStorage.getItem('dineinPendingOrders');
-        if (savedOrders) {
-          const parsedOrders = JSON.parse(savedOrders);
-          // Convert timestamp strings back to Date objects
-          const ordersWithDates = parsedOrders.map((order: any) => ({
-            ...order,
-            timestamp: new Date(order.timestamp)
-          }));
-          setPendingOrders(ordersWithDates);
-        }
-      } catch (err) {
-        console.error("Failed to load pending orders from localStorage", err);
-      }
-    };
-    
-    loadPendingOrders();
-  }, []);
+
 
   // Load data when component mounts
   useEffect(() => {
@@ -152,15 +129,7 @@ export const DineInPage: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // Persist pending orders to localStorage
-  useEffect(() => {
-    const savePendingOrders = () => {
-      localStorage.setItem('dineinPendingOrders', JSON.stringify(pendingOrders));
-    };
-    
-    // Save pending orders whenever they change
-    savePendingOrders();
-  }, [pendingOrders]);
+
 
   // Load existing table order when selectedTable changes
   useEffect(() => {
@@ -236,34 +205,12 @@ export const DineInPage: React.FC = () => {
   const getPendingItems = useCallback(() => currentOrder.filter((it) => !it.sentToKitchen), [currentOrder]);
 
   const getAllCombinedItems = useCallback(() => {
-    const map = new Map<string, CartItem>();
-    
-    // Add items from selected pending order if any
-    if (selectedPendingOrder) {
-      selectedPendingOrder.items.forEach((it) => {
-        const existing = map.get(it.id);
-        if (existing) existing.quantity += it.quantity;
-        else map.set(it.id, { ...it });
-      });
-    }
-    
-    // Add items from current order
-    currentOrder.forEach((it) => {
-      const existing = map.get(it.id);
-      if (existing) existing.quantity += it.quantity;
-      else map.set(it.id, { ...it });
-    });
-    
-    return Array.from(map.values());
-  }, [currentOrder, selectedPendingOrder]);
+    return currentOrder;
+  }, [currentOrder]);
 
   const subtotal = useMemo(() => {
-    if (selectedPendingOrder) {
-      // When recalling an order, use the combined subtotal
-      return selectedPendingOrder.subtotal + getAllCombinedItems().reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0);
-    }
     return getAllCombinedItems().reduce((s: number, i: CartItem) => s + i.price * i.quantity, 0);
-  }, [getAllCombinedItems, selectedPendingOrder]);
+  }, [getAllCombinedItems]);
   
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
@@ -775,109 +722,74 @@ export const DineInPage: React.FC = () => {
     if (selectedTable && selectedTableData) {
       await addItemsToTable(selectedTable, selectedTableData.name, pending);
       
-      // Clear current order after placing it
-      setCurrentOrder([]);
+      // Mark items as sent to kitchen
+      await markItemsAsSent(selectedTable);
       
-      // Show dialog to ask user whether to generate bill or hold
-      setShowHoldDialog(true);
+      // Reload the table order to show all items including sent ones
+      const order = getTableOrder(selectedTable);
+      if (order && order.items) {
+        const cartItems: CartItem[] = order.items.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          sentToKitchen: item.sentToKitchen || false,
+          department: item.department
+        }));
+        setCurrentOrder(cartItems);
+      }
+      
+      alert("Order placed successfully! You can add more items or generate bill.");
     }
-  }, [getPendingItems, kotConfig, printKOT, selectedTable, selectedTableData, currentOrder, addItemsToTable]);
+  }, [getPendingItems, kotConfig, printKOT, selectedTable, selectedTableData, addItemsToTable, markItemsAsSent, getTableOrder]);
 
-  const holdOrder = useCallback(() => {
-    setCurrentOrder([]);
-    setSelectedPendingOrder(null);
-    setShowHoldDialog(false);
-    alert("Order held. You can recall it later.");
-  }, []);
 
-  const generateBillNow = useCallback(async () => {
-    if (pendingOrders.length === 0) return;
+
+  const generateBill = useCallback(async () => {
+    if (!selectedTable || !selectedTableData) return;
     
-    // Get the most recent pending order
-    const mostRecentOrder = pendingOrders[pendingOrders.length - 1];
+    // Get all items from the table order
+    const order = getTableOrder(selectedTable);
+    if (!order || !order.items || order.items.length === 0) {
+      alert("No items in order to generate bill.");
+      return;
+    }
+    
+    const allItems = order.items;
+    const sub = allItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0);
+    const t = sub * 0.05;
+    const tot = sub + t;
     
     const invoice = {
       id: Date.now().toString(),
       billNumber: `BILL-${Date.now()}`,
       orderType: "dine-in",
-      tableName: mostRecentOrder.tableName,
-      items: mostRecentOrder.items,
-      subtotal: mostRecentOrder.subtotal,
-      tax: mostRecentOrder.tax,
-      total: mostRecentOrder.total,
+      tableName: selectedTableData.name,
+      items: allItems,
+      subtotal: sub,
+      tax: t,
+      total: tot,
       timestamp: new Date(),
     } as any;
 
     await addInvoice(invoice);
     
-    // Remove the pending order
-    setPendingOrders(prev => prev.filter(order => order.id !== mostRecentOrder.id));
-    clearOrder();
-    setShowHoldDialog(false);
+    // Complete the table order (clears order and makes table available)
+    await completeTableOrder(selectedTable);
     
-    alert("Bill generated and order completed.");
-  }, [pendingOrders, addInvoice, clearOrder]);
-
-  const completeBill = useCallback(async () => {
-    if (!selectedPendingOrder) return;
-    
-    const invoice = {
-      id: Date.now().toString(),
-      billNumber: `BILL-${Date.now()}`,
-      orderType: "dine-in",
-      tableName: selectedPendingOrder.tableName,
-      items: selectedPendingOrder.items,
-      subtotal: selectedPendingOrder.subtotal,
-      tax: selectedPendingOrder.tax,
-      total: selectedPendingOrder.total,
-      timestamp: new Date(),
-    } as any;
-
-    await addInvoice(invoice);
-    
-    // Remove the pending order from the list
-    setPendingOrders(prev => prev.filter(order => order.id !== selectedPendingOrder.id));
-    
-    // Clear the selected pending order and current order
-    setSelectedPendingOrder(null);
+    // Clear local state
     setCurrentOrder([]);
+    setSelectedTable("");
     setShowBillDialog(false);
     
-    alert("Bill generated and order completed.");
-  }, [selectedPendingOrder, addInvoice]);
+    alert("Bill generated successfully! Table is now available.");
+  }, [selectedTable, selectedTableData, getTableOrder, addInvoice, completeTableOrder]);
 
-  const recallOrder = useCallback((order: PendingOrder) => {
-    setCurrentOrder([...order.items]);
-    setSelectedPendingOrder(order);
-    // Don't close the dialog here, let the user close it manually
-    alert(`Order for table ${order.tableName} recalled. You can now modify or generate a bill for this order.`);
-  }, []);
 
-  const addMoreItemsToOrder = useCallback(() => {
-    if (!selectedPendingOrder) return;
-    
-    // Merge current order with recalled order
-    const mergedOrder = [...selectedPendingOrder.items, ...currentOrder];
-    
-    // Update the selected pending order with merged items
-    const updatedOrder = {
-      ...selectedPendingOrder,
-      items: mergedOrder,
-      subtotal: mergedOrder.reduce((s, i) => s + i.price * i.quantity, 0),
-      tax: mergedOrder.reduce((s, i) => s + i.price * i.quantity, 0) * 0.05,
-      total: mergedOrder.reduce((s, i) => s + i.price * i.quantity, 0) * 1.05
-    };
-    
-    setSelectedPendingOrder(updatedOrder);
-    setCurrentOrder([]);
-    
-    // Update the pending orders list
-    setPendingOrders(prev => prev.map(order => 
-      order.id === selectedPendingOrder.id ? updatedOrder : order
-    ));
-    
-    alert("Items added to recalled order.");
-  }, [selectedPendingOrder, currentOrder]);
+
+
+
+
 
   // Determine if cart should be visible
   const isCartVisible = selectedTable || currentOrder.length > 0;
@@ -1000,9 +912,7 @@ export const DineInPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold">
-                  {selectedPendingOrder 
-                    ? `Order: ${selectedPendingOrder.tableName}` 
-                    : (selectedTableData ? `Table ${selectedTableData.name}` : "Current Order")}
+                  {selectedTableData ? `Table ${selectedTableData.name}` : "Current Order"}
                 </h3>
                 <p className="text-sm text-gray-500">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
@@ -1026,71 +936,72 @@ export const DineInPage: React.FC = () => {
           {/* Cart Items - Scrollable section only */}
           <div className="flex-1 overflow-y-auto min-h-0" style={{ overflowY: 'auto' }}>
             <div className="px-8 py-5 space-y-4">
-              {currentOrder.length === 0 && (!selectedPendingOrder || selectedPendingOrder.items.length === 0) ? (
+              {currentOrder.length === 0 ? (
                 <div className="text-center py-10 text-gray-500">
                   <ShoppingCart className="size-16 mx-auto mb-4 text-gray-300" />
                   <div>No items in order</div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* When recalling an order, show all items together */}
-                  {selectedPendingOrder ? (
-                    // Show combined items from recalled order and current order
-                    getAllCombinedItems().map((it, idx) => (
-                      <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-lg mb-3">{it.name}</div>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-3">
-                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
-                                -
-                              </Button>
-                              <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
-                                +
-                              </Button>
-                            </div>
-                            <div className="ml-auto text-purple-600 font-bold text-lg">
-                              ₹{(it.price * it.quantity).toFixed(2)}
-                            </div>
+                  {/* Show all items - both pending and sent to kitchen */}
+                  {currentOrder.map((it, idx) => (
+                    <div 
+                      key={`${it.id}-${idx}`} 
+                      className={`flex items-start justify-between p-5 border-2 rounded-lg transition-colors ${
+                        it.sentToKitchen 
+                          ? 'border-gray-300 bg-gray-100' 
+                          : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="font-semibold text-lg">{it.name}</div>
+                          {it.sentToKitchen && (
+                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                              Sent to Kitchen
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => updateQuantity(it.id, -1, it.sentToKitchen)} 
+                              className="h-9 w-18 text-base font-bold"
+                              disabled={it.sentToKitchen}
+                            >
+                              -
+                            </Button>
+                            <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => updateQuantity(it.id, 1, it.sentToKitchen)} 
+                              className="h-9 w-18 text-base font-bold"
+                              disabled={it.sentToKitchen}
+                            >
+                              +
+                            </Button>
+                          </div>
+                          <div className="ml-auto text-purple-600 font-bold text-lg">
+                            ₹{(it.price * it.quantity).toFixed(2)}
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
-                            <Trash2 className="size-5" />
-                          </Button>
-                        </div>
                       </div>
-                    ))
-                  ) : (
-                    // Show only current order items
-                    getPendingItems().map((it, idx) => (
-                      <div key={`${it.id}-${idx}`} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-lg mb-3">{it.name}</div>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-3">
-                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, -1, false)} className="h-9 w-18 text-base font-bold">
-                                -
-                              </Button>
-                              <div className="w-12 text-center font-semibold text-lg">{it.quantity}</div>
-                              <Button variant="outline" size="sm" onClick={() => updateQuantity(it.id, 1, false)} className="h-9 w-18 text-base font-bold">
-                                +
-                              </Button>
-                            </div>
-                            <div className="ml-auto text-purple-600 font-bold text-lg">
-                              ₹{(it.price * it.quantity).toFixed(2)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <Button variant="ghost" size="sm" onClick={() => removeFromOrder(it.id, false)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9">
-                            <Trash2 className="size-5" />
-                          </Button>
-                        </div>
+                      <div className="ml-4">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => removeFromOrder(it.id, it.sentToKitchen)} 
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9"
+                          disabled={it.sentToKitchen}
+                        >
+                          <Trash2 className="size-5" />
+                        </Button>
                       </div>
-                    ))
-                  )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -1114,40 +1025,22 @@ export const DineInPage: React.FC = () => {
             </div>
 
             <div className="mt-4 space-y-2 mb-6">
-              {selectedPendingOrder && currentOrder.length > 0 ? (
-                <Button 
-                  onClick={addMoreItemsToOrder} 
-                  className="w-full"
-                >
-                  Add Items to Order
-                </Button>
-              ) : (
-                <Button 
-                  onClick={placeOrder} 
-                  disabled={getPendingItems().length === 0} 
-                  className="w-full"
-                >
-                  <Printer className="mr-2" /> 
-                  Place Order
-                </Button>
-              )}
+              <Button 
+                onClick={placeOrder} 
+                disabled={getPendingItems().length === 0} 
+                className="w-full"
+              >
+                <Printer className="mr-2" /> 
+                Place Order
+              </Button>
               
-              {selectedPendingOrder && (
-                <Button onClick={() => setShowBillDialog(true)} variant="outline" className="w-full">
+              {selectedTable && getTableOrder(selectedTable) && getTableOrder(selectedTable)!.items.length > 0 && (
+                <Button 
+                  onClick={() => setShowBillDialog(true)} 
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  <Printer className="mr-2" />
                   Generate Bill
-                </Button>
-              )}
-              
-              {selectedPendingOrder && (
-                <Button 
-                  onClick={() => {
-                    setSelectedPendingOrder(null);
-                    setCurrentOrder([]);
-                  }} 
-                  variant="outline" 
-                  className="w-full"
-                >
-                  Start New Order
                 </Button>
               )}
             </div>
@@ -1157,43 +1050,35 @@ export const DineInPage: React.FC = () => {
 
 
 
-      {/* Hold or Generate Bill Dialog */}
-      <Dialog open={showHoldDialog} onOpenChange={setShowHoldDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Order Placed</DialogTitle>
-            <DialogDescription>What would you like to do with this order?</DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <p className="text-center">KOT has been generated. Would you like to generate the bill now or hold the order?</p>
-            <div className="flex gap-2">
-              <Button 
-                onClick={holdOrder}
-                variant="outline"
-                className="flex-1"
-              >
-                Hold Order
-              </Button>
-              <Button 
-                onClick={generateBillNow}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                Generate Bill
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={showBillDialog} onOpenChange={setShowBillDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Generate Bill</DialogTitle>
-            <DialogDescription>Would you like to print the bill?</DialogDescription>
+            <DialogDescription>Confirm bill generation for {selectedTableData?.name}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="flex justify-between mb-4"><span>Total Amount:</span><span className="text-purple-600">₹{total.toFixed(2)}</span></div>
-            <div className="flex gap-2"><Button onClick={() => { printBill(); }} className="flex-1"> <Printer className="mr-2" /> Print Bill</Button><Button onClick={generateBillNow} variant="outline" className="flex-1">Complete Without Printing</Button></div>
+            <div className="flex justify-between mb-4">
+              <span>Total Amount:</span>
+              <span className="text-purple-600 font-bold">₹{total.toFixed(2)}</span>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => { 
+                  printBill(); 
+                  generateBill();
+                }} 
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
+                <Printer className="mr-2" /> Print & Complete
+              </Button>
+              <Button 
+                onClick={generateBill} 
+                variant="outline" 
+                className="flex-1"
+              >
+                Complete Without Printing
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
