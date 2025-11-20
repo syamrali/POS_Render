@@ -43,7 +43,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       
       {/* Glassmorphism Card - Wider card with better spacing */}
       <Card 
-        className="w-full max-w-2xl h-[620px] relative z-10 border-0 shadow-2xl p-6"
+        className="w-full max-w-2xl h-[720px] relative z-10 border-0 shadow-2xl p-6"
         style={{
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
@@ -66,7 +66,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 placeholder="Email"
                 value={email}
                 onChange={(e: any) => setEmail(e.target.value)}
-                required
+                required  
                 className="h-14 bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-white/50 focus:ring-white/50 text-base"
                 style={{
                   backdropFilter: 'blur(5px)',
