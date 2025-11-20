@@ -904,7 +904,7 @@ export const DineInPage: React.FC = () => {
                     onClick={() => handleTableSelect(table.id)}
                     className={`cursor-pointer ${table.status === "available"
                       ? "bg-green-100 border-green-300"
-                      : "bg-red-100 border-red-300"
+                      : "bg-red-50 border-red-200"
                       }`}
                   >
                     <CardHeader className="p-4">
@@ -916,7 +916,7 @@ export const DineInPage: React.FC = () => {
                             className={
                               table.status === "available"
                                 ? "bg-green-200 text-green-800 border-green-300"
-                                : "bg-red-200 text-red-800 border-red-300"
+                                : "bg-red-100 text-red-700 border-red-200"
                             }
                           >
                             {table.status}
@@ -925,14 +925,7 @@ export const DineInPage: React.FC = () => {
                         <div className="text-muted-foreground">{table.seats} seats • {table.category}</div>
                         {table.status === "occupied" && getTableOrder(table.id) && (
                           <div className="pt-2 border-t border-gray-200">
-                            <div className="flex items-center justify-center gap-1 text-orange-600">
-                              <Clock className="size-3" />
-                              <span className="text-sm font-semibold">{formatTimeAgo(getTableOrder(table.id)!.startTime)}</span>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              Started: {formatDateTime(getTableOrder(table.id)!.startTime)}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-sm text-gray-600">
                               {getTableOrder(table.id)?.items.length || 0} items
                             </div>
                           </div>
@@ -1020,14 +1013,6 @@ export const DineInPage: React.FC = () => {
                 <h3 className="text-xl font-semibold">
                   {selectedTableData ? `Table ${selectedTableData.name}` : "Current Order"}
                 </h3>
-                {selectedTable && getTableOrder(selectedTable) && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <Clock className="size-3 text-gray-500" />
-                    <p className="text-xs text-gray-500">
-                      Occupied: {formatTimeAgo(getTableOrder(selectedTable)!.startTime)}
-                    </p>
-                  </div>
-                )}
                 <p className="text-sm text-gray-500 mt-1">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
                 </p>
@@ -1196,23 +1181,9 @@ export const DineInPage: React.FC = () => {
             <DialogDescription>Confirm bill generation for {selectedTableData?.name}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            {selectedTable && getTableOrder(selectedTable) && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                  <Clock className="size-4" />
-                  <span>Order Time: {formatDateTime(getTableOrder(selectedTable)!.startTime)}</span>
-                </div>
-                <div className="text-xs text-gray-500 ml-6">
-                  Duration: {formatTimeAgo(getTableOrder(selectedTable)!.startTime)}
-                </div>
-              </div>
-            )}
             <div className="flex justify-between mb-4">
               <span>Total Amount:</span>
               <span className="text-purple-600 font-bold">₹{total.toFixed(2)}</span>
-            </div>
-            <div className="text-xs text-gray-500 mb-4">
-              Bill will be generated at: {formatDateTime(new Date())}
             </div>
             <div className="flex gap-2">
               <Button
