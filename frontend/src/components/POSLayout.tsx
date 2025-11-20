@@ -63,11 +63,11 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Sidebar - Fixed with new blue gradient */}
-      <aside className="fixed left-0 top-0 w-64 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 text-white flex flex-col overflow-y-auto shadow-2xl z-40" style={{ height: '100vh' }}>
+      {/* Sidebar - Fixed */}
+      <aside className="fixed left-0 top-0 w-64 bg-gradient-to-b from-purple-600 to-pink-600 text-white flex flex-col overflow-y-auto shadow-xl z-40" style={{ height: '100vh' }}>
         <div className="p-6 flex-shrink-0">
           <h1 className="text-2xl font-bold text-white">Restaurant POS</h1>
-          <p className="text-blue-200 text-sm mt-1">Point of Sale System</p>
+          <p className="text-purple-100 text-sm mt-1">Point of Sale System</p>
         </div>
 
         <nav className="flex-1 px-3 overflow-y-auto">
@@ -80,7 +80,7 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
                 onClick={() => setCurrentPage(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
                   isActive
-                    ? "bg-white text-blue-900 shadow-lg font-medium"
+                    ? "bg-white text-purple-600 shadow-lg"
                     : "text-white hover:bg-white/10"
                 }`}
               >

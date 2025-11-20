@@ -32,11 +32,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    // Clean, professional blue gradient background
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 p-4">
+    // Updated to match the application's exact color scheme
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-600 p-4">
       <Card className="w-full max-w-md shadow-2xl border-0">
         <CardHeader className="text-center pb-2 pt-8">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
             <ShoppingCart className="w-10 h-10 text-white" />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900">Restaurant POS</CardTitle>
@@ -55,7 +55,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 value={email}
                 onChange={(e: any) => setEmail(e.target.value)}
                 required
-                className="h-11 border-slate-300 focus:border-blue-600 focus:ring-blue-600"
+                className="h-11 border-slate-300 focus:border-purple-600 focus:ring-purple-600"
               />
             </div>
             
@@ -68,7 +68,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 value={password}
                 onChange={(e: any) => setPassword(e.target.value)}
                 required
-                className="h-11 border-slate-300 focus:border-blue-600 focus:ring-blue-600"
+                className="h-11 border-slate-300 focus:border-purple-600 focus:ring-purple-600"
               />
             </div>
 
@@ -78,7 +78,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={(checked: any) => setRememberMe(checked === true)}
-                  className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                  className="border-slate-300 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                 />
                 <Label
                   htmlFor="remember"
@@ -89,7 +89,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </div>
               <button
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                className="text-sm text-purple-600 hover:text-purple-700 transition-colors font-medium"
                 onClick={() => console.log("Forgot password clicked")}
               >
                 Forgot password?
@@ -98,7 +98,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-700 hover:to-emerald-600 text-white py-6 text-base font-medium shadow-lg hover:shadow-xl transition-all"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-6 text-base font-medium shadow-lg hover:shadow-xl transition-all"
             >
               Sign In
             </Button>
@@ -107,7 +107,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <span className="text-slate-600 text-sm">Don't have an account? </span>
               <button
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium"
+                className="text-sm text-purple-600 hover:text-purple-700 transition-colors font-medium"
                 onClick={() => console.log("Sign up clicked")}
               >
                 Sign up
