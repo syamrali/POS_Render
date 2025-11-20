@@ -324,7 +324,7 @@ export function MenuPage() {
             className={selectedCategory === "All" ? "text-white" : ""}
             style={selectedCategory === "All" 
               ? { backgroundColor: '#6D9773' }
-              : { borderColor: '#6D9773', color: '#0C3B2E' }
+              : { borderColor: '#6D9773', color: '#000000' }
             }
           >
             All
@@ -337,7 +337,7 @@ export function MenuPage() {
               className={selectedCategory === category.name ? "text-white" : ""}
               style={selectedCategory === category.name 
                 ? { backgroundColor: '#6D9773' }
-                : { borderColor: '#6D9773', color: '#0C3B2E' }
+                : { borderColor: '#6D9773', color: '#000000' }
               }
             >
               {category.name}
