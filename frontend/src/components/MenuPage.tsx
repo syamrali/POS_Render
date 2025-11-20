@@ -323,7 +323,7 @@ export function MenuPage() {
             onClick={() => setSelectedCategory("All")}
             className={selectedCategory === "All" ? "text-white" : ""}
             style={selectedCategory === "All" 
-              ? { backgroundColor: '#6D9773' }
+              ? { backgroundColor: '#000000' }
               : { borderColor: '#6D9773', color: '#000000' }
             }
           >
