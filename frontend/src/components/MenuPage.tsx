@@ -286,7 +286,8 @@ export function MenuPage() {
             <Button
               onClick={() => setImportDialogOpen(true)}
               variant="outline"
-              className="border-green-600 text-green-600 hover:bg-green-50"
+              style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
+              className="hover:bg-green-50"
             >
               <FileSpreadsheet className="size-4 mr-2" />
               Bulk Import
@@ -294,7 +295,8 @@ export function MenuPage() {
             <Button
               onClick={handleExportData}
               variant="outline"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
+              className="hover:bg-green-50"
             >
               <Download className="size-4 mr-2" />
               Export Data
@@ -302,7 +304,8 @@ export function MenuPage() {
           </div>
           <Button
             onClick={handleAdd}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="text-white"
+            style={{ backgroundColor: '#6D9773' }}
           >
             <Plus className="size-4 mr-2" />
             Add Item
@@ -316,9 +319,10 @@ export function MenuPage() {
           <Button
             variant={selectedCategory === "All" ? "default" : "outline"}
             onClick={() => setSelectedCategory("All")}
-            className={selectedCategory === "All" 
-              ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-              : ""
+            className={selectedCategory === "All" ? "text-white" : ""}
+            style={selectedCategory === "All" 
+              ? { backgroundColor: '#6D9773' }
+              : { borderColor: '#6D9773', color: '#0C3B2E' }
             }
           >
             All
@@ -328,9 +332,10 @@ export function MenuPage() {
               key={category.id}
               variant={selectedCategory === category.name ? "default" : "outline"}
               onClick={() => setSelectedCategory(category.name)}
-              className={selectedCategory === category.name 
-                ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                : ""
+              className={selectedCategory === category.name ? "text-white" : ""}
+              style={selectedCategory === category.name 
+                ? { backgroundColor: '#6D9773' }
+                : { borderColor: '#6D9773', color: '#0C3B2E' }
               }
             >
               {category.name}
@@ -352,7 +357,7 @@ export function MenuPage() {
                       <Badge variant="outline" className="text-xs">{item.department}</Badge>
                     </div>
                   </div>
-                  <p className="text-lg font-bold text-purple-600">₹{item.price}</p>
+                  <p className="text-lg font-bold" style={{ color: '#0C3B2E' }}>₹{item.price}</p>
                 </div>
                 <CardDescription className="mt-2">{item.description}</CardDescription>
               </CardHeader>
@@ -481,7 +486,8 @@ export function MenuPage() {
             </Button>
             <Button
               onClick={handleSave}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="text-white"
+              style={{ backgroundColor: '#6D9773' }}
             >
               {editingItem ? "Save Changes" : "Add Item"}
             </Button>
@@ -533,7 +539,8 @@ export function MenuPage() {
             <Button
               onClick={handleDownloadTemplate}
               variant="outline"
-              className="w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+              className="w-full hover:bg-green-50"
+              style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
             >
               <Download className="size-4 mr-2" />
               Download Excel Template
@@ -551,7 +558,8 @@ export function MenuPage() {
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                className="w-full text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 {importing ? (
                   <>Processing...</>

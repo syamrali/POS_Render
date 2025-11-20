@@ -263,7 +263,8 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Save KOT Settings
               </Button>
@@ -397,7 +398,8 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Save Bill Settings
               </Button>
@@ -479,7 +481,8 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSaveRestaurantSettings}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Save Changes
               </Button>
@@ -546,7 +549,8 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Update Account
               </Button>
@@ -620,7 +624,8 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Save Preferences
               </Button>
@@ -638,7 +643,7 @@ export function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+              <div className="p-6 rounded-lg border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <div className="text-gray-900 font-medium mb-1">Professional Plan</div>
@@ -646,12 +651,12 @@ export function SettingsPage() {
                       Unlimited tables and orders
                     </p>
                   </div>
-                  <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                  <Badge className="text-white" style={{ backgroundColor: '#6D9773' }}>
                     Active
                   </Badge>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-purple-600">$49</span>
+                  <span style={{ color: '#0C3B2E' }}>$49</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </div>
@@ -662,8 +667,8 @@ export function SettingsPage() {
                 <div className="text-gray-900 font-medium">Payment Method</div>
                 <div className="p-4 border rounded-lg flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="size-10 rounded bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-                      <CreditCard className="size-5 text-white" />
+                    <div className="size-10 rounded flex items-center justify-center text-white" style={{ backgroundColor: '#6D9773' }}>
+                      <CreditCard className="size-5" />
                     </div>
                     <div>
                       <p className="text-gray-900">•••• •••• •••• 4242</p>

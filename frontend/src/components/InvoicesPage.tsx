@@ -188,10 +188,10 @@ export function InvoicesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <p className="text-muted-foreground mb-1">Total Revenue</p>
-            <p className="text-purple-600">₹{totalRevenue.toFixed(2)}</p>
+            <p style={{ color: '#0C3B2E' }}>₹{totalRevenue.toFixed(2)}</p>
           </CardContent>
         </Card>
 
@@ -328,7 +328,7 @@ export function InvoicesPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="text-purple-600">₹{(invoice.total || 0).toFixed(2)}</p>
+                      <p style={{ color: '#0C3B2E' }}>₹{(invoice.total || 0).toFixed(2)}</p>
                       <Button
                         size="sm"
                         variant="outline"
@@ -422,13 +422,14 @@ export function InvoicesPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Total:</span>
-                  <span className="text-purple-600">₹{(selectedInvoice.total || 0).toFixed(2)}</span>
+                  <span style={{ color: '#0C3B2E' }}>₹{(selectedInvoice.total || 0).toFixed(2)}</span>
                 </div>
               </div>
 
               <Button
                 onClick={() => printInvoice(selectedInvoice)}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="w-full text-white"
+                style={{ backgroundColor: '#6D9773' }}
               >
                 <Printer className="size-4 mr-2" />
                 Print Invoice

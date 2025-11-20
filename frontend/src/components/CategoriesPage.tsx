@@ -98,7 +98,8 @@ export function CategoriesPage() {
           </div>
           <Button
             onClick={handleAdd}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="text-white"
+            style={{ backgroundColor: '#6D9773' }}
           >
             <Plus className="size-4 mr-2" />
             Add Category
@@ -111,8 +112,8 @@ export function CategoriesPage() {
             <Card key={cat.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
-                    <Tag className="size-6 text-pink-600" />
+                  <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6D977320' }}>
+                    <Tag className="size-6" style={{ color: '#6D9773' }} />
                   </div>
                   <div>
                     <p className="text-lg text-gray-900 font-medium">{cat.name}</p>
@@ -142,7 +143,8 @@ export function CategoriesPage() {
                 <Button
                   onClick={handleAdd}
                   variant="outline"
-                  className="border-pink-600 text-pink-600 hover:bg-pink-50"
+                  style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
+                  className="hover:bg-green-50"
                 >
                   <Plus className="size-4 mr-2" />
                   Add Your First Category
@@ -184,7 +186,8 @@ export function CategoriesPage() {
             </Button>
             <Button
               onClick={handleSave}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="text-white"
+              style={{ backgroundColor: '#6D9773' }}
             >
               Add Category
             </Button>

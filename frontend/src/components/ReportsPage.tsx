@@ -131,43 +131,43 @@ ${data.topItems.map((item, idx) => `${idx + 1}. ${item.name}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-muted-foreground mb-1">Total Revenue</p>
-                <p className="text-purple-600">₹{data.totalRevenue.toFixed(2)}</p>
+                <p style={{ color: '#0C3B2E' }}>₹{data.totalRevenue.toFixed(2)}</p>
               </div>
-              <div className="size-12 rounded-full bg-purple-200 flex items-center justify-center">
-                <DollarSign className="size-6 text-purple-600" />
+              <div className="size-12 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: '#6D9773' }}>
+                <DollarSign className="size-6" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-muted-foreground mb-1">Total Orders</p>
-                <p className="text-blue-600">{data.totalOrders}</p>
+                <p style={{ color: '#0C3B2E' }}>{data.totalOrders}</p>
               </div>
-              <div className="size-12 rounded-full bg-blue-200 flex items-center justify-center">
-                <ShoppingBag className="size-6 text-blue-600" />
+              <div className="size-12 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: '#6D9773' }}>
+                <ShoppingBag className="size-6" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-muted-foreground mb-1">Avg Order Value</p>
-                <p className="text-green-600">₹{data.averageOrderValue.toFixed(2)}</p>
+                <p style={{ color: '#0C3B2E' }}>₹{data.averageOrderValue.toFixed(2)}</p>
               </div>
-              <div className="size-12 rounded-full bg-green-200 flex items-center justify-center">
-                <TrendingUp className="size-6 text-green-600" />
+              <div className="size-12 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: '#6D9773' }}>
+                <TrendingUp className="size-6" />
               </div>
             </div>
           </CardContent>
@@ -206,15 +206,15 @@ ${data.topItems.map((item, idx) => `${idx + 1}. ${item.name}
               {data.topItems.map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-purple-100 flex items-center justify-center">
-                      <span className="text-purple-600">{idx + 1}</span>
+                    <div className="size-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6D977320' }}>
+                      <span style={{ color: '#0C3B2E' }}>{idx + 1}</span>
                     </div>
                     <div>
                       <p className="text-gray-900">{item.name}</p>
                       <p className="text-muted-foreground">{item.quantity} sold</p>
                     </div>
                   </div>
-                  <p className="text-purple-600">₹{item.revenue.toFixed(2)}</p>
+                  <p style={{ color: '#0C3B2E' }}>₹{item.revenue.toFixed(2)}</p>
                 </div>
               ))}
             </div>

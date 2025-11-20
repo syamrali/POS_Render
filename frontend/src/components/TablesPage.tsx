@@ -139,7 +139,8 @@ export function TablesPage() {
         </div>
         <Button
           onClick={handleAdd}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="text-white"
+          style={{ backgroundColor: '#6D9773' }}
         >
           <Plus className="size-4 mr-2" />
           Add Table
@@ -148,43 +149,43 @@ export function TablesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-muted-foreground mb-1">Total Tables</p>
-                <p className="text-purple-600">{tables.length}</p>
+                <p style={{ color: '#0C3B2E' }}>{tables.length}</p>
               </div>
-              <div className="size-12 rounded-full bg-purple-200 flex items-center justify-center">
-                <Users className="size-6 text-purple-600" />
+              <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6D9773' }}>
+                <Users className="size-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-muted-foreground mb-1">Total Seats</p>
-                <p className="text-blue-600">{tables.reduce((sum, t) => sum + t.seats, 0)}</p>
+                <p style={{ color: '#0C3B2E' }}>{tables.reduce((sum, t) => sum + t.seats, 0)}</p>
               </div>
-              <div className="size-12 rounded-full bg-blue-200 flex items-center justify-center">
-                <Users className="size-6 text-blue-600" />
+              <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6D9773' }}>
+                <Users className="size-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-100">
+        <Card className="border" style={{ backgroundColor: '#6D977310', borderColor: '#6D9773' }}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-muted-foreground mb-1">Categories</p>
-                <p className="text-orange-600">{Object.keys(groupedTables).length}</p>
+                <p style={{ color: '#0C3B2E' }}>{Object.keys(groupedTables).length}</p>
               </div>
-              <div className="size-12 rounded-full bg-orange-200 flex items-center justify-center">
-                <Users className="size-6 text-orange-600" />
+              <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6D9773' }}>
+                <Users className="size-6 text-white" />
               </div>
             </div>
           </CardContent>
@@ -300,7 +301,8 @@ export function TablesPage() {
             </Button>
             <Button
               onClick={handleSave}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="text-white"
+              style={{ backgroundColor: '#6D9773' }}
             >
               {editingTable ? "Save Changes" : "Add Table"}
             </Button>

@@ -98,7 +98,8 @@ export function DepartmentsPage() {
           </div>
           <Button
             onClick={handleAdd}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="text-white"
+            style={{ backgroundColor: '#6D9773' }}
           >
             <Plus className="size-4 mr-2" />
             Add Department
@@ -111,8 +112,8 @@ export function DepartmentsPage() {
             <Card key={dept.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                    <FolderPlus className="size-6 text-purple-600" />
+                  <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6D977320' }}>
+                    <FolderPlus className="size-6" style={{ color: '#6D9773' }} />
                   </div>
                   <div>
                     <p className="text-lg text-gray-900 font-medium">{dept.name}</p>
@@ -142,7 +143,8 @@ export function DepartmentsPage() {
                 <Button
                   onClick={handleAdd}
                   variant="outline"
-                  className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                  style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
+                  className="hover:bg-green-50"
                 >
                   <Plus className="size-4 mr-2" />
                   Add Your First Department
@@ -184,7 +186,8 @@ export function DepartmentsPage() {
             </Button>
             <Button
               onClick={handleSave}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="text-white"
+              style={{ backgroundColor: '#6D9773' }}
             >
               Add Department
             </Button>
