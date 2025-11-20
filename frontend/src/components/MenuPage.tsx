@@ -306,8 +306,10 @@ export function MenuPage() {
           </div>
           <Button
             onClick={handleAdd}
-            className="text-white"
+            className="text-white transition-all"
             style={{ backgroundColor: '#6D9773' }}
+            onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+            onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
           >
             <Plus className="size-4 mr-2" />
             Add Item
@@ -488,8 +490,10 @@ export function MenuPage() {
             </Button>
             <Button
               onClick={handleSave}
-              className="text-white"
+              className="text-white transition-all"
               style={{ backgroundColor: '#6D9773' }}
+              onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+              onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
             >
               {editingItem ? "Save Changes" : "Add Item"}
             </Button>
@@ -560,8 +564,10 @@ export function MenuPage() {
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="w-full text-white"
+                className="w-full text-white transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#5A7F61')}
+                onMouseLeave={(e: any) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#6D9773')}
               >
                 {importing ? (
                   <>Processing...</>

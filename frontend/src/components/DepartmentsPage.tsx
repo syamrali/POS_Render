@@ -98,8 +98,10 @@ export function DepartmentsPage() {
           </div>
           <Button
             onClick={handleAdd}
-            className="text-white"
+            className="text-white transition-all"
             style={{ backgroundColor: '#6D9773' }}
+            onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+            onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
           >
             <Plus className="size-4 mr-2" />
             Add Department
@@ -186,8 +188,10 @@ export function DepartmentsPage() {
             </Button>
             <Button
               onClick={handleSave}
-              className="text-white"
+              className="text-white transition-all"
               style={{ backgroundColor: '#6D9773' }}
+              onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+              onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
             >
               Add Department
             </Button>

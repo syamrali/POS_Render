@@ -195,7 +195,7 @@ export const DineInPage: React.FC = () => {
             console.error("Failed to fetch table order", err);
           });
         }
-      } else if (table && table.status === "available") {
+      } else if (table && table.status === "Available") {
         // If table is available, clear the current order
         setCurrentOrder([]);
       }
@@ -276,7 +276,7 @@ export const DineInPage: React.FC = () => {
 
     // If table is occupied, automatically load existing order
     const table = tables.find((t: Table) => t.id === tableId);
-    if (table && table.status === "occupied") {
+    if (table && table.status === "Occupied") {
       const order = getTableOrder(tableId);
       if (order && order.items) {
         // Load the existing items into the current order state
@@ -977,8 +977,10 @@ export const DineInPage: React.FC = () => {
                         }}
                         variant="default"
                         type="button"
-                        className="w-full border-0 text-white font-medium"
+                        className="w-full border-0 text-white font-medium transition-all"
                         style={{ backgroundColor: '#6D9773', cursor: 'pointer' }}
+                        onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                        onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
                       >
                         <Plus className="size-4 mr-2" /> Add to Order
                       </Button>
@@ -1125,8 +1127,10 @@ export const DineInPage: React.FC = () => {
               <Button
                 onClick={placeOrder}
                 disabled={getPendingItems().length === 0}
-                className="w-full text-white font-medium"
+                className="w-full text-white font-medium transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#5A7F61')}
+                onMouseLeave={(e: any) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#6D9773')}
               >
                 <Printer className="mr-2" />
                 Place Order
@@ -1135,8 +1139,10 @@ export const DineInPage: React.FC = () => {
               {selectedTable && getTableOrder(selectedTable) && getTableOrder(selectedTable)!.items.length > 0 && (
                 <Button
                   onClick={() => setShowBillDialog(true)}
-                  className="w-full text-white font-medium"
+                  className="w-full text-white font-medium transition-all"
                   style={{ backgroundColor: '#6D9773' }}
+                  onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                  onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
                 >
                   <Printer className="mr-2" />
                   Generate Bill
@@ -1167,8 +1173,10 @@ export const DineInPage: React.FC = () => {
               </Button>
               <Button
                 onClick={generateBillFromHold}
-                className="flex-1 text-white font-medium"
+                className="flex-1 text-white font-medium transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Generate Bill
               </Button>
@@ -1194,8 +1202,10 @@ export const DineInPage: React.FC = () => {
                   printBill();
                   generateBill();
                 }}
-                className="flex-1 text-white font-medium"
+                className="flex-1 text-white font-medium transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 <Printer className="mr-2" /> Print & Complete
               </Button>

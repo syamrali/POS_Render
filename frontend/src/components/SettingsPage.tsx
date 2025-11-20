@@ -263,8 +263,10 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="text-white"
+                className="text-white transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Save KOT Settings
               </Button>
@@ -398,8 +400,10 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="text-white"
+                className="text-white transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Save Bill Settings
               </Button>
@@ -481,8 +485,10 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSaveRestaurantSettings}
-                className="text-white"
+                className="text-white transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Save Changes
               </Button>
@@ -549,8 +555,10 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="text-white"
+                className="text-white transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Update Account
               </Button>
@@ -624,8 +632,10 @@ export function SettingsPage() {
 
               <Button 
                 onClick={handleSave}
-                className="text-white"
+                className="text-white transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Save Preferences
               </Button>

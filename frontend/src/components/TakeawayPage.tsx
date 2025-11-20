@@ -840,10 +840,12 @@ export const TakeawayPage: React.FC = () => {
             </div>
             <Button 
               onClick={() => setShowRecallDialog(true)}
-              className="text-white font-medium"
+              className="text-white font-medium transition-all"
               style={{
                 backgroundColor: '#6D9773',
               }}
+              onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+              onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
             >
               <RotateCcw className="size-4 mr-2" />
               Recall ({pendingOrders.length})
@@ -866,8 +868,10 @@ export const TakeawayPage: React.FC = () => {
                     }}
                     variant="default"
                     type="button"
-                    className="w-full border-0 text-white font-medium"
+                    className="w-full border-0 text-white font-medium transition-all"
                     style={{ backgroundColor: '#6D9773', cursor: 'pointer' }}
+                    onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                    onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
                   >
                     <Plus className="size-4 mr-2" /> Add to Order
                   </Button>
@@ -1021,8 +1025,10 @@ export const TakeawayPage: React.FC = () => {
               {selectedPendingOrder && currentOrder.length > 0 ? (
                 <Button 
                   onClick={addMoreItemsToOrder} 
-                  className="w-full text-white font-medium"
+                  className="w-full text-white font-medium transition-all"
                   style={{ backgroundColor: '#6D9773' }}
+                  onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                  onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
                 >
                   Add Items to Order
                 </Button>
@@ -1030,8 +1036,10 @@ export const TakeawayPage: React.FC = () => {
                 <Button 
                   onClick={placeOrder} 
                   disabled={getPendingItems().length === 0} 
-                  className="w-full text-white font-medium"
+                  className="w-full text-white font-medium transition-all"
                   style={{ backgroundColor: '#6D9773' }}
+                  onMouseEnter={(e: any) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#5A7F61')}
+                  onMouseLeave={(e: any) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#6D9773')}
                 >
                   <Printer className="mr-2" /> 
                   Place Order
@@ -1127,8 +1135,10 @@ export const TakeawayPage: React.FC = () => {
               </Button>
               <Button 
                 onClick={generateBillNow}
-                className="flex-1 text-white font-medium"
+                className="flex-1 text-white font-medium transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               >
                 Generate Bill
               </Button>
@@ -1173,8 +1183,10 @@ export const TakeawayPage: React.FC = () => {
                   printBill(); 
                   completeBill(); 
                 }} 
-                className="flex-1 text-white font-medium"
+                className="flex-1 text-white font-medium transition-all"
                 style={{ backgroundColor: '#6D9773' }}
+                onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+                onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
               > 
                 <Printer className="mr-2" /> Print & Complete
               </Button>
