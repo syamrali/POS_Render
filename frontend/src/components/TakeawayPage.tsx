@@ -51,6 +51,16 @@ export const TakeawayPage: React.FC = () => {
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
   const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
   const [selectedPendingOrder, setSelectedPendingOrder] = useState<PendingOrder | null>(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // Update time every minute for real-time display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -173,6 +183,37 @@ export const TakeawayPage: React.FC = () => {
   
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
+
+  // Format time helper function
+  const formatTimeAgo = useCallback((startTime: string | Date) => {
+    const start = typeof startTime === 'string' ? new Date(startTime) : startTime;
+    const diffMs = currentTime - start.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+      return `${diffDays}d ${diffHours % 24}h`;
+    } else if (diffHours > 0) {
+      return `${diffHours}h ${diffMins % 60}m`;
+    } else {
+      return `${diffMins}m`;
+    }
+  }, [currentTime]);
+
+  // Format date time helper
+  const formatDateTime = useCallback((date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  }, []);
 
   const handleCategorySelect = useCallback((c: string) => setSelectedCategory(c), []);
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value), []);
@@ -859,7 +900,15 @@ export const TakeawayPage: React.FC = () => {
                 <h3 className="text-xl font-semibold">
                   {selectedPendingOrder ? `Order: ${selectedPendingOrder.invoiceNumber}` : "Current Order"}
                 </h3>
-                <p className="text-sm text-gray-500">
+                {selectedPendingOrder && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Clock className="size-3 text-gray-500" />
+                    <p className="text-xs text-gray-500">
+                      Placed: {formatTimeAgo(selectedPendingOrder.timestamp)} ago
+                    </p>
+                  </div>
+                )}
+                <p className="text-sm text-gray-500 mt-1">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
                 </p>
               </div>
@@ -1034,8 +1083,15 @@ export const TakeawayPage: React.FC = () => {
                         ₹{order.total.toFixed(2)}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {order.items.length} items • {order.timestamp.toLocaleTimeString()}
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <Clock className="size-3" />
+                      <span>{formatTimeAgo(order.timestamp)} ago</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {formatDateTime(order.timestamp)}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {order.items.length} items
                     </div>
                   </div>
                 ))}
@@ -1081,13 +1137,27 @@ export const TakeawayPage: React.FC = () => {
             <DialogDescription>Would you like to print the bill?</DialogDescription>
           </DialogHeader>
           <div className="py-4">
+            {selectedPendingOrder && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <Clock className="size-4" />
+                  <span>Order Time: {formatDateTime(selectedPendingOrder.timestamp)}</span>
+                </div>
+                <div className="text-xs text-gray-500 ml-6">
+                  Duration: {formatTimeAgo(selectedPendingOrder.timestamp)}
+                </div>
+              </div>
+            )}
             <div className="flex justify-between mb-4">
               <span>Total Amount:</span>
-              <span className="text-purple-600">₹{
+              <span className="text-purple-600 font-bold">₹{
                 selectedPendingOrder 
                   ? selectedPendingOrder.total.toFixed(2) 
                   : '0.00'
               }</span>
+            </div>
+            <div className="text-xs text-gray-500 mb-4">
+              Bill will be generated at: {formatDateTime(new Date())}
             </div>
             <div className="flex gap-2">
               <Button 
@@ -1095,9 +1165,9 @@ export const TakeawayPage: React.FC = () => {
                   printBill(); 
                   completeBill(); 
                 }} 
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               > 
-                <Printer className="mr-2" /> Print Bill
+                <Printer className="mr-2" /> Print & Complete
               </Button>
               <Button onClick={completeBill} variant="outline" className="flex-1">
                 Complete Without Printing

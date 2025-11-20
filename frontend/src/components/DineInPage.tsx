@@ -68,6 +68,16 @@ export const DineInPage: React.FC = () => {
   const [showBillDialog, setShowBillDialog] = useState(false);
   const [showHoldDialog, setShowHoldDialog] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // Update time every minute for real-time display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -229,6 +239,37 @@ export const DineInPage: React.FC = () => {
 
   const tax = useMemo(() => subtotal * 0.05, [subtotal]);
   const total = useMemo(() => subtotal + tax, [subtotal, tax]);
+
+  // Format time helper function
+  const formatTimeAgo = useCallback((startTime: string | Date) => {
+    const start = typeof startTime === 'string' ? new Date(startTime) : startTime;
+    const diffMs = currentTime - start.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+      return `${diffDays}d ${diffHours % 24}h`;
+    } else if (diffHours > 0) {
+      return `${diffHours}h ${diffMins % 60}m`;
+    } else {
+      return `${diffMins}m`;
+    }
+  }, [currentTime]);
+
+  // Format date time helper
+  const formatDateTime = useCallback((date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  }, []);
 
   const handleTableSelect = useCallback((tableId: string) => {
     setSelectedTable(tableId);
@@ -886,7 +927,10 @@ export const DineInPage: React.FC = () => {
                           <div className="pt-2 border-t border-gray-200">
                             <div className="flex items-center justify-center gap-1 text-orange-600">
                               <Clock className="size-3" />
-                              <span className="text-sm">{Math.floor((Date.now() - new Date(getTableOrder(table.id)!.startTime).getTime()) / 60000)} mins</span>
+                              <span className="text-sm font-semibold">{formatTimeAgo(getTableOrder(table.id)!.startTime)}</span>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              Started: {formatDateTime(getTableOrder(table.id)!.startTime)}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
                               {getTableOrder(table.id)?.items.length || 0} items
@@ -976,7 +1020,15 @@ export const DineInPage: React.FC = () => {
                 <h3 className="text-xl font-semibold">
                   {selectedTableData ? `Table ${selectedTableData.name}` : "Current Order"}
                 </h3>
-                <p className="text-sm text-gray-500">
+                {selectedTable && getTableOrder(selectedTable) && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Clock className="size-3 text-gray-500" />
+                    <p className="text-xs text-gray-500">
+                      Occupied: {formatTimeAgo(getTableOrder(selectedTable)!.startTime)}
+                    </p>
+                  </div>
+                )}
+                <p className="text-sm text-gray-500 mt-1">
                   {getAllCombinedItems().length} {getAllCombinedItems().length === 1 ? 'item' : 'items'}
                 </p>
               </div>
@@ -1144,9 +1196,23 @@ export const DineInPage: React.FC = () => {
             <DialogDescription>Confirm bill generation for {selectedTableData?.name}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
+            {selectedTable && getTableOrder(selectedTable) && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <Clock className="size-4" />
+                  <span>Order Time: {formatDateTime(getTableOrder(selectedTable)!.startTime)}</span>
+                </div>
+                <div className="text-xs text-gray-500 ml-6">
+                  Duration: {formatTimeAgo(getTableOrder(selectedTable)!.startTime)}
+                </div>
+              </div>
+            )}
             <div className="flex justify-between mb-4">
               <span>Total Amount:</span>
               <span className="text-purple-600 font-bold">₹{total.toFixed(2)}</span>
+            </div>
+            <div className="text-xs text-gray-500 mb-4">
+              Bill will be generated at: {formatDateTime(new Date())}
             </div>
             <div className="flex gap-2">
               <Button
