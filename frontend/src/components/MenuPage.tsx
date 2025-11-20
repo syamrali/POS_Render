@@ -336,7 +336,7 @@ export function MenuPage() {
               onClick={() => setSelectedCategory(category.name)}
               className={selectedCategory === category.name ? "text-white" : ""}
               style={selectedCategory === category.name 
-                ? { backgroundColor: '#6D9773' }
+                ? { backgroundColor: '#000000' }
                 : { borderColor: '#6D9773', color: '#000000' }
               }
             >
