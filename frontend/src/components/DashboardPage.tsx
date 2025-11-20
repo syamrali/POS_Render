@@ -166,17 +166,17 @@ export const DashboardPage: React.FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Today's Sales</CardTitle>
-              <DollarSign className="size-4 text-green-600" />
+              <DollarSign className="size-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">₹{stats.todaySales.toFixed(2)}</div>
               <div className="flex items-center gap-1 mt-1">
                 {salesChange >= 0 ? (
-                  <TrendingUp className="size-4 text-green-600" />
+                  <TrendingUp className="size-4 text-emerald-600" />
                 ) : (
-                  <TrendingDown className="size-4 text-red-600" />
+                  <TrendingDown className="size-4 text-rose-600" />
                 )}
-                <span className={`text-xs ${salesChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-xs ${salesChange >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                   {Math.abs(salesChange).toFixed(1)}% vs yesterday
                 </span>
               </div>
@@ -194,11 +194,11 @@ export const DashboardPage: React.FC = () => {
               <div className="text-2xl font-bold text-gray-900">{stats.todayOrders}</div>
               <div className="flex items-center gap-1 mt-1">
                 {ordersChange >= 0 ? (
-                  <TrendingUp className="size-4 text-green-600" />
+                  <TrendingUp className="size-4 text-emerald-600" />
                 ) : (
-                  <TrendingDown className="size-4 text-red-600" />
+                  <TrendingDown className="size-4 text-rose-600" />
                 )}
-                <span className={`text-xs ${ordersChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-xs ${ordersChange >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                   {Math.abs(ordersChange).toFixed(1)}% vs yesterday
                 </span>
               </div>
@@ -210,7 +210,7 @@ export const DashboardPage: React.FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Avg Order Value</CardTitle>
-              <Package className="size-4 text-purple-600" />
+              <Package className="size-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">₹{stats.averageOrderValue.toFixed(2)}</div>
@@ -222,7 +222,7 @@ export const DashboardPage: React.FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Table Occupancy</CardTitle>
-              <Users className="size-4 text-orange-600" />
+              <Users className="size-4 text-amber-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">
@@ -251,7 +251,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-purple-600 h-2 rounded-full"
+                      className="bg-blue-600 h-2 rounded-full"
                       style={{
                         width: `${stats.todaySales > 0 ? (stats.salesByType.dineIn / stats.todaySales) * 100 : 0}%`
                       }}
@@ -268,7 +268,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-pink-600 h-2 rounded-full"
+                      className="bg-emerald-600 h-2 rounded-full"
                       style={{
                         width: `${stats.todaySales > 0 ? (stats.salesByType.takeaway / stats.todaySales) * 100 : 0}%`
                       }}
@@ -290,8 +290,8 @@ export const DashboardPage: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-orange-100 flex items-center justify-center">
-                    <Clock className="size-5 text-orange-600" />
+                  <div className="size-10 rounded-full bg-amber-100 flex items-center justify-center">
+                    <Clock className="size-5 text-amber-600" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600">Peak Hour</p>
@@ -299,8 +299,8 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <Award className="size-5 text-green-600" />
+                  <div className="size-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <Award className="size-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600">Best Seller</p>
@@ -327,8 +327,8 @@ export const DashboardPage: React.FC = () => {
                 {stats.topSellingItems.map((item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-full bg-purple-100 flex items-center justify-center">
-                        <span className="text-sm font-bold text-purple-600">#{index + 1}</span>
+                      <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-sm font-bold text-blue-600">#{index + 1}</span>
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">{item.name}</p>
