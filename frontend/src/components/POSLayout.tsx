@@ -63,11 +63,17 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Sidebar - Fixed */}
-      <aside className="fixed left-0 top-0 w-64 bg-gradient-to-b from-purple-600 to-pink-600 text-white flex flex-col overflow-y-auto shadow-xl z-40" style={{ height: '100vh' }}>
+      {/* Sidebar - Fixed with new green gradient from palette */}
+      <aside 
+        className="fixed left-0 top-0 w-64 text-white flex flex-col overflow-y-auto shadow-2xl z-40" 
+        style={{ 
+          height: '100vh',
+          background: 'linear-gradient(180deg, #0C3B2E 0%, #6D9773 100%)'
+        }}
+      >
         <div className="p-6 flex-shrink-0">
           <h1 className="text-2xl font-bold text-white">Restaurant POS</h1>
-          <p className="text-purple-100 text-sm mt-1">Point of Sale System</p>
+          <p className="text-base" style={{ color: '#FFBA00' }}>Point of Sale System</p>
         </div>
 
         <nav className="flex-1 px-3 overflow-y-auto">
@@ -80,9 +86,12 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
                 onClick={() => setCurrentPage(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
                   isActive
-                    ? "bg-white text-purple-600 shadow-lg"
+                    ? "bg-white shadow-lg font-medium"
                     : "text-white hover:bg-white/10"
                 }`}
+                style={{
+                  color: isActive ? '#0C3B2E' : 'white'
+                }}
               >
                 <Icon className="size-5" />
                 <span>{item.label}</span>

@@ -39,11 +39,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       }}
     >
       {/* Overlay for better contrast */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/50" />
       
-      {/* Glassmorphism Card */}
+      {/* Glassmorphism Card - Larger with better spacing */}
       <Card 
-        className="w-full max-w-md relative z-10 border-0 shadow-2xl"
+        className="w-full max-w-lg relative z-10 border-0 shadow-2xl"
         style={{
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
@@ -51,15 +51,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           border: '1px solid rgba(255, 255, 255, 0.2)'
         }}
       >
-        <CardHeader className="text-center pb-2 pt-8">
-          <CardTitle className="text-3xl font-bold text-white mb-2">Welcome</CardTitle>
-          <CardDescription className="text-gray-200">
+        <CardHeader className="text-center pb-6 pt-12">
+          <CardTitle className="text-4xl font-bold text-white mb-3">Welcome</CardTitle>
+          <CardDescription className="text-gray-200 text-base">
             Sign in to Restaurant POS
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-8 pb-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
+        <CardContent className="px-10 pb-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-3">
               <Input
                 id="email"
                 type="email"
@@ -67,7 +67,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 value={email}
                 onChange={(e: any) => setEmail(e.target.value)}
                 required
-                className="h-12 bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-white/50 focus:ring-white/50"
+                className="h-14 bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-white/50 focus:ring-white/50 text-base"
                 style={{
                   backdropFilter: 'blur(5px)',
                   WebkitBackdropFilter: 'blur(5px)'
@@ -75,7 +75,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               />
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Input
                 id="password"
                 type="password"
@@ -83,7 +83,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 value={password}
                 onChange={(e: any) => setPassword(e.target.value)}
                 required
-                className="h-12 bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-white/50 focus:ring-white/50"
+                className="h-14 bg-white/20 border-white/30 text-white placeholder:text-gray-300 focus:border-white/50 focus:ring-white/50 text-base"
                 style={{
                   backdropFilter: 'blur(5px)',
                   WebkitBackdropFilter: 'blur(5px)'
@@ -93,22 +93,28 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white h-12 text-base font-medium shadow-lg hover:shadow-xl transition-all"
+              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all mt-8"
+              style={{
+                background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)',
+                color: '#FFBA00'
+              }}
             >
               LOGIN
             </Button>
 
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm pt-4">
               <button
                 type="button"
-                className="text-white hover:text-gray-200 transition-colors font-medium"
+                className="transition-colors font-medium"
+                style={{ color: '#FFBA00' }}
                 onClick={() => console.log("Forgot password clicked")}
               >
                 Forgot Password ?
               </button>
               <button
                 type="button"
-                className="text-white hover:text-gray-200 transition-colors font-medium"
+                className="transition-colors font-medium"
+                style={{ color: '#FFBA00' }}
                 onClick={() => console.log("Sign up clicked")}
               >
                 Sign Up
