@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Plus, ShoppingCart, Trash2, Printer, Clock, Search } from "lucide-react";
+import { Plus, ShoppingCart, Trash2, Printer, Clock, Search, ChevronLeft } from "lucide-react";
 import { Input } from "./ui/input";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import * as api from "../services/api";
@@ -49,12 +49,12 @@ export const DineInPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState<string>("");
 
-  // Restore selected table from localStorage on mount
+  // Clear selected table when component mounts to always show table selection
   useEffect(() => {
-    const savedTableId = localStorage.getItem('dineInSelectedTable');
-    if (savedTableId) {
-      setSelectedTable(savedTableId);
-    }
+    // Reset to table selection view on mount
+    setSelectedTable("");
+    setCurrentOrder([]);
+    localStorage.removeItem('dineInSelectedTable');
   }, []);
 
   // Save selected table to localStorage when it changes
@@ -903,7 +903,24 @@ export const DineInPage: React.FC = () => {
 
           {(selectedTable) && (
             <>
-              <div className="mb-6"><h2 className="text-gray-900 mb-2">{selectedTableData ? `Table ${selectedTableData.name}` : "Dine-In Order"}</h2><p className="text-muted-foreground">Select items to add to order</p></div>
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-gray-900 mb-2">{selectedTableData ? `Table ${selectedTableData.name}` : "Dine-In Order"}</h2>
+                  <p className="text-muted-foreground">Select items to add to order</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSelectedTable("");
+                    setCurrentOrder([]);
+                    localStorage.removeItem('dineInSelectedTable');
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <ChevronLeft className="size-4" />
+                  Back to Tables
+                </Button>
+              </div>
 
               <div className="mb-6"><div className="relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" /><Input value={searchQuery} onChange={handleSearchChange} placeholder="Search menu items..." className="pl-10 w-full" /></div></div>
 
