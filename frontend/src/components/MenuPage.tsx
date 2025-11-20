@@ -285,18 +285,20 @@ export function MenuPage() {
           <div className="flex gap-2">
             <Button
               onClick={() => setImportDialogOpen(true)}
-              variant="outline"
-              style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
-              className="hover:bg-green-50"
+              className="text-white transition-all"
+              style={{ backgroundColor: '#6D9773' }}
+              onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+              onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
             >
               <FileSpreadsheet className="size-4 mr-2" />
               Bulk Import
             </Button>
             <Button
               onClick={handleExportData}
-              variant="outline"
-              style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
-              className="hover:bg-green-50"
+              className="text-white transition-all"
+              style={{ backgroundColor: '#6D9773' }}
+              onMouseEnter={(e: any) => e.currentTarget.style.backgroundColor = '#5A7F61'}
+              onMouseLeave={(e: any) => e.currentTarget.style.backgroundColor = '#6D9773'}
             >
               <Download className="size-4 mr-2" />
               Export Data
@@ -353,8 +355,8 @@ export function MenuPage() {
                     <CardTitle className="text-lg text-gray-900">{item.name}</CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">Code: {item.productCode}</p>
                     <div className="flex gap-1 mt-2">
-                      <Badge variant="secondary" className="text-xs">{item.category}</Badge>
-                      <Badge variant="outline" className="text-xs">{item.department}</Badge>
+                      <Badge variant="secondary" className="text-xs" style={{ color: '#000000' }}>{item.category}</Badge>
+                      <Badge variant="outline" className="text-xs" style={{ color: '#000000' }}>{item.department}</Badge>
                     </div>
                   </div>
                   <p className="text-lg font-bold" style={{ color: '#0C3B2E' }}>₹{item.price}</p>
