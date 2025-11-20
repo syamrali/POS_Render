@@ -43,7 +43,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       
       {/* Glassmorphism Card - Wider card with better spacing */}
       <Card 
-        className="w-full max-w-2xl relative z-10 border-0 shadow-2xl"
+        className="w-full max-w-2xl h-[620px] relative z-10 border-0 shadow-2xl p-6"
         style={{
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
@@ -57,7 +57,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             Sign in to Restaurant POS
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-16 pb-10">
+        <CardContent className="px-20 pb-14 pt-4 space-y-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3">
               <Input
