@@ -63,12 +63,12 @@ export function POSLayout({ onLogout }: POSLayoutProps) {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      {/* Sidebar - Fixed with new green gradient from palette */}
+      {/* Sidebar - Fixed with solid green color */}
       <aside 
         className="fixed left-0 top-0 w-64 text-white flex flex-col overflow-y-auto shadow-2xl z-40" 
         style={{ 
           height: '100vh',
-          background: 'linear-gradient(180deg, #0C3B2E 0%, #6D9773 100%)'
+          backgroundColor: '#6D9773'
         }}
       >
         <div className="p-6 flex-shrink-0">

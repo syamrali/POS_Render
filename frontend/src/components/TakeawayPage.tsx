@@ -842,7 +842,7 @@ export const TakeawayPage: React.FC = () => {
               onClick={() => setShowRecallDialog(true)}
               className="text-white font-medium"
               style={{
-                background: 'linear-gradient(to right, #6D9773, #0C3B2E)',
+                backgroundColor: '#6D9773',
               }}
             >
               <RotateCcw className="size-4 mr-2" />
@@ -867,7 +867,7 @@ export const TakeawayPage: React.FC = () => {
                     variant="default"
                     type="button"
                     className="w-full border-0 text-white font-medium"
-                    style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)', cursor: 'pointer' }}
+                    style={{ backgroundColor: '#6D9773', cursor: 'pointer' }}
                   >
                     <Plus className="size-4 mr-2" /> Add to Order
                   </Button>
@@ -1022,7 +1022,7 @@ export const TakeawayPage: React.FC = () => {
                 <Button 
                   onClick={addMoreItemsToOrder} 
                   className="w-full text-white font-medium"
-                  style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)' }}
+                  style={{ backgroundColor: '#6D9773' }}
                 >
                   Add Items to Order
                 </Button>
@@ -1031,7 +1031,7 @@ export const TakeawayPage: React.FC = () => {
                   onClick={placeOrder} 
                   disabled={getPendingItems().length === 0} 
                   className="w-full text-white font-medium"
-                  style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)' }}
+                  style={{ backgroundColor: '#6D9773' }}
                 >
                   <Printer className="mr-2" /> 
                   Place Order
@@ -1043,7 +1043,7 @@ export const TakeawayPage: React.FC = () => {
                   onClick={() => setShowBillDialog(true)} 
                   variant="outline" 
                   className="w-full"
-                  style={{ borderColor: '#FFBA00', color: '#0C3B2E' }}
+                  style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
                 >
                   Generate Bill
                 </Button>
@@ -1128,7 +1128,7 @@ export const TakeawayPage: React.FC = () => {
               <Button 
                 onClick={generateBillNow}
                 className="flex-1 text-white font-medium"
-                style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Generate Bill
               </Button>
@@ -1174,7 +1174,7 @@ export const TakeawayPage: React.FC = () => {
                   completeBill(); 
                 }} 
                 className="flex-1 text-white font-medium"
-                style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
+                style={{ backgroundColor: '#6D9773' }}
               > 
                 <Printer className="mr-2" /> Print & Complete
               </Button>

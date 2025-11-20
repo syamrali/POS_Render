@@ -978,7 +978,7 @@ export const DineInPage: React.FC = () => {
                         variant="default"
                         type="button"
                         className="w-full border-0 text-white font-medium"
-                        style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)', cursor: 'pointer' }}
+                        style={{ backgroundColor: '#6D9773', cursor: 'pointer' }}
                       >
                         <Plus className="size-4 mr-2" /> Add to Order
                       </Button>
@@ -1126,7 +1126,7 @@ export const DineInPage: React.FC = () => {
                 onClick={placeOrder}
                 disabled={getPendingItems().length === 0}
                 className="w-full text-white font-medium"
-                style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)' }}
+                style={{ backgroundColor: '#6D9773' }}
               >
                 <Printer className="mr-2" />
                 Place Order
@@ -1136,7 +1136,7 @@ export const DineInPage: React.FC = () => {
                 <Button
                   onClick={() => setShowBillDialog(true)}
                   className="w-full text-white font-medium"
-                  style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
+                  style={{ backgroundColor: '#6D9773' }}
                 >
                   <Printer className="mr-2" />
                   Generate Bill
@@ -1168,7 +1168,7 @@ export const DineInPage: React.FC = () => {
               <Button
                 onClick={generateBillFromHold}
                 className="flex-1 text-white font-medium"
-                style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
+                style={{ backgroundColor: '#6D9773' }}
               >
                 Generate Bill
               </Button>
@@ -1195,7 +1195,7 @@ export const DineInPage: React.FC = () => {
                   generateBill();
                 }}
                 className="flex-1 text-white font-medium"
-                style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
+                style={{ backgroundColor: '#6D9773' }}
               >
                 <Printer className="mr-2" /> Print & Complete
               </Button>

@@ -93,10 +93,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <Button
               type="submit"
-              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all mt-8"
+              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all mt-8 text-white"
               style={{
-                background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)',
-                color: '#FFBA00'
+                backgroundColor: '#6D9773'
               }}
             >
               LOGIN
