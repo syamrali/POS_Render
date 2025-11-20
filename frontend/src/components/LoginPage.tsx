@@ -41,9 +41,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       {/* Overlay for better contrast */}
       <div className="absolute inset-0 bg-black/50" />
       
-      {/* Glassmorphism Card - Larger with better spacing */}
+      {/* Glassmorphism Card - Wider card with better spacing */}
       <Card 
-        className="w-full max-w-lg relative z-10 border-0 shadow-2xl"
+        className="w-full max-w-2xl relative z-10 border-0 shadow-2xl"
         style={{
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
@@ -51,13 +51,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           border: '1px solid rgba(255, 255, 255, 0.2)'
         }}
       >
-        <CardHeader className="text-center pb-6 pt-12">
+        <CardHeader className="text-center pb-6 pt-10">
           <CardTitle className="text-4xl font-bold text-white mb-3">Welcome</CardTitle>
           <CardDescription className="text-gray-200 text-base">
             Sign in to Restaurant POS
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-10 pb-10">
+        <CardContent className="px-16 pb-10">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3">
               <Input

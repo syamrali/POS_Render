@@ -967,8 +967,8 @@ export const DineInPage: React.FC = () => {
                 {filteredItems.length === 0 && (<div className="col-span-full text-center py-12 text-gray-500"><Search className="size-12 mx-auto mb-4 opacity-20" /><p>No items found</p></div>)}
 
                 {filteredItems.map((item) => (
-                  <Card key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold text-purple-600">₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
+                  <Card key={item.id} className="bg-white border-2 rounded-lg overflow-hidden hover:shadow-lg transition-shadow" style={{ borderColor: '#6D9773' }}>
+                    <CardHeader className="p-4"><div className="space-y-2"><div className="flex justify-between items-start"><div><CardTitle className="text-lg font-semibold">{item.name}</CardTitle><p className="text-sm text-gray-500">{item.category}</p></div><p className="text-lg font-bold" style={{ color: '#0C3B2E' }}>₹{item.price}</p></div><p className="text-sm text-gray-500">{item.description}</p></div></CardHeader>
                     <CardContent className="p-4 pt-0">
                       <Button
                         onClick={() => {
@@ -977,8 +977,8 @@ export const DineInPage: React.FC = () => {
                         }}
                         variant="default"
                         type="button"
-                        className="w-full !bg-purple-600 hover:!bg-purple-700 !text-white border-0"
-                        style={{ backgroundColor: '#9333ea', color: 'white', cursor: 'pointer' }}
+                        className="w-full border-0 text-white font-medium"
+                        style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)', cursor: 'pointer' }}
                       >
                         <Plus className="size-4 mr-2" /> Add to Order
                       </Button>
@@ -1020,8 +1020,8 @@ export const DineInPage: React.FC = () => {
               <div>
                 {getAllCombinedItems().length > 0 ? (
                   <div className="flex items-center gap-2">
-                    <ShoppingCart className="size-6 text-purple-600" />
-                    <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                    <ShoppingCart className="size-6" style={{ color: '#0C3B2E' }} />
+                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ backgroundColor: '#6D977320', color: '#0C3B2E' }}>
                       {getAllCombinedItems().length}
                     </span>
                   </div>
@@ -1055,7 +1055,7 @@ export const DineInPage: React.FC = () => {
                         <div className="flex items-center gap-2 mb-3">
                           <div className="font-semibold text-lg">{it.name}</div>
                           {it.sentToKitchen && (
-                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                            <Badge variant="outline" style={{ backgroundColor: '#6D977320', color: '#0C3B2E', borderColor: '#6D9773' }}>
                               Sent to Kitchen
                             </Badge>
                           )}
@@ -1081,7 +1081,7 @@ export const DineInPage: React.FC = () => {
                               +
                             </Button>
                           </div>
-                          <div className="ml-auto text-purple-600 font-bold text-lg">
+                          <div className="ml-auto font-bold text-lg" style={{ color: '#0C3B2E' }}>
                             ₹{(it.price * it.quantity).toFixed(2)}
                           </div>
                         </div>
@@ -1117,7 +1117,7 @@ export const DineInPage: React.FC = () => {
               </div>
               <div className="flex justify-between text-base font-semibold pt-2 border-t">
                 <span>Total</span>
-                <span className="text-purple-600">₹{total.toFixed(2)}</span>
+                <span style={{ color: '#0C3B2E' }}>₹{total.toFixed(2)}</span>
               </div>
             </div>
 
@@ -1125,7 +1125,8 @@ export const DineInPage: React.FC = () => {
               <Button
                 onClick={placeOrder}
                 disabled={getPendingItems().length === 0}
-                className="w-full"
+                className="w-full text-white font-medium"
+                style={{ background: 'linear-gradient(135deg, #6D9773 0%, #0C3B2E 100%)' }}
               >
                 <Printer className="mr-2" />
                 Place Order
@@ -1134,7 +1135,8 @@ export const DineInPage: React.FC = () => {
               {selectedTable && getTableOrder(selectedTable) && getTableOrder(selectedTable)!.items.length > 0 && (
                 <Button
                   onClick={() => setShowBillDialog(true)}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="w-full text-white font-medium"
+                  style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
                 >
                   <Printer className="mr-2" />
                   Generate Bill
@@ -1165,7 +1167,8 @@ export const DineInPage: React.FC = () => {
               </Button>
               <Button
                 onClick={generateBillFromHold}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="flex-1 text-white font-medium"
+                style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
               >
                 Generate Bill
               </Button>
@@ -1183,7 +1186,7 @@ export const DineInPage: React.FC = () => {
           <div className="py-4">
             <div className="flex justify-between mb-4">
               <span>Total Amount:</span>
-              <span className="text-purple-600 font-bold">₹{total.toFixed(2)}</span>
+              <span className="font-bold" style={{ color: '#0C3B2E' }}>₹{total.toFixed(2)}</span>
             </div>
             <div className="flex gap-2">
               <Button
@@ -1191,7 +1194,8 @@ export const DineInPage: React.FC = () => {
                   printBill();
                   generateBill();
                 }}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="flex-1 text-white font-medium"
+                style={{ background: 'linear-gradient(135deg, #FFBA00 0%, #BB8A52 100%)' }}
               >
                 <Printer className="mr-2" /> Print & Complete
               </Button>
@@ -1199,6 +1203,7 @@ export const DineInPage: React.FC = () => {
                 onClick={generateBill}
                 variant="outline"
                 className="flex-1"
+                style={{ borderColor: '#6D9773', color: '#0C3B2E' }}
               >
                 Complete Without Printing
               </Button>
